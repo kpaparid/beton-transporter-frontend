@@ -1,6 +1,8 @@
 import React from "react";
 import { Button } from '@themesberg/react-bootstrap';
 
+//
+
 const defaultVariant = "primary";
 export const EditBtn = (props) => {
     const { onClick, className = "", size, variant, editMode } = props;
