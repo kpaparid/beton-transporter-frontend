@@ -2,70 +2,25 @@
 import moment from "moment-timezone";
 
 
-export const moo = [
-    {
-      id: 1,
-      title: 'The Hunger Games',
-      authors: 'Suzanne Collins',
-      num_pages: 374,
-      rating: 4.33
-    },
-    {
-      id: 2,
-      title: 'Harry Potter and the Order of the Phoenix',
-      authors: 'J.K. Rowling',
-      num_pages: 870,
-      rating: 4.48
-    },
-    {
-      id: 3,
-      title: 'To Kill a Mockingbird',
-      authors: 'Harper Lee',
-      num_pages: 324,
-      rating: 4.27
-    },
-    {
-      id: 4,
-      title: 'Pride and Prejudice',
-      authors: 'Jane Austen',
-      num_pages: 279,
-      rating: 4.25
-    },
-    {
-      id: 5,
-      title: 'Twilight',
-      authors: 'Stephenie Meyer',
-      num_pages: 498,
-      rating: 3.58
-    },
-    {
-      id: 6,
-      title: 'The Book Thief',
-      authors: 'Markus Zusak',
-      num_pages: 552,
-      rating: 4.36
-    }
-  ];
 
 export const labels = [
-    
-        "Datum" ,
-        "Wagen",
-        "Werk" ,
-        "Cbm" ,
-        "Abfahrt",
-        "Km Stand bei Abfahrt",
-        "Ankunft",
-        "Km Stand bei Ankunft",
-        "Lieferschein Nr.",
-        "Fahrer"  ,
-        "Baustelle" ,
-        "Entladebeginn" ,
-        "Entladeende",
-        "EntladeTyp",
-        "Wartezeit",
-        "Sonstiges"
-];
+    { name: "datum", text: "Datum", filterType: 'date'  },
+    { name: "wagen", text: "Wagen", filterType: 'checkbox' },
+    { name: "werk", text: "Werk", filterType: 'checkbox' },
+    { name: "cbm", text: "Cbm", filterType: 'range' },
+    { name: "abfahrt", text: "Abfahrt", filterType: 'checkbox'  },
+    { name: "kmAbfahrt", text: "Km Stand bei Abfahrt", filterType: 'range'  },
+    { name: "ankunft", text: "Ankunft", filterType: 'range'  },
+    { name: "kmAnkunft", text: "Km Stand bei Ankunft", filterType: 'range'  },
+    { name: "lieferscheinNr", text: "Lieferschein Nr.", filterType: 'checkbox'  },
+    { name: "fahrer", text: "Fahrer", filterType: 'checkbox'  },
+    { name: "baustelle", text: "Baustelle", filterType: 'checkbox'  },
+    { name: "entladeBeginn", text: "EntladeBeginn", filterType: 'range'  },
+    { name: "entladeEnde", text: "EntladeEnde", filterType: 'range'  },
+    { name: "entladeTyp", text: "EntladeTyp", filterType: 'checkbox'  },
+    { name: "wartezeit", text: "Wartezeit", filterType: 'range'  },
+    { name: "sonstiges", text: "Sonstiges", filterType: 'none' }
+]
 
 export default [
     {   

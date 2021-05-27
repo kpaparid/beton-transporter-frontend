@@ -1,0 +1,112 @@
+.mybutton {
+    background-color: $white;
+    color: $default;
+    border: 0;
+  :hover,
+  :focus {
+    background-color: $tertiary;
+    color: $white;
+  }
+}
+.mybutton2:hover,
+.mybutton2:focus {
+  background-color: $tertiary;
+  border: 0;
+}
+.mydropdowntoggle{
+  box-shadow: inset 0 0px 0px rgb(46 54 80 / 13%), 0 0 0 0rem rgb(222 223 226 / 50%);
+}
+.mydropdownlist{
+  background-color: $white;
+  color: $default;
+  :disabled {
+    opacity: 1;
+  }
+  
+  .dropdown-toggle {
+    box-shadow: 0;
+    :focus{
+      box-shadow: inset 0 3px 6px rgb(46 54 80 / 13%), 0 0 0 0.2rem rgb(222 223 226 / 50%);
+    }
+  }
+  button{
+    border: 0;
+    padding: 0rem;
+    box-shadow: inset 0 0px 0 rgb(255 255 255 / 0%), 0 0px 0px rgb(46 54 80 / 0%), 0 0 0 0 rgb(61 168 156 / 0%);
+    // box-shadow: 0;
+    border-radius: 0.5rem;
+    
+    button{
+      box-shadow: 0;
+    }
+    :hover,
+    :focus {
+      background-color: aliceblue;
+      color: $default;
+      
+    }
+    
+  }
+  
+}
+
+.mycheckbox:hover,
+.mycheckbox:focus {
+    transform: scale(1.1);  
+}
+
+
+
+.mycontainer {
+
+  width: 230px;
+  line-height: 26px;
+  padding-left: 1.5rem;
+  padding-right: 1rem;
+  text-align: left;
+  font-size: $font-size-md;
+  font-family: $font-family-sans-serif;
+  font-weight: $font-weight-normal;
+
+  div{
+    div{
+    padding-left: 3rem;
+    align-items: left;
+    .form-check-input:disabled{
+      opacity: 1;
+    }
+    
+      
+  }}
+
+}
+.DateRangePickerInput_arrow {
+  padding: 0;
+  display: none;
+  text-align: left;
+}
+.DateInput{
+  // width: 100%;
+}
+.DateInput_input{
+width: 100%;
+text-align: left;
+font-size: $font-size-md;
+font-family: $font-family-sans-serif;
+font-weight: $font-weight-normal;
+color: $default;
+padding: 0.5625rem;
+margin-left: 2rem;
+}
+.DateInput_input::-webkit-input-placeholder{
+color: $default;
+}
+.DateRangePickerInput__showClearDates {
+padding-right: 0;
+}
+.DateRangePicker_picker{
+margin-top: 35px 
+}
+.DateInput_fang{
+display: none;
+}

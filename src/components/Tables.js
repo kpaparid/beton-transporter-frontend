@@ -283,9 +283,15 @@ export const TransactionsTable = (props) => {
   const tablelist = useSelector(selectorMenu, shallowEqual);
   const stateAPIStatus = useLoadTransactionsData();
 
-
   const checkboxList = useSelector(state => state.checked)
-  
+
+  const displayColumn = useSelector(selectorMenu4)
+
+    function selectorMenu4(state) {
+      const { transactionsFilter } = state;
+      const table = transactionsFilter.checked.map(item => item ? 'table-cell' : 'none')
+      return table;
+    }
 
 
   const dispatch = useDispatch();
@@ -318,7 +324,7 @@ export const TransactionsTable = (props) => {
     });
     return table;
   }
-  
+
 
   function handleCheckboxClick(event) {
     dispatch({
@@ -328,60 +334,65 @@ export const TransactionsTable = (props) => {
       }
     });
   }
-  
+
 
 
   const TableRow = (props) => {
-    const { index, row } = props;
-    
+    const { index, row, displayColumn } = props;
     const checked = useSelector(selectorMenu)
     function selectorMenu(state) {
       const { checked } = state;
       return checked[parseInt(index)];
     }
-
     return (
-      <tr className="text-left align-middle"  style={{backgroundColor:'#c5ded6'}}>
-        <td className=" px-2">
+      <tr className="text-left align-middle" style={{ backgroundColor: '#c5ded6' }}>
+        <td className="px-2" style={{width:'30px'}}>
           <Form.Check
             id={`checkbox${index}`}
             htmlFor={`checkbox${index}`}
-            defaultChecked= {checked}
-            onChange={handleCheckboxClick} 
+            defaultChecked={checked}
+            onChange={handleCheckboxClick}
           />
         </td>
-        {Object.keys(row).
-          filter(key => (key !== 'id') && (key !== 'labelId') && (key !== 'checked')).map(key =>
-          <td key={`$s-${key}`} className="text-center px-1 text-wrap">
-            <span>
-              <MyTextArea
-                myIndex={parseInt(index)}
-                myKey={key}
-                text={row[key]} 
-                myChecked = {checked}
-                />
-            </span>
-          </td>)}
+        {Object.keys(row)
+          .filter(key => (key !== 'id') && (key !== 'labelId') && (key !== 'checked'))
+          .map((key, i) =>
+            <td key={`$s-${key}`} 
+              className="text-center px-1 text-wrap" 
+              style={{ display: displayColumn[i] }}>
+                <span>
+                  <MyTextArea
+                    myIndex={parseInt(index)}
+                    myKey={key}
+                    text={row[key]}
+                    myChecked={checked}
+                  />
+                </span>
+            </td>)}
       </tr>
     );
   };
 
 
   const HeaderRow = (props) => {
-    const table = props.table;
+    const { table, displayColumn }= props
+    
     return (
       <tr className="align-middle">
-        <th className="border-bottom px-2 text-left">
+        <th className="border-bottom px-2 text-left" style={{width:'30px'}}>
           <Form.Check
             id="checkboxAll"
             htmlFor="checkboxAll"
             checked={checkedAll}
-            onChange={handleAllClick} 
+            onChange={handleAllClick}
           />
         </th>
         {table.map((key, index) =>
-
-          <th key={`$s-${key}`} className="border-bottom  px-2 text-wrap text-center" >{key}</th>
+          <th key={`$s-${key}`}
+            className="border-bottom  px-2 text-wrap text-center "
+            style={{display:displayColumn[index]}}>
+            {key}
+          </th>
         )}
       </tr>
     );
@@ -424,10 +435,17 @@ export const TransactionsTable = (props) => {
       <Card.Body className="px-1">
         <Table className="user-table align-items-center">
           <thead className="thead-light">
-            <HeaderRow table={labels} />
+            <HeaderRow
+              table={labels.map(item => item.text)}
+              displayColumn={displayColumn} />
           </thead>
           <tbody>
-            {tablelist.map((t, index) => <TableRow key={`transaction-${t.id}`} row={t} index={index} />)}
+            {tablelist.map((t, index) =>
+              <TableRow key={`transaction-${t.id}`}
+                row={t}
+                index={index}
+                displayColumn={displayColumn}
+              />)}
           </tbody>
         </Table>
         <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">

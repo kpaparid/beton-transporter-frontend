@@ -18,17 +18,23 @@ import ReactDOM from 'react-dom';
 import { HashRouter } from "react-router-dom";
 import { Provider } from "react-redux"
 
+
 // core styles
 import "./scss/volt.scss";
+
 
 // vendor styles
 import "@fortawesome/fontawesome-free/css/all.css";
 import "react-datetime/css/react-datetime.css";
 
+// import "./scss/kpaparid/components/mycalendarstyles.css";
+
 import HomePage from "./pages/HomePage";
 import ScrollToTop from "./components/ScrollToTop";
 import { createReduxStore } from './pages/reducers/redux';
 
+// import "react-dates/initialize";
+// import "react-dates/lib/css/_datepicker.css";
 
 
 

@@ -43,5 +43,5 @@ export const DownloadBtn = (props) => {
 export const MyBtn = (props) => {
     const { onClick = "", text = "", className = "", size = "", variant = defaultVariant } = props;
     return (
-        <Button className={className} onClick={onClick} variant={variant} size={size}>{text}</Button>)
+        <Button className={`${className} mybutton2`} onClick={onClick} variant={variant} size={size}>{text}</Button>)
 };

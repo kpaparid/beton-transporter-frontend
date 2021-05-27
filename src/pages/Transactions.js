@@ -15,8 +15,6 @@ export default () => {
 
   const dispatch = useDispatch();
   const checkedExists = useSelector(selectorCheckedExists)
-  const checko = useSelector(state=>state.checked)
-  // const editmode = useSelector(state=>state.editMode)
 
   function selectorCheckedExists(state) {
     const { checked } = state;
@@ -24,19 +22,13 @@ export default () => {
     return index === -1 ? false : true
 
   }
-  
-  const test = 'test'
-  const handleTest = () => {
-    // console.log(checko)
-    // console.log(editmode)
-  }
   const toggleEditMode = () => {
     dispatch({
       type: ACTIONS.EDIT_TOGGLE,
     });
   }
   const handleEditEnable = () => {
-    if(checkedExists) {
+    if (checkedExists) {
       toggleEditMode()
     }
 
@@ -55,7 +47,7 @@ export default () => {
     toggleEditMode()
   }
   const handleDownload = () => {
-    
+
     console.log("DOWNLOAD")
   }
   function closeAllCheckBoxes() {
@@ -70,53 +62,37 @@ export default () => {
   }
 
   return (
-
     <>
-        <div className="d-block pt-4 mb-4 mb-md-0">
-          <Breadcrumb className="d-none d-md-inline-block" listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}>
-            <Breadcrumb.Item><FontAwesomeIcon icon={faHome} /></Breadcrumb.Item>
-            <Breadcrumb.Item>faHome</Breadcrumb.Item>
-            <Breadcrumb.Item active>Touren</Breadcrumb.Item>
-          </Breadcrumb>
-        </div>   
+      <div className="d-block pt-4 mb-4 mb-md-0">
+        <Breadcrumb className="d-none d-md-inline-block" listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}>
+          <Breadcrumb.Item><FontAwesomeIcon icon={faHome} /></Breadcrumb.Item>
+          <Breadcrumb.Item>faHome</Breadcrumb.Item>
+          <Breadcrumb.Item active>Touren</Breadcrumb.Item>
+        </Breadcrumb>
+      </div>
+      <div className="d-flex justify-content-between flex-wrap align-items-center py-4">
+        <div className="d-flex align-items-center mt-2" >
+          <Dropdown as={ButtonGroup} className="mb-2 me-2 " >
+            <Dropdown.Toggle split variant="tertiary">
+              Filter<FontAwesomeIcon icon={faAngleDown} className="dropdown-arrow" />
+            </Dropdown.Toggle>
 
-      
-        <div className="d-flex justify-content-between flex-wrap align-items-center py-4">
-          
-          <div className="d-flex align-items-center mt-2" >
-            <Dropdown as={ButtonGroup} className="mb-2 me-2 " >
-              <Dropdown.Toggle split variant="tertiary">
-                Filter<FontAwesomeIcon icon={faAngleDown} className="dropdown-arrow" />
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu className="dropdown-menu-xs" style={{display:"inline-table", animation: "disable"}} >
-                <DropdownFilter></DropdownFilter>
-              </Dropdown.Menu>
-            </Dropdown>
-            <h5 className="m-0 py-0 px-2">Touren Alle Werke Marz 2021s</h5>
-          </div>
-          <div className="flex-wrap d-flex">
+            <Dropdown.Menu className="dropdown-menu-xs" style={{ display: "inline-table", animation: "disable" }} >
+              <DropdownFilter></DropdownFilter>
+            </Dropdown.Menu>
+          </Dropdown>
+          <h5 className="m-0 py-0 px-2">Touren Alle Werke Marz 2021s</h5>
+        </div>
+        <div className="flex-wrap d-flex">
           <ButtonGroup className="btn-toolbar mt-2 flex-wrap justify-content-end" variant="danger">
-            
-              <DownloadBtn onClick={handleTest} text={test}/>
-              <EditBtn onClick={handleEditEnable} text="Edit"/>
-              <SaveBtn onClick={handleSave} text="Speichern"/>
-              <BreakBtn onClick={handleEditDisable} text="Abbruch"/>
-              <DownloadBtn onClick={handleDownload}/>
+            <EditBtn onClick={handleEditEnable} text="Edit" />
+            <SaveBtn onClick={handleSave} text="Speichern" />
+            <BreakBtn onClick={handleEditDisable} text="Abbruch" />
+            <DownloadBtn onClick={handleDownload} />
           </ButtonGroup>
         </div>
-      <TransactionsTable/>
-      
+        <TransactionsTable />
       </div>
-        <div style={{ maxWidth: '100%' }}>
-
-    </div>
-      
-      
-           
-      
-      
-
     </>
   );
 };

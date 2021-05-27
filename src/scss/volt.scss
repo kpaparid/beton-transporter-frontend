@@ -18,12 +18,14 @@
 // Bootstrap mixins and functions
 @import "../../node_modules/bootstrap/scss/mixins";
 @import "../../node_modules/bootstrap/scss/functions";
+// @import "../../node_modules/react-dates/lib/css/datepicker";
 
 // Change variables here
 @import "volt/variables";
 
 // Bootstrap
 @import "../../node_modules/bootstrap/scss/bootstrap";
+
 
 // Vendor
 @import "volt/vendor";
@@ -43,3 +45,10 @@
 @import "volt/components";
 
 // write your custom styles here!
+// @import "node_modules/react-dates/lib/css/_datepicker";
+
+
+@import "react-dates/lib/css/_datepicker.css";
+
+@import "kpaparid/components";
+// @import "../../node_modules/react-dates/lib/css/_datepicker";

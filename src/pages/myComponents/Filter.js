@@ -4,36 +4,37 @@ import { useLayoutEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { Form, ButtonGroup, Dropdown } from '@themesberg/react-bootstrap';
-import transactions from "../../data/transactions";
+import { labels } from "../../data/transactions";
 
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import { ACTIONS } from '../reducers/redux';
+import NestedFilter from "./NestedFilter";
 
 export const DropdownRow = (props) => {
-    const { left, right } = props;
-
+    const { label, transactionsTable } = props;
+    const left= label.text
+    const right=[...new Set(transactionsTable.map(t => t[label.name]))]
+    
+    const display = (right.length === 1) || (label.filterType === 'none') ? 'd-none' : 'd-block'
     return (
-        <div className="container px-2">
-            <div className="row flex-wrap">
-                <p className="col-md-4 col-xs-4 text-wrap text-left " >{left}</p>
-
-                <div className="g-0 ps-md-8 ps-xs-1 d-flex col-md-8 col-xs-8">
-                    <p className="col-11 px-3 text-right text-truncate">{right}</p>
-                    <div className="col-1 dropdown-arrow text-right pe-3"><FontAwesomeIcon icon={faAngleRight} className="dropdown-arrow" /></div>
-
+        <div className="ps-2 pe-2 container-fluid d-flex justify-content-between">
+            <div className="d-flex align-items-center">
+                <div className="align-items-center ps-0 text-wrap text-left pe-4 text-break">{left}</div>
+            </div>
+            <div className="d-flex align-items-center justify-content-end">
+                {/* <div className="align-items-center ps-3 text-right  text-truncate w-50">{right}</div> */}
+                <div className={`dropdown-arrow text-right ${display}`}>
+                    <FontAwesomeIcon icon={faAngleRight} className="dropdown-arrow" />
                 </div>
             </div>
+
+
         </div>
     )
 };
-  
-    
-export const SelectRow =(props) => {
-    return (<div>
-        
-    </div>)
-    
-};
-export const DropdownFilter = (props) => {
-
+function Dropd(props){
+    const { label, index, transactionsTable}= props
+    const currentWidth = useWindowSize();
     function useWindowSize() {
         const [size, setSize] = useState(0);
         useLayoutEffect(() => {
@@ -46,62 +47,57 @@ export const DropdownFilter = (props) => {
         });
         return size;
     }
-    const currentWidth = useWindowSize();
-    const data = [
-        { "label": "datum", "text": "Datum" },
-        { "label": "wagen", "text": "Wagen" },
-        { "label": "werk", "text": "Werk" },
-        { "label": "cbm", "text": "Cbm" },
-        { "label": "abfahrt", "text": "Abfahrt" },
-        { "label": "kmAbfahrt", "text": "Km Stand bei Abfahrt" },
-        { "label": "ankunft", "text": "Ankunft" },
-        { "label": "kmAnkunft", "text": "Km Stand bei Ankunft" },
-        { "label": "lieferscheinNr", "text": "Lieferschein Nr." },
-        { "label": "baustelle", "text": "Baustelle" },
-        { "label": "entladeBeginn", "text": "EntladeBeginn" },
-        { "label": "entladeEnde", "text": "EntladeEnde" },
-        { "label": "entladeTyp", "text": "EntladeTyp" },
-        { "label": "wartezeit", "text": "Wartezeit" },
-        { "label": "sonstiges", "text": "Sonstiges" }
-    ]
-
-
+        return (
+        <Dropdown
+            drop={(currentWidth > 600) ? "right" : "down"}
+            as={ButtonGroup}
+            disabled
+            className="d-flex p-0 ps-4 pe-2 py-1 mydropdownlist"
+            style={{ minWidth: '200px' }}>
+            <Dropdown.Toggle split variant="white" disabled={label.filterType === 'none'} className="d-flex shadow-none">
+                <DropdownRow
+                    label={label}
+                    transactionsTable={transactionsTable}
+                />
+            </Dropdown.Toggle>
+            <NestedFilter
+                index={index}
+                transactionsTable={transactionsTable}
+                labels={label}
+            />
+        </Dropdown>
+        )
+}  
+export const DropdownFilter = (props) => {
+    const dispatch = useDispatch();
+    
+    
+    const checked = useSelector(state => state.transactionsFilter.checked)      
+      function handleChange(index, event) {
+        dispatch({
+            type: ACTIONS.TOGGLE_COLUMN,
+            payload: {
+              index: index,
+            },
+          })
+      }
+      
+    const transactionsTable = useSelector(state => state.transactionsTable)
+    
     return (
         <div>
-            {data.map((d, index) =>
-                <div key={d.label.toString()}>
-                    <SelectRow></SelectRow>
-                    <Dropdown drop={(currentWidth > 1000) ? "right" : "down"} as={ButtonGroup} className="d-flex">
-                        <Dropdown.Toggle split variant="white" className="d-flex  shadow-none">
-                            <DropdownRow left={d.text} right={[...new Set(transactions.map(t => t[d.label.toString()]))].join(" , ")}></DropdownRow>
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu className="dropdown-menu-right">
-                            <Form className="container-fluid px-3">
-                                <Form.Check className="d-flex row g-0" id={`checkbox-all-${index}`} htmlFor={`checkbox-all-${index}`}>
-                                    <Form.Check.Label className="col-10">Select All</Form.Check.Label>
-                                    <div className="col-1 flex-fill text-right">
-                                        <Form.Check.Input type='checkbox' />
-                                    </div>
-
-                                </Form.Check>
-                            </Form>
-                            <Dropdown.Divider></Dropdown.Divider>
-                            {[...new Set(transactions.map(t => t[d.label.toString()]))].map((t, index) =>
-                            
-                                <Form className="container-fluid px-3" key={index}>
-                                    <Form.Check className="d-flex row g-0" id={`checkbox-${d.label.toString()}-${index}`} htmlFor={`checkbox-${d.label.toString()}-${index}`}>
-                                        <Form.Check.Label className="col-10">{t}</Form.Check.Label>
-                                        <div className="col-1 flex-fill text-right">
-                                            <Form.Check.Input type='checkbox' />
-                                        </div>
-
-                                    </Form.Check>
-                                </Form>
-                                
-                            )}
-                        </Dropdown.Menu>
-                    </Dropdown>
+            {labels.map((label, index) =>
+                <div key={label.name.toString()} className="d-flex align-items-center">
+                    <Form.Check
+                        id={`checkbox${index}`}
+                        htmlFor={`checkbox${index}`}
+                        defaultChecked={checked[index]}
+                        className="align-items-center m-0 ps-3 pe-1 justify-content-start mycheckbox"
+                        onChange= {(e) => handleChange(index, e)}>
+                    </Form.Check>
+                    
+                    
+                    <Dropd label={label} index={index} transactionsTable={transactionsTable}></Dropd>
                     <Dropdown.Divider></Dropdown.Divider>
                 </div>
             )}
