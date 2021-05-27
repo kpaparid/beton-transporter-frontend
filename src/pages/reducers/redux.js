@@ -12,6 +12,7 @@ export const ACTIONS = {
     EDIT_TOGGLE: 'EDIT_TOGGLE',
     TOGGLE_COLUMN: 'TOGGLE_COLUMN',
     NESTEDFILTER_TOGGLEALL: 'NESTEDFILTER_TOGGLEALL',
+    NESTEDFILTER_TOGGLEONE: 'NESTEDFILTER_TOGGLEONE',
     
 };
 
@@ -139,6 +140,21 @@ function MyReducer(state = myInitialState, action) {
             const index = newNestedFilter.findIndex(item => item.label === label)
             newNestedFilter[index].filter = newNestedFilter[index].filter.map(row => ({...row, checked:checked}))
             console.log(newNestedFilter)
+            return {
+                ...state,
+                transactionsFilter:{
+                    ...state.transactionsFilter,
+                    newNestedFilter: newNestedFilter,
+                }
+                };
+        }
+        case ACTIONS.NESTEDFILTER_TOGGLEONE: {
+            const { label, value_index } = action.payload;
+            console.log(value_index)
+            const newNestedFilter = state.transactionsFilter.nestedFilter
+            const index = newNestedFilter.findIndex(item => item.label === label)
+            newNestedFilter[index].filter[value_index].checked = !newNestedFilter[index].filter[value_index].checked
+            console.log(newNestedFilter[index].filter[value_index].checked)
             return {
                 ...state,
                 transactionsFilter:{

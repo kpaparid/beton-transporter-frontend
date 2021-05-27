@@ -11,15 +11,22 @@ import { ACTIONS } from "../reducers/redux";
 
 
 function MyCheckboxContainer (props) {
-    const {labels, text, index='0', checked=false, onChange} = props
-    function btnTapped() {
-        console.log('tapped');
+    const {labels, text, index='0', checked=false, handler} = props
+
+    function selector2(state) {
+        const nestedFilter = state.transactionsFilter.nestedFilter.find(row => row.label === labels.name)
+        const left = nestedFilter.filter.length;
+        const right = nestedFilter.filter.filter(item => item.checked === true).length
+        return (left === right)
     }
+    const checkedAll = useSelector(selector2)
+
     return (
         <div className="container-fluid p-0 py-1 px-2"  key={index}>
-                    <Button className="w-100" 
+                    <Button className="w-100"
+                        id={'nested_checkbox_'+index} 
                         variant='white'
-                        onClick={onChange}
+                        onClick={() => handler(index)}
                         >
                         <div className="container-fluid mycontainer d-flex justify-content-between">
                             <div>{text}</div>
@@ -31,7 +38,7 @@ function MyCheckboxContainer (props) {
                                     <Form.Check.Input 
                                     type='checkbox' 
                                     disabled
-                                    defaultChecked = {checked}
+                                    checked = {checked}
                                     />
                                 </div>
                             </Form.Check>
@@ -40,17 +47,22 @@ function MyCheckboxContainer (props) {
                  </div>
     )
 }
+function MyMapper(props){
+    
+}
 export default (props) => {
     const { labels } = props
-    const nestedFilter = useSelector(selector)
     const nestedFilter2 = useSelector(state=>state.transactionsFilter.nestedFilter)
+    const nestedFilter3 = useSelector(selector3)
     const dispatch = useDispatch();
-    function selector(state) {
-        return state.transactionsFilter.nestedFilter.find(row => row.label === labels.name)
-    }
     function selector2(state) {
         const nestedFilter = state.transactionsFilter.nestedFilter.find(row => row.label === labels.name)
-        return nestedFilter.filter.length === nestedFilter.filter.filter(item => item.checked === true).length;
+        const left = nestedFilter.filter.length;
+        const right = nestedFilter.filter.filter(item => item.checked === true).length
+        return (left === right)
+    }
+    function selector3(state) {
+        return [...state.transactionsFilter.nestedFilter.find(row => row.label === labels.name).filter]
     }
     const checkedAll = useSelector(selector2)
     function toggleAll(event){
@@ -59,11 +71,22 @@ export default (props) => {
             type: ACTIONS.NESTEDFILTER_TOGGLEALL,
             payload: {
               label: labels.name,
-              checked: false
+              checked: !checkedAll
             },
           })
-          console.log(nestedFilter)
     }
+    function toggleOne(index){
+        console.log('click')
+        dispatch({
+            type: ACTIONS.NESTEDFILTER_TOGGLEONE,
+            payload: {
+              label: labels.name,
+                value_index: index
+            },
+          })
+          console.log(nestedFilter2)
+    }
+
 
     return (
         <>
@@ -71,16 +94,18 @@ export default (props) => {
                 labels={labels}
                 text='Select All'
                 checked= {checkedAll}
-                onChange={toggleAll}
+                handler={toggleAll}
             />
             <Dropdown.Divider></Dropdown.Divider>
             {
-            nestedFilter.filter.map((item, index) => 
+            nestedFilter3.map((item, index) => 
             <MyCheckboxContainer
                 key={index}
+                index={index}
                 labels={labels}
                 text={item.value}
                 checked={item.checked}
+                handler={toggleOne}
             />)
                 
             
