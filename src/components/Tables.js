@@ -279,19 +279,30 @@ export const RankingTable = () => {
 export const TransactionsTable = (props) => {
   const totalTransactions = transactions.length;
 
-  const checkedAll = useSelector((state) => state.checkedAll);
-  const tablelist = useSelector(selectorMenu, shallowEqual);
+  // const checkedAll = useSelector((state) => {
+  //   const checkedIdLength = state.tourTable.checkedId.length
+  //   const allIdLength = state.tourTable.allId.length
+
+  //   return checkedIdLength === allIdLength
+  // });
+  const checkedAll = true;
   const stateAPIStatus = useLoadTransactionsData();
+  // const displayColumn = useSelector(selectorMenu4)
 
-  const checkboxList = useSelector(state => state.checked)
 
-  const displayColumn = useSelector(selectorMenu4)
+  const shownTourTable = useSelector(shownToursSelector, shallowEqual)
 
-    function selectorMenu4(state) {
-      const { transactionsFilter } = state;
-      const table = transactionsFilter.checked.map(item => item ? 'table-cell' : 'none')
-      return table;
-    }
+  function shownToursSelector(state){
+    const shownId = state.tourTable.shownId
+    const table = []
+    
+    shownId.forEach(item => {
+      table.push( {id: item, value: state.tourTable.byId[item]} )
+    })
+    console.log('rerender')
+    return [...table]
+  }
+  
 
 
   const dispatch = useDispatch();
@@ -300,37 +311,17 @@ export const TransactionsTable = (props) => {
       type: ACTIONS.TOGGLE_CHECK_ALL,
     });
   }
-  function selectorMenu(state) {
-    const { checkedAll, transactionsTable } = state;
-    const table = []
-    transactionsTable.forEach((row, index) => {
-      table.push(transactionsTable[index]);
-    });
-    return table;
-  }
-  function selectorMenu2(state) {
-    const { transactionsTable } = state;
-    const table = []
-    transactionsTable.forEach((row, index) => {
-      table.push(transactionsTable[index]['checked']);
-    });
-    return table;
-  }
-  function selectorMenu3(state) {
-    const { checked } = state;
-    const table = []
-    checked.forEach((row, index) => {
-      table.push(row);
-    });
-    return table;
-  }
 
 
-  function handleCheckboxClick(event) {
+
+
+  function handleCheckboxClick(id, event) {
+    
     dispatch({
       type: ACTIONS.CHECK_ONE,
       payload: {
-        id: event.target.id,
+        id: id
+
       }
     });
   }
@@ -339,40 +330,60 @@ export const TransactionsTable = (props) => {
 
   const TableRow = (props) => {
     const { index, row, displayColumn } = props;
-    const checked = useSelector(selectorMenu)
-    function selectorMenu(state) {
-      const { checked } = state;
-      return checked[parseInt(index)];
-    }
+    const r = row.value
+    const id = row.id
+    // const checked = useSelector(selectorMenu)
+    // function selectorMenu(state) {
+    //   const { tourTable } = state;
+    //   const checked = tourTable.checkedId.findIndex(item => item === id) === -1 ? false : true 
+    //   // console.log(checked)
+    //   return checked;
+    // }
+
     return (
       <tr className="text-left align-middle" style={{ backgroundColor: '#c5ded6' }}>
         <td className="px-2" style={{width:'30px'}}>
           <Form.Check
-            id={`checkbox${index}`}
-            htmlFor={`checkbox${index}`}
-            defaultChecked={checked}
-            onChange={handleCheckboxClick}
+            key={`checkbox_tablerow_${index}`}
+            id={`checkbox_tablerow_${index}`}
+            htmlFor={`checkbox_tablerow_${index}`}
+            defaultChecked={'checked'}
+            onChange={(event) =>handleCheckboxClick(id, event)}
           />
         </td>
-        {Object.keys(row)
-          .filter(key => (key !== 'id') && (key !== 'labelId') && (key !== 'checked'))
-          .map((key, i) =>
-            <td key={`$s-${key}`} 
-              className="text-center px-1 text-wrap" 
-              style={{ display: displayColumn[i] }}>
-                <span>
-                  <MyTextArea
-                    myIndex={parseInt(index)}
-                    myKey={key}
-                    text={row[key]}
-                    myChecked={checked}
-                  />
-                </span>
-            </td>)}
+        <TablerowContents
+          key={`tablerow_contents_${id}`}
+          row={r}
+          id={id}
+          // displayColumn={displayColumn}
+        />
       </tr>
     );
   };
-
+  function TablerowContents(props) {
+    const {row, id, displayColumn} = props
+    
+    
+    return <>
+     {Object.keys(row)
+       .filter(key => (key !== 'id') 
+       )
+       .map((key, i) =>
+         <td key={`$td-${key}`} 
+           className="text-center px-1 text-wrap" 
+          //  style={{ display: displayColumn[i] }}
+           >
+             <span>
+               {/* <MyTextArea
+                key={`$myTextArea_${id}_${key}`}
+                myId={id}
+                myKey={key}
+                text={row[key]}
+                 /> */}
+             </span>
+         </td>)}
+    </>
+  }
 
   const HeaderRow = (props) => {
     const { table, displayColumn }= props
@@ -390,7 +401,8 @@ export const TransactionsTable = (props) => {
         {table.map((key, index) =>
           <th key={`$s-${key}`}
             className="border-bottom  px-2 text-wrap text-center "
-            style={{display:displayColumn[index]}}>
+            // style={{display:displayColumn[index]}}
+            >
             {key}
           </th>
         )}
@@ -422,29 +434,29 @@ export const TransactionsTable = (props) => {
     return stateAPIStatus;
   }
 
-  useEffect(() => {
-    console.log('SERVER_EVENT: menu list changed');
-    console.log(tablelist)
-    console.log(checkboxList)
+  // useEffect(() => {
+  //   console.log('SERVER_EVENT: menu list changed');
+  //   console.log(shownTourTable)
 
-  }, [tablelist]);
+  // }, [shownTourTable]);
 
 
   return (
     <Card border="light" className="table-wrapper table-responsive shadow table">
       <Card.Body className="px-1">
         <Table className="user-table align-items-center">
-          <thead className="thead-light">
+          {/* <thead className="thead-light">
             <HeaderRow
               table={labels.map(item => item.text)}
-              displayColumn={displayColumn} />
-          </thead>
+              // displayColumn={displayColumn} 
+              />
+          </thead> */}
           <tbody>
-            {tablelist.map((t, index) =>
+            {shownTourTable.map((t, index) =>
               <TableRow key={`transaction-${t.id}`}
                 row={t}
                 index={index}
-                displayColumn={displayColumn}
+                // displayColumn={displayColumn}
               />)}
           </tbody>
         </Table>

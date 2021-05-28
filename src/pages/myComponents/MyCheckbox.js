@@ -47,9 +47,7 @@ function MyCheckboxContainer (props) {
                  </div>
     )
 }
-function MyMapper(props){
-    
-}
+
 export default (props) => {
     const { labels } = props
     const nestedFilter2 = useSelector(state=>state.transactionsFilter.nestedFilter)
@@ -84,7 +82,6 @@ export default (props) => {
                 value_index: index
             },
           })
-          console.log(nestedFilter2)
     }
 
 

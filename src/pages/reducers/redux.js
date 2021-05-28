@@ -15,9 +15,6 @@ export const ACTIONS = {
     NESTEDFILTER_TOGGLEONE: 'NESTEDFILTER_TOGGLEONE',
     
 };
-
-
-
 const myInitialState = {
     checkedAll: '',
     transactionsTable: [],
@@ -26,10 +23,27 @@ const myInitialState = {
     editMode: false,
     transactionsDate: '12-2021',
     transactionsFilter: {
-        nestedFilter: [],
+        nestedFilter: [{
+            label: '',
+            filter: [{
+                checked: true, 
+                value: ''
+            }]
+        }],
         checked: []
+    },
+
+    tourTable: {
+        byId: {},
+        allId: [],
+        shownId: [],
+        checkedId: [],
+        changesById: {},
     }
+
+
 };
+
 function MyReducer(state = myInitialState, action) {
     switch (action.type) {
         case ACTIONS.LOAD_TRANSACTIONS_TABLE: {
@@ -42,6 +56,12 @@ function MyReducer(state = myInitialState, action) {
                 filter:[...new Set(table.map(row=>row[item]))].map(item => ({checked:true, value: item}))}))
 
             console.log(newTransactionsFilterFilters)
+            
+            
+            const newTourTableById = table.map((item, index) => ({  ['Tour'+index] : {...item}  })).reduce((prev, curr) => ({...prev, ...curr}))
+            const newTourTableAllId = table.map((item, index) => ('Tour'+index))
+            
+
             return {
                 ...state,
                 checked: newChecked,
@@ -49,6 +69,12 @@ function MyReducer(state = myInitialState, action) {
                 transactionsFilter: {
                     checked: newTransactionsFilterChecked,
                     nestedFilter: newTransactionsFilterFilters,
+                },
+                tourTable: {
+                    ...state.tourTable,
+                    byId: newTourTableById,
+                    allId: [...newTourTableAllId],
+                    shownId: [...newTourTableAllId],
                 }
             };
         }
@@ -61,6 +87,7 @@ function MyReducer(state = myInitialState, action) {
             return {
                 ...state,
                 transactionsFilter: {
+                    ...state.transactionsFilter,
                     checked: newTransactionsFilterChecked
                 }
             }
@@ -74,29 +101,45 @@ function MyReducer(state = myInitialState, action) {
         }
 
         case ACTIONS.TOGGLE_CHECK_ALL: {
-            const newCheckedAll = state.checkedAll === 'checked'? '' : 'checked'
+
+            const tourTable = state.tourTable
+            const checkedAll = tourTable.checkedId.length === tourTable.allId.length
+            var newCheckedId = checkedAll ? [] : tourTable.allId
             return {
                 ...state,
-                checkedAll: newCheckedAll,
-                checked: state.checked.map(item => newCheckedAll),
+                tourTable:{
+                    ...state.tourTable,
+                    checkedId: [...newCheckedId],
+                }
                 };
         }
         case ACTIONS.CLOSE_CHECK_ALL: {
+            
             return {
                 ...state,
-                checkedAll: '',
-                checked: state.checked.map(item => ''),
+                tourTable:{
+                    ...state.tourTable,
+                    checkedId: [],
+                }
             };
         }
         
         case ACTIONS.CHECK_ONE: {
-            const { id } = action.payload;
-            var row = parseInt(id.replace('checkbox',''))
-            const newChecked = state.checked
-            newChecked[row] = newChecked[row] === '' ? 'checked' : ''
+            const { id } = action.payload
+
+            const index = state.tourTable.checkedId.findIndex(item => item === id)
+            var  newCheckedId = state.tourTable.checkedId
+            index === -1 ? newCheckedId.push(id) : newCheckedId = newCheckedId.filter(item => item !== id)
+            console.log('single click')
+            console.log(newCheckedId)
+
+
             return {
                 ...state,
-                checked: newChecked,
+                tourTable: {
+                    ...state.tourTable,
+                    checkedId: newCheckedId
+                }
             };
         }
 
@@ -113,20 +156,24 @@ function MyReducer(state = myInitialState, action) {
             };
         }
         case ACTIONS.ADD_CHANGE: {
-            const { id, label, text } = action.payload 
-            const newChanges = state.changes
-            const index = newChanges.findIndex(item => item.id === id)                    
-            if(index === -1){
-                const change = { id: id, [label]: text}
-                newChanges.push(change)
-            }
-            else{
-                newChanges[index] = {...newChanges[index], [label]: text}
-            }
-            return {
-                ...state,
-                changes: newChanges,
-            };
+            const { id, key, change } = action.payload
+
+            console.log(id)
+            console.log(key)
+            console.log(change)
+
+            const newChangesById = state.tourTable.changesById
+            newChangesById[id] = {...newChangesById[id], [key] : change}
+
+            console.log(newChangesById)
+
+            // return {
+            //     ...state,
+            //     tourTable: {
+            //         ...state.tourTable,
+            //         changesById: newChangesById,
+            //     }
+            // };
         }
         case ACTIONS.DELETE_CHANGES: {
             return {
@@ -150,11 +197,11 @@ function MyReducer(state = myInitialState, action) {
         }
         case ACTIONS.NESTEDFILTER_TOGGLEONE: {
             const { label, value_index } = action.payload;
-            console.log(value_index)
+            // console.log(value_index)
             const newNestedFilter = state.transactionsFilter.nestedFilter
             const index = newNestedFilter.findIndex(item => item.label === label)
             newNestedFilter[index].filter[value_index].checked = !newNestedFilter[index].filter[value_index].checked
-            console.log(newNestedFilter[index].filter[value_index].checked)
+            // console.log(newNestedFilter)
             return {
                 ...state,
                 transactionsFilter:{

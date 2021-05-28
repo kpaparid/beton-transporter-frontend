@@ -17,9 +17,9 @@ export default () => {
   const checkedExists = useSelector(selectorCheckedExists)
 
   function selectorCheckedExists(state) {
-    const { checked } = state;
-    const index = checked.findIndex(item => item === "checked")
-    return index === -1 ? false : true
+    const { tourTable } = state;
+    
+    return tourTable.checkedId.length !== 0 ? true : false
 
   }
   const toggleEditMode = () => {
