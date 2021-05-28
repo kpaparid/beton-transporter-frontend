@@ -8,6 +8,7 @@ import { DropdownFilter } from "./myComponents/Filter";
 import { BreakBtn, EditBtn, MyBtn, SaveBtn, DownloadBtn } from "./myComponents/MyButtons";
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../pages/reducers/redux";
+import { TourTable } from "./myComponents/MyTourTable";
 
 
 
@@ -91,7 +92,7 @@ export default () => {
             <DownloadBtn onClick={handleDownload} />
           </ButtonGroup>
         </div>
-        <TransactionsTable />
+        <TourTable></TourTable>
       </div>
     </>
   );

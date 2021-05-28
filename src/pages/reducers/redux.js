@@ -167,13 +167,13 @@ function MyReducer(state = myInitialState, action) {
 
             console.log(newChangesById)
 
-            // return {
-            //     ...state,
-            //     tourTable: {
-            //         ...state.tourTable,
-            //         changesById: newChangesById,
-            //     }
-            // };
+            return {
+                ...state,
+                tourTable: {
+                    ...state.tourTable,
+                    changesById: newChangesById,
+                }
+            };
         }
         case ACTIONS.DELETE_CHANGES: {
             return {

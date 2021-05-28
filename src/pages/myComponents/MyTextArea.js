@@ -9,23 +9,23 @@ export default (props) => {
     const { text = "", rows = 1, minRows = 1, maxRows = 10, className = "" } = props
     const { myKey, myIndex,  myId} = props
 
-    const checked = useSelector(selectorMenu, shallowEqual)
-    function selectorMenu(state) {
+    const checked = useSelector(checkedSelector, shallowEqual)
+    function checkedSelector(state) {
       const { tourTable } = state;
-      const checked = tourTable.checkedId.findIndex(item => item === myId) === -1 ? false : true 
+      const checked = tourTable.checkedId.findIndex(item => item === myId) === -1 ? false : true
       return checked;
     }
     
-    const editMode = useSelector(selectorMenu, shallowEqual)
-    function selectorMenu(state) {
+    const editMode = useSelector(editModeSelector, shallowEqual)
+    function editModeSelector(state) {
         const { editMode } = state;
         // console.log(myChecked)
         // console.log(state.tourTable.byId)
         return editMode;
       }
 
-      const editValue = useSelector(selectorMenu2, shallowEqual)
-      function selectorMenu2(state) {
+      const editValue = useSelector(editedValueSelector, shallowEqual)
+      function editedValueSelector(state) {
         const { tourTable } = state;
         var row = tourTable.byId[myId][myKey]
         if(tourTable.changesById[myId] && tourTable.changesById[myId][myKey]){
@@ -39,6 +39,7 @@ export default (props) => {
 
     const handleChange = (event) => {
         console.log('render')
+        console.log(checked)
         dispatch({
             type: ACTIONS.ADD_CHANGE,
             payload: {
@@ -49,8 +50,7 @@ export default (props) => {
           });
     };
 
-    // if (editMode && checked) {
-        if (true) {
+    if (editMode && checked) {
         return (
             <> 
             <Form
@@ -62,9 +62,10 @@ export default (props) => {
                         key={`fc${myId}_${myKey}`}
                         as="textarea"
                         rows="4"
-                        value={editValue}
+                        defaultValue={editValue}
                         className="fw-normal"
                         onChange={handleChange}
+                        // autoFocus
                         style={{
                             minWidth: "100px",
                             fontSize: '14px',
