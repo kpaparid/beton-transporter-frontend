@@ -10,7 +10,7 @@ import MyTextArea from './MyTextArea';
 
 
 export const TableRow = (props) => {
-    const { index, row, displayColumn } = props;
+    const { index, row } = props;
     const r = row.value
     const id = row.id
     
@@ -21,7 +21,6 @@ export const TableRow = (props) => {
           type: ACTIONS.CHECK_ONE,
           payload: {
             id: id
-    
           }
         });
       }
@@ -30,8 +29,7 @@ export const TableRow = (props) => {
     const checked = useSelector(selectorMenu)
     function selectorMenu(state) {
       const { tourTable } = state;
-      const checked = tourTable.checkedId.findIndex(item => item === id) === -1 ? false : true 
-      // console.log(checked)
+      const checked = tourTable.checkedId.findIndex(item => item === id) === -1 ? '' : 'checked' 
       return checked;
     }
 
@@ -42,7 +40,7 @@ export const TableRow = (props) => {
             key={`checkbox_tablerow_${index}`}
             id={`checkbox_tablerow_${index}`}
             htmlFor={`checkbox_tablerow_${index}`}
-            defaultChecked={checked}
+            checked={checked}
             onChange={(event) =>handleCheckboxClick(id, event)}
           />
         </td>
@@ -50,23 +48,20 @@ export const TableRow = (props) => {
           key={`tablerow_contents_${id}`}
           row={r}
           id={id}
-          // displayColumn={displayColumn}
         />
       </tr>
     );
   };
 export const TablerowContents =(props) =>{
-    const {row, id, displayColumn} = props
+    const {row, id } = props
+    const checkedColumns = useSelector(state => state.tourTable.checkedLabelsId)
     
-    
+
     return <>
-     {Object.keys(row)
-       .filter(key => (key !== 'id') 
-       )
-       .map((key, i) =>
+     {
+     checkedColumns.map((key, i) =>
          <td key={`$td-${key}`} 
            className="text-center px-1 text-wrap" 
-          //  style={{ display: displayColumn[i] }}
            >
              <span>
                <MyTextArea
@@ -80,20 +75,8 @@ export const TablerowContents =(props) =>{
     </>
   }
 
-export const HeaderRow = (props) => {
-    const { table, displayColumn }= props
-    const dispatch = useDispatch();
-    function handleAllClick() {
-      dispatch({
-        type: ACTIONS.TOGGLE_CHECK_ALL,
-      });
-    }
-    const checkedAll = useSelector((state) => {
-      const checkedIdLength = state.tourTable.checkedId.length
-      const allIdLength = state.tourTable.allId.length
-  
-      return checkedIdLength === allIdLength
-    });
+export const HeaderRow = ( props ) => {
+    const {headers, checked, handleAllClick} = props
 
     return (
       <tr className="align-middle">
@@ -101,14 +84,13 @@ export const HeaderRow = (props) => {
           <Form.Check
             id="checkboxAll"
             htmlFor="checkboxAll"
-            checked={checkedAll}
+            checked={checked}
             onChange={handleAllClick}
           />
         </th>
-        {table.map((key, index) =>
+        {headers.map((key, index) =>
           <th key={`$s-${key}`}
             className="border-bottom  px-2 text-wrap text-center "
-            style={{display:displayColumn[index]}}
             >
             {key}
           </th>

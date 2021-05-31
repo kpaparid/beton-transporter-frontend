@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faAngleDown } from '@fortawesome/free-solid-svg-icons';
 import { Button, ButtonGroup, Breadcrumb, Dropdown } from '@themesberg/react-bootstrap';
@@ -15,6 +15,14 @@ import { TourTable } from "./myComponents/MyTourTable";
 export default () => {
 
   const dispatch = useDispatch();
+  const tourTable = useSelector(state => state)
+
+  useEffect(() => {
+    console.log('rerender')
+    console.log(tourTable)
+  }, [tourTable]);
+
+
   const checkedExists = useSelector(selectorCheckedExists)
 
   function selectorCheckedExists(state) {
@@ -45,7 +53,9 @@ export default () => {
       type: ACTIONS.SAVE_CHANGES,
     });
     closeAllCheckBoxes()
+    clearChanges()
     toggleEditMode()
+    console.log(tourTable)
   }
   const handleDownload = () => {
 

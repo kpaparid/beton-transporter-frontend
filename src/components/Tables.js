@@ -9,7 +9,6 @@ import commands from "../data/commands";
 import MyTextArea from "../pages/myComponents/MyTextArea";
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../pages/reducers/redux";
-import { loadTransactionsData } from "../pages/reducers/loadTransactionsData";
 
 
 

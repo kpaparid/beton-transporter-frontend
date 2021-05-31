@@ -16,13 +16,7 @@ export default (props) => {
       return checked;
     }
     
-    const editMode = useSelector(editModeSelector, shallowEqual)
-    function editModeSelector(state) {
-        const { editMode } = state;
-        // console.log(myChecked)
-        // console.log(state.tourTable.byId)
-        return editMode;
-      }
+    const editMode = useSelector(state => state.tourTable.editMode)
 
       const editValue = useSelector(editedValueSelector, shallowEqual)
       function editedValueSelector(state) {

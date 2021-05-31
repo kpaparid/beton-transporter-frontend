@@ -7,7 +7,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 const defaultVariant = "primary";
 
 export const EditBtn = (props) => {
-    const editMode = useSelector(state=>state.editMode)
+    const editMode = useSelector(state=>state.tourTable.editMode)
     const { onClick, className = "", size, variant, text='Edit' } = props;
     return (
         <MyBtn className={`${className} ${editMode ? "disabled" : ""} `} 
@@ -15,7 +15,7 @@ export const EditBtn = (props) => {
         variant={variant} size={size}></MyBtn>)
 };
 export const SaveBtn = (props) => {
-    const editMode = useSelector(state=>state.editMode)
+    const editMode = useSelector(state=>state.tourTable.editMode)
     const { onClick, className = "", size, variant, text='Save' } = props;
     return (
         <MyBtn 
@@ -24,7 +24,7 @@ export const SaveBtn = (props) => {
         variant={variant} size={size}></MyBtn>)
 };
 export const BreakBtn = (props) => {
-    const editMode = useSelector(state=>state.editMode)
+    const editMode = useSelector(state=>state.tourTable.editMode)
     const { onClick, className = "", size, variant, text='Break' } = props;
     return (
         <MyBtn 

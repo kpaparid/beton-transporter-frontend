@@ -7,17 +7,15 @@ import { ACTIONS } from "../reducers/redux";
 // import { loadTransactionsData } from "../pages/reducers/loadTransactionsData";
 import { TableRow, TablerowContents, HeaderRow } from './MyTableRow';
 import { MyTextArea } from './MyTextArea';
-import { loadTransactionsData } from "../reducers/loadTransactionsData";
+import { loadToursData } from "../reducers/loadToursData";
 
 
 export const TourTable = (props) => {
     
-    const stateAPIStatus = useLoadTransactionsData();
-    // const displayColumn = useSelector(selectorMenu4)
-  
-  
+  const dispatch = useDispatch();
+    const stateAPIStatus = useLoadToursData();    
     const shownTourTable = useSelector(shownToursSelector, shallowEqual)
-    const totalTransactions = shownTourTable.length;
+    const totalTours = shownTourTable.length;
   
     function shownToursSelector(state){
       const shownId = state.tourTable.shownId
@@ -29,18 +27,19 @@ export const TourTable = (props) => {
       return [...table]
     }  
   
-    function useLoadTransactionsData() {
+    function useLoadToursData() {
       const [stateAPIStatus, setAPIStatus] = useState('idle');
       const dispatch = useDispatch();
   
       useEffect(() => {
         setAPIStatus('loading');
-        loadTransactionsData()
+        loadToursData()
           .then((data) => {
             dispatch({
-              type: ACTIONS.LOAD_TRANSACTIONS_TABLE,
+              type: ACTIONS.LOAD_TOUR_TABLE,
               payload: {
-                table: data,
+                table: data.table,
+                labels: data.labels,
               },
             });
             setAPIStatus('success');
@@ -53,29 +52,35 @@ export const TourTable = (props) => {
       return stateAPIStatus;
     }
   
-    // useEffect(() => {
-    //   console.log('SERVER_EVENT: menu list changed');
-    //   console.log(shownTourTable)
-  
-    // }, [shownTourTable]);
-  
+    function handleAllClick() {
+      dispatch({
+        type: ACTIONS.TOGGLE_CHECK_ALL,
+      });
+    }
+    const checkedAll = useSelector((state) => {
+      const checkedIdLength = state.tourTable.checkedId.length
+      const allIdLength = state.tourTable.allId.length
+      return checkedIdLength === allIdLength
+    });
+    
+    const shownLabels = useSelector(state => state.tourTable.checkedLabelsId)
   
     return (
       <Card border="light" className="table-wrapper table-responsive shadow table">
         <Card.Body className="px-1">
           <Table className="user-table align-items-center">
             <thead className="thead-light">
-              {/* <HeaderRow
-                // table={labels.map(item => item.text)}
-                // displayColumn={displayColumn} 
-                /> */}
+              <HeaderRow
+                 headers={shownLabels}
+                 checked={checkedAll}
+                 handleAllClick={handleAllClick}
+                />
             </thead>
             <tbody>
               {shownTourTable.map((t, index) =>
                 <TableRow key={`transaction-${t.id}`}
                   row={t}
                   index={index}
-                //   displayColumn={displayColumn}
                 />)}
             </tbody>
           </Table>
@@ -96,7 +101,7 @@ export const TourTable = (props) => {
               </Pagination>
             </Nav>
             <small className="fw-bold">
-              Showing <b>{totalTransactions}</b> out of <b>25</b> entries
+              Showing <b>{totalTours}</b> out of <b>25</b> entries
             </small>
           </Card.Footer>
         </Card.Body>

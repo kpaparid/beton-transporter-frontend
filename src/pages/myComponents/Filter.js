@@ -11,11 +11,19 @@ import { ACTIONS } from '../reducers/redux';
 import NestedFilter from "./NestedFilter";
 
 export const DropdownRow = (props) => {
-    const { label, transactionsTable } = props;
-    const left= label.text
-    const right=[...new Set(transactionsTable.map(t => t[label.name]))]
-    
-    const display = (right.length === 1) || (label.filterType === 'none') ? 'd-none' : 'd-block'
+    const { label } = props;
+    const left = label.text
+    const tourTableUniqueLength = useSelector(mySelector)
+
+    function mySelector(state) {
+        console.log(state.tourTable.byId)
+        const test = state.tourTable.allId.map(item => state.tourTable.byId[item][label.id])
+        const test2 = [...new Set(test)].length
+        console.log(test2)
+        return test2
+    }
+    console.log(tourTableUniqueLength)
+    const display = (tourTableUniqueLength === 1) || (label.filterType === 'none') ? 'd-none' : 'd-block'
     return (
         <div className="ps-2 pe-2 container-fluid d-flex justify-content-between">
             <div className="d-flex align-items-center">
@@ -32,8 +40,9 @@ export const DropdownRow = (props) => {
         </div>
     )
 };
-function Dropd(props){
-    const { label, index, transactionsTable}= props
+function Dropd(props) {
+    const { labelId, index, transactionsTable } = props
+    const label  = useSelector(state => state.tourTable.labelsById[labelId])
     const currentWidth = useWindowSize();
     function useWindowSize() {
         const [size, setSize] = useState(0);
@@ -47,7 +56,7 @@ function Dropd(props){
         });
         return size;
     }
-        return (
+    return (
         <Dropdown
             drop={(currentWidth > 600) ? "right" : "down"}
             as={ButtonGroup}
@@ -66,38 +75,44 @@ function Dropd(props){
                 labels={label}
             />
         </Dropdown>
-        )
-}  
+    )
+}
 export const DropdownFilter = (props) => {
     const dispatch = useDispatch();
-    
-    
-    const checked = useSelector(state => state.transactionsFilter.checked)      
-      function handleChange(index, event) {
+    const checked = useSelector(state => state.transactionsFilter.checked)
+    const labelsNames = useSelector((state) => {
+        const { tourTable } = state
+        const labelsNames = tourTable.allLabelsId.map(label => tourTable.labelsById[label].text)
+        console.log(labelsNames)
+        return labelsNames
+    })
+    const labels = useSelector(state => state.tourTable.labelsById)
+
+    function handleChange(index, event) {
         dispatch({
             type: ACTIONS.TOGGLE_COLUMN,
             payload: {
-              index: index,
+                index: index,
             },
-          })
-      }
-      
+        })
+    }
+
     const transactionsTable = useSelector(state => state.transactionsTable)
-    
+
     return (
         <div>
-            {labels.map((label, index) =>
-                <div key={label.name.toString()} className="d-flex align-items-center">
+            {Object.keys(labels).map((labelId, index) =>
+                <div key={labelId} className="d-flex align-items-center">
                     <Form.Check
                         id={`checkbox${index}`}
                         htmlFor={`checkbox${index}`}
                         defaultChecked={checked[index]}
                         className="align-items-center m-0 ps-3 pe-1 justify-content-start mycheckbox"
-                        onChange= {(e) => handleChange(index, e)}>
+                        onChange={(e) => handleChange(index, e)}>
                     </Form.Check>
-                    
-                    
-                    <Dropd label={label} index={index} transactionsTable={transactionsTable}></Dropd>
+
+
+                    <Dropd labelId={labelId} index={index} transactionsTable={transactionsTable}></Dropd>
                     <Dropdown.Divider></Dropdown.Divider>
                 </div>
             )}
