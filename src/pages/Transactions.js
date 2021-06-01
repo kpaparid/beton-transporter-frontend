@@ -15,7 +15,7 @@ import { TourTable } from "./myComponents/MyTourTable";
 export default () => {
 
   const dispatch = useDispatch();
-  const tourTable = useSelector(state => state)
+  const tourTable = useSelector(state => state.tourTable)
 
   useEffect(() => {
     console.log('rerender')

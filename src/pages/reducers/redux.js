@@ -1,4 +1,5 @@
 import { createStore } from 'redux';
+import moment from "moment";
 
 export const ACTIONS = {
     CLOSE_CHECK_ALL: 'CLOSE_CHECK_ALL',
@@ -43,6 +44,9 @@ const myInitialState = {
         allLabelsId: [],
         checkedLabelsId: [],
         labelsById: {},
+        tourDate: '12-2021',
+
+        filteredOutValues: {"wagen" : [704], "fahrer" : ["Uwe Schwille"]}
     }
 
 
@@ -53,8 +57,6 @@ function MyReducer(state = myInitialState, action) {
         case ACTIONS.LOAD_TOUR_TABLE: {
             const { table, labels } = action.payload;
             
-        // allLabelsId: [],
-        // checkedLabelsId: [],
             console.log('LOADING TOUR TABLE')
             const newTransactionsTable = table.map((item, index) => ({...item, labelId: item.id, id: index}))
             const newChecked = table.map(item=>'')
@@ -63,13 +65,19 @@ function MyReducer(state = myInitialState, action) {
                 label: item,
                 filter:[...new Set(table.map(row=>row[item]))].map(item => ({checked:true, value: item}))}))            
             
-                const newTourTableById = table.map((item, index) => ({  ['Tour'+index] : {...item}  })).reduce((prev, curr) => ({...prev, ...curr}))
-            const newTourTableAllId = table.map((item, index) => ('Tour'+index))
-
-            const newLabelsById = labels.map( label => ({[label.id] : {...label}})).reduce((prev, curr) => ({...prev, ...curr}))
+            
+            
+            
+            const newTourTableById = table.map((item, index) => ({  ['Tour'+index] : {...item}  })).reduce((prev, curr) => ({...prev, ...curr}))
+            const newTourTableAllId = Object.keys(newTourTableById)
+            
+            const newLabelsById = labels.map( (label, index) => ({[label.id] : {...label, "priority": index}})).reduce((prev, curr) => ({...prev, ...curr}))
             const newAllLabelsId = labels.map( label => label.id)
             const checkedLabelsId = [...newAllLabelsId]
-            
+
+            const newShownId = newTourTableAllId.filter( id => (moment(newTourTableById[id].datum, 'DD-MM-YYYY').format('MM-YYYY') === state.tourTable.tourDate))
+
+
             return {
                 ...state,
                 checked: newChecked,
@@ -82,7 +90,7 @@ function MyReducer(state = myInitialState, action) {
                     ...state.tourTable,
                     byId: newTourTableById,
                     allId: [...newTourTableAllId],
-                    shownId: [...newTourTableAllId],
+                    shownId: newShownId,
                     labelsById: newLabelsById,
                     allLabelsId: newAllLabelsId,
                     checkedLabelsId: checkedLabelsId,
@@ -91,15 +99,28 @@ function MyReducer(state = myInitialState, action) {
         }
         
         case ACTIONS.TOGGLE_COLUMN: {
-            const { index } = action.payload;
+            const { index, labelId } = action.payload;
+            console.log('Toggle_Column: '+labelId)
             const newTransactionsFilterChecked = state.transactionsFilter.checked
             newTransactionsFilterChecked[index] = !newTransactionsFilterChecked[index]
-            console.log(newTransactionsFilterChecked)
+            
+            const test = state.tourTable.checkedLabelsId
+            const newCheckedLabelsId = state.tourTable.checkedLabelsId.indexOf(labelId) === -1 ? [...state.tourTable.checkedLabelsId, labelId] : state.tourTable.checkedLabelsId.filter(label => label !== labelId)
+
+            
+            console.log(newCheckedLabelsId)
+            console.log(state.tourTable.checkedLabelsId.indexOf(labelId))
+
+
             return {
                 ...state,
                 transactionsFilter: {
                     ...state.transactionsFilter,
                     checked: newTransactionsFilterChecked
+                },
+                tourTable: {
+                    ...state.tourTable,
+                    checkedLabelsId: newCheckedLabelsId,
                 }
             }
         }
@@ -202,31 +223,36 @@ function MyReducer(state = myInitialState, action) {
             };
         }
         case ACTIONS.NESTEDFILTER_TOGGLEALL: {
-            const { label, checked } = action.payload;
-            const newNestedFilter = state.transactionsFilter.nestedFilter
-            const index = newNestedFilter.findIndex(item => item.label === label)
-            newNestedFilter[index].filter = newNestedFilter[index].filter.map(row => ({...row, checked:checked}))
-            console.log(newNestedFilter)
+            const { label, data } = action.payload;
+            
+            const values = data.map(item => item.value)
+            const checked = data.filter(item => item.checked === 'checked')
+            const checkedAll = values.length === checked.length
+            const newFilteredOutValues = state.tourTable.filteredOutValues
+            const newValues = checkedAll ? values : []
+            newFilteredOutValues[label] = newValues;
             return {
                 ...state,
-                transactionsFilter:{
-                    ...state.transactionsFilter,
-                    newNestedFilter: newNestedFilter,
+                tourTable: {
+                    ...state.tourTable,
+                    filteredOutValues: newFilteredOutValues
                 }
                 };
         }
         case ACTIONS.NESTEDFILTER_TOGGLEONE: {
-            const { label, value_index } = action.payload;
-            // console.log(value_index)
-            const newNestedFilter = state.transactionsFilter.nestedFilter
-            const index = newNestedFilter.findIndex(item => item.label === label)
-            newNestedFilter[index].filter[value_index].checked = !newNestedFilter[index].filter[value_index].checked
-            // console.log(newNestedFilter)
+            const { label, value } = action.payload;
+            const newFilteredOutValues = {...state.tourTable.filteredOutValues}
+            const newValues = newFilteredOutValues[label] && 
+            (newFilteredOutValues[label].findIndex(item => item === value) === -1) ? 
+            [...newFilteredOutValues[label], value] : 
+            [...newFilteredOutValues[label]].filter(item => item !== value)
+
+            newFilteredOutValues[label] = newValues
             return {
                 ...state,
-                transactionsFilter:{
-                    ...state.transactionsFilter,
-                    newNestedFilter: newNestedFilter,
+                tourTable: {
+                    ...state.tourTable,
+                    filteredOutValues: newFilteredOutValues
                 }
                 };
         }

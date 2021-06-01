@@ -11,28 +11,20 @@ import { ACTIONS } from "../reducers/redux";
 
 
 function MyCheckboxContainer (props) {
-    const {labels, text, index='0', checked=false, handler} = props
-
-    function selector2(state) {
-        const nestedFilter = state.transactionsFilter.nestedFilter.find(row => row.label === labels.name)
-        const left = nestedFilter.filter.length;
-        const right = nestedFilter.filter.filter(item => item.checked === true).length
-        return (left === right)
-    }
-    const checkedAll = useSelector(selector2)
-
+    const {labels, text, index='0', checked, handler} = props
+    
     return (
         <div className="container-fluid p-0 py-1 px-2"  key={index}>
                     <Button className="w-100"
                         id={'nested_checkbox_'+index} 
                         variant='white'
-                        onClick={() => handler(index)}
+                        onClick={handler}
                         >
                         <div className="container-fluid mycontainer d-flex justify-content-between">
                             <div>{text}</div>
                             <Form.Check className="d-flex justify-content-between g-0 align-items-center"
-                                id={`checkbox-${labels.name.toString()}-${index}`}
-                                htmlFor={`checkbox-${labels.name.toString()}-${index}`}
+                                id={`checkbox-${labels.id}-${index}`}
+                                htmlFor={`checkbox-${labels.id}-${index}`}
                                 >
                                 <div className="align-items-center">
                                     <Form.Check.Input 
@@ -49,37 +41,29 @@ function MyCheckboxContainer (props) {
 }
 
 export default (props) => {
-    const { labels } = props
-    const nestedFilter2 = useSelector(state=>state.transactionsFilter.nestedFilter)
-    const nestedFilter3 = useSelector(selector3)
+    const { labels, data } = props
     const dispatch = useDispatch();
-    function selector2(state) {
-        const nestedFilter = state.transactionsFilter.nestedFilter.find(row => row.label === labels.name)
-        const left = nestedFilter.filter.length;
-        const right = nestedFilter.filter.filter(item => item.checked === true).length
-        return (left === right)
-    }
-    function selector3(state) {
-        return [...state.transactionsFilter.nestedFilter.find(row => row.label === labels.name).filter]
-    }
-    const checkedAll = useSelector(selector2)
-    function toggleAll(event){
-        console.log('click')
+
+    const checkedAll = data[labels.id].filter(item => item.checked === "checked").length === data[labels.id].length ? 'checked' : ''
+    console.log(checkedAll)
+    
+    function toggleAll(label,data, event){
+        console.log('click nestedFilter All')
         dispatch({
             type: ACTIONS.NESTEDFILTER_TOGGLEALL,
             payload: {
-              label: labels.name,
-              checked: !checkedAll
+              label: label,
+              data : data[label]
             },
           })
     }
-    function toggleOne(index){
-        console.log('click')
+    function toggleOne(label, value){
+        console.log('click nestedFilter Single')
         dispatch({
             type: ACTIONS.NESTEDFILTER_TOGGLEONE,
             payload: {
-              label: labels.name,
-                value_index: index
+              label: label,
+              value: value
             },
           })
     }
@@ -90,19 +74,19 @@ export default (props) => {
             <MyCheckboxContainer
                 labels={labels}
                 text='Select All'
-                checked= {checkedAll}
-                handler={toggleAll}
+                handler={(e) => toggleAll(labels.id, data, e)}
+                checked={checkedAll}
             />
             <Dropdown.Divider></Dropdown.Divider>
             {
-            nestedFilter3.map((item, index) => 
+            data[labels.id].map((item, index) => 
             <MyCheckboxContainer
                 key={index}
                 index={index}
                 labels={labels}
                 text={item.value}
                 checked={item.checked}
-                handler={toggleOne}
+                handler={(e) => toggleOne(labels.id, item.value)}
             />)
                 
             

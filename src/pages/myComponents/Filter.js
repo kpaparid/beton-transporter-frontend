@@ -10,38 +10,79 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from '../reducers/redux';
 import NestedFilter from "./NestedFilter";
 
-export const DropdownRow = (props) => {
-    const { label } = props;
-    const left = label.text
-    const tourTableUniqueLength = useSelector(mySelector)
+export const DropdownFilter = () => {
+    const dispatch = useDispatch();
+    const labels = useSelector(state => state.tourTable.labelsById)
+    const checked = useSelector(state => {
+        const checkedList = state.tourTable.allLabelsId
+            .map(label =>  ({[label] : state.tourTable.checkedLabelsId.indexOf(label) === -1 ? '' : 'checked'}))
+            .reduce((prev, curr) => ({...prev, ...curr}))
+        return checkedList
+    })
 
-    function mySelector(state) {
-        console.log(state.tourTable.byId)
-        const test = state.tourTable.allId.map(item => state.tourTable.byId[item][label.id])
-        const test2 = [...new Set(test)].length
-        console.log(test2)
-        return test2
+    function handleChange(index, labelId, event) {
+        dispatch({
+            type: ACTIONS.TOGGLE_COLUMN,
+            payload: {
+                index: index,
+                labelId: labelId
+            },
+        })
     }
-    console.log(tourTableUniqueLength)
-    const display = (tourTableUniqueLength === 1) || (label.filterType === 'none') ? 'd-none' : 'd-block'
+    const data = useSelector(myDataSelector)
+    function myDataSelector(state) {
+        const values = state.tourTable.allLabelsId.map(label => {
+            const tourTableByLabel = state.tourTable.shownId.map(item => state.tourTable.byId[item][label])
+            const values = [...new Set(tourTableByLabel)]
+                .map(item => ({
+                    value: item, 
+                    checked: state.tourTable.filteredOutValues[label] && 
+                    state.tourTable.filteredOutValues[label].findIndex(e => e===item) !== -1 ? '' : 'checked'
+                }))
+            return {[label]: values}
+        }).reduce((prev, curr) => ({...prev, ...curr}))
+        return values
+    }
+    console.log(data)
+
+
+
+    const displayArrowByLabel = useSelector(tourTableUniqueLengthSelector)
+    function tourTableUniqueLengthSelector(state) {
+        const length = state.tourTable.allLabelsId.map(label => {
+            if(state.tourTable.labelsById[label].filterType === 'none') return {[label]: false}
+            const tourTableByLabel = state.tourTable.shownId.map(item => state.tourTable.byId[item][label])
+            const length = [...new Set(tourTableByLabel)].length
+            if(length > 1) return {[label]: true}
+            return {[label]: false}
+        }).reduce((prev, curr) => ({...prev, ...curr}))
+        return length
+    }
     return (
-        <div className="ps-2 pe-2 container-fluid d-flex justify-content-between">
-            <div className="d-flex align-items-center">
-                <div className="align-items-center ps-0 text-wrap text-left pe-4 text-break">{left}</div>
-            </div>
-            <div className="d-flex align-items-center justify-content-end">
-                {/* <div className="align-items-center ps-3 text-right  text-truncate w-50">{right}</div> */}
-                <div className={`dropdown-arrow text-right ${display}`}>
-                    <FontAwesomeIcon icon={faAngleRight} className="dropdown-arrow" />
+        <div>
+            {Object.keys(labels).map((labelId, index) =>
+                <div key={labelId} className="d-flex align-items-center">
+                    <Form.Check
+                        id={`checkbox${index}`}
+                        htmlFor={`checkbox${index}`}
+                        checked={checked[labelId]}
+                        className="align-items-center m-0 ps-3 pe-1 justify-content-start mycheckbox"
+                        onChange={(e) => handleChange(index, labelId, e)}>
+                    </Form.Check>
+                    <DropdownContent 
+                        labelId={labelId} 
+                        index={index}
+                        displayArrow = {displayArrowByLabel[labelId]}
+                        data={data}
+                    />
                 </div>
-            </div>
-
-
+            )}
         </div>
+
     )
 };
-function Dropd(props) {
-    const { labelId, index, transactionsTable } = props
+function DropdownContent(props) {
+    const { labelId, index, displayArrow, data } = props
     const label  = useSelector(state => state.tourTable.labelsById[labelId])
     const currentWidth = useWindowSize();
     function useWindowSize() {
@@ -56,6 +97,7 @@ function Dropd(props) {
         });
         return size;
     }
+    
     return (
         <Dropdown
             drop={(currentWidth > 600) ? "right" : "down"}
@@ -66,57 +108,34 @@ function Dropd(props) {
             <Dropdown.Toggle split variant="white" disabled={label.filterType === 'none'} className="d-flex shadow-none">
                 <DropdownRow
                     label={label}
-                    transactionsTable={transactionsTable}
+                    displayArrow = {displayArrow}
                 />
             </Dropdown.Toggle>
             <NestedFilter
                 index={index}
-                transactionsTable={transactionsTable}
                 labels={label}
+                labelId = {labelId}
+                data = {data}
             />
         </Dropdown>
     )
 }
-export const DropdownFilter = (props) => {
-    const dispatch = useDispatch();
-    const checked = useSelector(state => state.transactionsFilter.checked)
-    const labelsNames = useSelector((state) => {
-        const { tourTable } = state
-        const labelsNames = tourTable.allLabelsId.map(label => tourTable.labelsById[label].text)
-        console.log(labelsNames)
-        return labelsNames
-    })
-    const labels = useSelector(state => state.tourTable.labelsById)
-
-    function handleChange(index, event) {
-        dispatch({
-            type: ACTIONS.TOGGLE_COLUMN,
-            payload: {
-                index: index,
-            },
-        })
-    }
-
-    const transactionsTable = useSelector(state => state.transactionsTable)
-
+export const DropdownRow = (props) => {
+    const displayArrow = props.displayArrow ? 'd-block' : 'd-none' 
+    const left = props.label.text
+    
     return (
-        <div>
-            {Object.keys(labels).map((labelId, index) =>
-                <div key={labelId} className="d-flex align-items-center">
-                    <Form.Check
-                        id={`checkbox${index}`}
-                        htmlFor={`checkbox${index}`}
-                        defaultChecked={checked[index]}
-                        className="align-items-center m-0 ps-3 pe-1 justify-content-start mycheckbox"
-                        onChange={(e) => handleChange(index, e)}>
-                    </Form.Check>
-
-
-                    <Dropd labelId={labelId} index={index} transactionsTable={transactionsTable}></Dropd>
-                    <Dropdown.Divider></Dropdown.Divider>
+        <div className="ps-2 pe-2 container-fluid d-flex justify-content-between">
+            <div className="d-flex align-items-center">
+                <div className="align-items-center ps-0 text-wrap text-left pe-4 text-break">{left}</div>
+            </div>
+            <div className="d-flex align-items-center justify-content-end">
+                {/* <div className="align-items-center ps-3 text-right  text-truncate w-50">{right}</div> */}
+                <div className={`dropdown-arrow text-right ${displayArrow}`}>
+                    <FontAwesomeIcon icon={faAngleRight} className="dropdown-arrow" />
                 </div>
-            )}
+            </div>
         </div>
-
     )
 };
+

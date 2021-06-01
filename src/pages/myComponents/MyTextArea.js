@@ -7,44 +7,15 @@ import { ACTIONS } from '../reducers/redux';
 
 export default (props) => {
     const { text = "", rows = 1, minRows = 1, maxRows = 10, className = "" } = props
-    const { myKey, myIndex,  myId} = props
-
-    const checked = useSelector(checkedSelector, shallowEqual)
-    function checkedSelector(state) {
-      const { tourTable } = state;
-      const checked = tourTable.checkedId.findIndex(item => item === myId) === -1 ? false : true
-      return checked;
-    }
+    const { myKey, myId, editMode=false, handleEditChange} = props
     
-    const editMode = useSelector(state => state.tourTable.editMode)
+    const [change, setChange] = useState(text)
 
-      const editValue = useSelector(editedValueSelector, shallowEqual)
-      function editedValueSelector(state) {
-        const { tourTable } = state;
-        var row = tourTable.byId[myId][myKey]
-        if(tourTable.changesById[myId] && tourTable.changesById[myId][myKey]){
-            row = tourTable.changesById[myId][myKey]
-        }
-        return row;
-        }
-
-
-    const dispatch = useDispatch();
-
-    const handleChange = (event) => {
-        console.log('render')
-        console.log(checked)
-        dispatch({
-            type: ACTIONS.ADD_CHANGE,
-            payload: {
-              id: myId,
-              key: myKey,
-              change: event.target.value,
-            }
-          });
-    };
-
-    if (editMode && checked) {
+    function handleOnChange(id, key, event) {
+        setChange(event.target.value)
+        handleEditChange(id, key, event.target.value)
+    }
+    if (editMode) {
         return (
             <> 
             <Form
@@ -56,10 +27,9 @@ export default (props) => {
                         key={`fc${myId}_${myKey}`}
                         as="textarea"
                         rows="4"
-                        defaultValue={editValue}
+                        defaultValue={change}
                         className="fw-normal"
-                        onChange={handleChange}
-                        // autoFocus
+                        onChange={(event) => handleOnChange(myId, myKey, event)}
                         style={{
                             minWidth: "100px",
                             fontSize: '14px',

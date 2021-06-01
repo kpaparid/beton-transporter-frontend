@@ -18,6 +18,7 @@ export default (props) => {
     const [startDate, setStartDate] = useState();
     const [endDate, setEndDate] = useState();
     const [focusedInput, setFocusedInput] = useState();
+    console.log(availableDates)
     // const isOutsideRange = day => day.isAfter(moment()) || day.isBefore(moment().subtract(31, "days"));
     const isOutsideRange = day => day.isBefore(moment(month, 'M').subtract(31, "days"));
 

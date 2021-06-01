@@ -6,26 +6,18 @@ import { useSelector } from 'react-redux';
 import { Dropdown } from '@themesberg/react-bootstrap';
 
 export default (props) => {
-    const { index, transactionsTable, labels } = props
+    const { index, labels, labelId, data } = props
     function selectorMenu(state) {
-        const { transactionsDate, transactionsTable } = state;
-        const table = new Set()
-        const selectedMonth = moment(transactionsDate, 'MM').format('MM.YYYY')
-        transactionsTable.forEach((row, index) => {
-            const date = moment(transactionsTable[index].datum, 'DD.MM.YYYY')
-            if (selectedMonth === date.format('MM.YYYY')) {
-                table.add(date.format('YYYY-MM-DD'))
-            }
-        });
-        return [...table];
+        const { shownId, byId } = state.tourTable;
+        return [...new Set(shownId.map(tour => byId[tour].datum))]
     }
     if (labels.filterType === 'checkbox') {
         return (
             <Dropdown.Menu className="dropdown-menu-right">
                 <MyCheckbox
                     index={index}
-                    transactionsTable={transactionsTable}
                     labels={labels}
+                    data={data}
                 />
             </Dropdown.Menu>
         )
@@ -35,17 +27,18 @@ export default (props) => {
             <Dropdown.Menu className="dropdown-menu-right">
                 <MyCheckbox
                     labels={labels}
+                    data={data}
                 />
             </Dropdown.Menu>
         )
     }
     if (labels.filterType === 'date') {
-        const transactionsDate = useSelector(state => state.transactionsDate)
+        const tourDate = useSelector(state => state.tourTable.tourDate)
         const availableDates = useSelector(selectorMenu)
         return (
             <Dropdown.Menu className="dropdown-menu-right">
                 <MyCalendar
-                    month={transactionsDate}
+                    month={tourDate}
                     availableDates={availableDates}
                 />
             </Dropdown.Menu>

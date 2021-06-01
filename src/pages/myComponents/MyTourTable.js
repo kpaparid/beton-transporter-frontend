@@ -22,10 +22,18 @@ export const TourTable = (props) => {
       const table = []
       
       shownId.forEach(item => {
-        table.push( {id: item, value: state.tourTable.byId[item]} )
+        var flag = true;
+        flag && state.tourTable.allLabelsId.forEach(label => {
+          if (state.tourTable.filteredOutValues[label] &&
+            state.tourTable.filteredOutValues[label].findIndex(f => f === state.tourTable.byId[item][label]) !== -1) {
+              flag = false;
+          }
+        })
+        flag && table.push({ id: item, value: state.tourTable.byId[item] })
       })
+
       return [...table]
-    }  
+    }
   
     function useLoadToursData() {
       const [stateAPIStatus, setAPIStatus] = useState('idle');
@@ -63,8 +71,38 @@ export const TourTable = (props) => {
       return checkedIdLength === allIdLength
     });
     
-    const shownLabels = useSelector(state => state.tourTable.checkedLabelsId)
   
+    function handleCheckboxClick(id, event) {
+      dispatch({
+        type: ACTIONS.CHECK_ONE,
+        payload: {
+          id: id
+        }
+      });
+    }
+    const checked = useSelector(selectorMenu)
+    function selectorMenu(state) {
+      const { tourTable } = state;      
+      if(tourTable.shownId.length > 0 && tourTable.checkedId.length > 0) {
+        const unchecked = tourTable.shownId.map(tour => ({[tour] : ''})).reduce((prev, curr) => ({...prev, ...curr}))
+        const checked = tourTable.checkedId.map(tour => ({[tour] : 'checked'})).reduce((prev, curr) => ({...prev, ...curr}))
+        return {...unchecked, ...checked};
+      }
+      if(tourTable.shownId.length > 0) {
+        const unchecked = tourTable.shownId.map(tour => ({[tour] : ''})).reduce((prev, curr) => ({...prev, ...curr}))
+        return unchecked;
+      }
+      }
+    
+    const editMode = useSelector(state => state.tourTable.editMode)
+
+    const shownLabels = useSelector(sortedLabelsSelector)
+    function sortedLabelsSelector(state) {
+      const c = state.tourTable.checkedLabelsId
+      const shownLabels = [...c].sort((a, b) => state.tourTable.labelsById[a].priority - state.tourTable.labelsById[b].priority)
+      return shownLabels
+    }
+    
     return (
       <Card border="light" className="table-wrapper table-responsive shadow table">
         <Card.Body className="px-1">
@@ -81,6 +119,10 @@ export const TourTable = (props) => {
                 <TableRow key={`transaction-${t.id}`}
                   row={t}
                   index={index}
+                  checked={checked[t.id]}
+                  handleCheckboxClick={handleCheckboxClick}
+                  checkedColumns={shownLabels}
+                  editMode={editMode}
                 />)}
             </tbody>
           </Table>
