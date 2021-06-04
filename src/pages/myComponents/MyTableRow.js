@@ -10,21 +10,25 @@ import MyTextArea from './MyTextArea';
 
 
 export const TableRow = (props) => {
-  const { index, row, handleCheckboxClick, checked, checkedColumns, editMode } = props;
+  const { index, row, handleCheckboxClick, checked, checkedColumns, editMode, checkbox=false } = props;
   const r = row.value
   const id = row.id
 
   return (
+    
     <tr className="text-left align-middle" style={{ backgroundColor: '#c5ded6' }}>
+      {
+      checkbox &&
       <td className="px-2" style={{ width: '30px' }}>
-        <Form.Check
-          key={`checkbox_tablerow_${index}`}
-          id={`checkbox_tablerow_${index}`}
-          htmlFor={`checkbox_tablerow_${index}`}
-          checked={checked}
-          onChange={(event) => handleCheckboxClick(id, event)}
-        />
-      </td>
+      <Form.Check
+        key={`checkbox_tablerow_${index}`}
+        id={`checkbox_tablerow_${index}`}
+        htmlFor={`checkbox_tablerow_${index}`}
+        checked={checked}
+        onChange={(event) => handleCheckboxClick(id, event)}
+      />
+    </td>
+    }
       <TablerowContents
         key={`tablerow_contents_${id}`}
         row={r}
@@ -73,17 +77,20 @@ export const TablerowContents = (props) => {
   </>
 }
 export const HeaderRow = (props) => {
-  const { headers, checked, handleAllClick } = props
+  const { headers, checked, handleAllClick, checkbox=false } = props
   return (
     <tr className="align-middle">
+      {checkbox &&
       <th className="border-bottom px-2 text-left" style={{ width: '30px' }}>
-        <Form.Check
-          id="checkboxAll"
-          htmlFor="checkboxAll"
-          checked={checked}
-          onChange={handleAllClick}
-        />
-      </th>
+      <Form.Check
+        id="checkboxAll"
+        htmlFor="checkboxAll"
+        checked={checked}
+        onChange={handleAllClick}
+      />
+    </th>
+      }
+      
       {headers.map((key, index) =>
         <th 
           key={`$s-${key}`}

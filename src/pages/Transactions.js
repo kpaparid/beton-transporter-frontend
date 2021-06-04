@@ -9,14 +9,15 @@ import { BreakBtn, EditBtn, MyBtn, SaveBtn, DownloadBtn } from "./myComponents/M
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../pages/reducers/redux";
 import { TourTable } from "./myComponents/MyTourTable";
-
+import moment from "moment";
+import MyOwnCalendar from "./myComponents/MyOwnCalendar";
 
 
 export default () => {
 
   const dispatch = useDispatch();
   const tourTable = useSelector(state => state.tourTable)
-
+  const tourDate = moment(useSelector(state => state.tourTable.tourDate), "MM-YYYY").format("MMMM YYYY")
   useEffect(() => {
     console.log('rerender')
     console.log(tourTable)
@@ -71,7 +72,6 @@ export default () => {
       type: ACTIONS.DELETE_CHANGES,
     });
   }
-
   return (
     <>
       <div className="d-block pt-4 mb-4 mb-md-0">
@@ -92,7 +92,9 @@ export default () => {
               <DropdownFilter></DropdownFilter>
             </Dropdown.Menu>
           </Dropdown>
-          <h5 className="m-0 py-0 px-2">Touren Alle Werke Marz 2021s</h5>
+          <h5 className="m-0 py-0 px-2">Touren Alle Werke</h5>
+          <MyOwnCalendar value={tourDate}></MyOwnCalendar>
+
         </div>
         <div className="flex-wrap d-flex">
           <ButtonGroup className="btn-toolbar mt-2 flex-wrap justify-content-end" variant="danger">

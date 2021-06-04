@@ -1,9 +1,9 @@
 import React from "react";
 import MyCheckbox from "./MyCheckbox";
 import MyCalendar from "./MyCalendar";
-import moment from "moment";
 import { useSelector } from 'react-redux';
 import { Dropdown } from '@themesberg/react-bootstrap';
+import { DayCalendar } from "./MyOwnCalendar";
 
 export default (props) => {
     const { index, labels, labelId, data } = props
@@ -36,11 +36,12 @@ export default (props) => {
         const tourDate = useSelector(state => state.tourTable.tourDate)
         const availableDates = useSelector(selectorMenu)
         return (
-            <Dropdown.Menu className="dropdown-menu-right">
-                <MyCalendar
-                    month={tourDate}
-                    availableDates={availableDates}
-                />
+            <Dropdown.Menu className="dropdown-menu-right p-0">
+                <DayCalendar
+                    // value={value}
+                    date={tourDate}
+                >
+                </DayCalendar>
             </Dropdown.Menu>
         )
     }

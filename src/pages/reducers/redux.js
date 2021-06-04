@@ -14,6 +14,7 @@ export const ACTIONS = {
     TOGGLE_COLUMN: 'TOGGLE_COLUMN',
     NESTEDFILTER_TOGGLEALL: 'NESTEDFILTER_TOGGLEALL',
     NESTEDFILTER_TOGGLEONE: 'NESTEDFILTER_TOGGLEONE',
+    TOURTABLE_CHANGE_TOURDATE: 'TOURTABLE_CHANGE_TOURDATE',
     
 };
 const myInitialState = {
@@ -46,7 +47,7 @@ const myInitialState = {
         labelsById: {},
         tourDate: '12-2021',
 
-        filteredOutValues: {"wagen" : [704], "fahrer" : ["Uwe Schwille"]}
+        filteredOutValues: {}
     }
 
 
@@ -254,8 +255,26 @@ function MyReducer(state = myInitialState, action) {
                     ...state.tourTable,
                     filteredOutValues: newFilteredOutValues
                 }
-                };
-        }
+            };
+        } 
+        case ACTIONS.TOURTABLE_CHANGE_TOURDATE: {
+            const oldMonth = moment(state.tourTable.tourDate, "MM-YYYY").format("MMM")
+            const oldYear = moment(state.tourTable.tourDate, "MM-YYYY").format("YYYY")
+            const { month=oldMonth, yearIncrement=0 } = action.payload;
+            
+            const newMonth = moment(month, 'MMM').format('MM')            
+            const newYear = moment().year(parseInt(oldYear) + yearIncrement).format('YYYY')
+            const newDate = moment().year(newYear).month(parseInt(newMonth) -1).format('MM-YYYY')
+
+            return {
+                ...state,
+                tourTable: {
+                    ...state.tourTable,
+                    tourDate: newDate,
+                }
+            }
+        };
+
         default:
             return state;
     }

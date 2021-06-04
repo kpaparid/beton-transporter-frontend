@@ -112,6 +112,7 @@ export const TourTable = (props) => {
                  headers={shownLabels}
                  checked={checkedAll}
                  handleAllClick={handleAllClick}
+                 checkbox
                 />
             </thead>
             <tbody>
@@ -123,6 +124,7 @@ export const TourTable = (props) => {
                   handleCheckboxClick={handleCheckboxClick}
                   checkedColumns={shownLabels}
                   editMode={editMode}
+                  checkbox
                 />)}
             </tbody>
           </Table>
