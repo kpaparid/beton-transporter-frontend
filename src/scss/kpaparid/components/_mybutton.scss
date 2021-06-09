@@ -1,0 +1,16 @@
+.noboxshadow {
+  box-shadow: 0px 0px 0px;
+}
+.whitedisabled {
+  &:disabled,
+  &[readonly]{
+    background-color: white;
+  }
+}
+.was-validated,
+textarea.form-control.is-valid,
+textarea.form-control.is-invalid {
+  padding-right: 0.75rem;
+  padding-left: calc(1.5em + 1.1rem);
+  background-position: top calc(0.375em + 0.2rem) left calc(0.1em + 0.275rem);
+}

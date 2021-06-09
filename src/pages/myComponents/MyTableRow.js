@@ -4,6 +4,7 @@ import { Form } from '@themesberg/react-bootstrap';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from '../reducers/redux';
 import MyTextArea from './MyTextArea';
+import MyInput from './MyInput';
 
 
 
@@ -16,7 +17,7 @@ export const TableRow = (props) => {
 
   return (
     
-    <tr className="text-left align-middle" style={{ backgroundColor: '#c5ded6' }}>
+    <tr className="text-left align-middle">
       {
       checkbox &&
       <td className="px-2" style={{ width: '30px' }}>
@@ -36,13 +37,13 @@ export const TableRow = (props) => {
         checkedColumns={checkedColumns}
         checked={checked}
         editMode={editMode}
+        
       />
     </tr>
   );
 };
 export const TablerowContents = (props) => {
-  const { row, id, checkedColumns, checked, editMode } = props
-  
+  const { row, id, checkedColumns, checked, editMode } = props  
 
   const dispatch = useDispatch();
     const handleEditChange = (id, key, change) => {
@@ -59,18 +60,24 @@ export const TablerowContents = (props) => {
   
   return <>
     {
-      checkedColumns.map((key, i) =>
-        <td key={`$td-${key}`}
+      checkedColumns.map((label) =>
+      
+        <td key={`$td-${row[label.id]}`}
           className="text-center px-1 text-wrap"
         >
           <span>
-            <MyTextArea
-              key={`$myTextArea_${id}_${key}`}
-              myId={id}
-              myKey={key}
-              text={row[key]}
-              editMode={editMode && checked === 'checked'}
-              handleEditChange={handleEditChange}
+            <MyInput
+              id={`$td-${row[label.id]}`}
+              value={row[label.id]}
+              enabled={editMode && checked === 'checked'}
+              onChange={handleEditChange}
+              type ={label.type}
+              rows={2}
+              defaultValue={label.text}
+              label={label.id}
+              // validation
+              invalidation
+              errorMessage
             />
           </span>
         </td>)}
@@ -91,12 +98,12 @@ export const HeaderRow = (props) => {
     </th>
       }
       
-      {headers.map((key, index) =>
+      {headers.map((header) =>
         <th 
-          key={`$s-${key}`}
+          key={`$s-${header}`}
           className="border-bottom  px-2 text-wrap text-center "
         >
-          {key}
+          {header}
         </th>
       )}
     </tr>

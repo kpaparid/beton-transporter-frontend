@@ -28,7 +28,7 @@ export default (props) => {
                 <MyCheckbox
                     labels={labels}
                     data={data}
-                />
+                    />
             </Dropdown.Menu>
         )
     }
@@ -39,7 +39,8 @@ export default (props) => {
             <Dropdown.Menu className="dropdown-menu-right p-0">
                 <DayCalendar
                     // value={value}
-                    date={tourDate}
+                    month={tourDate}
+                    disableMonthSwap
                 >
                 </DayCalendar>
             </Dropdown.Menu>

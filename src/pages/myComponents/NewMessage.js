@@ -24,7 +24,7 @@ export default (props) => {
         setMessage({
             ...message,
             ['to']: receivers,
-            ['date']: moment().format("DD.MM.YY")
+            ['date']: moment().format("DD/MM/YY")
         });
     };
     const handleTextChange = (event) => {

@@ -19,6 +19,7 @@ function MyCheckboxContainer (props) {
                         id={'nested_checkbox_'+index} 
                         variant='white'
                         onClick={handler}
+                        style={{boxShadow:"0px 0px 0px"}}
                         >
                         <div className="container-fluid mycontainer d-flex justify-content-between">
                             <div>{text}</div>

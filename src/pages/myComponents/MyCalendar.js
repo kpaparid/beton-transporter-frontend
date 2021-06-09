@@ -35,7 +35,7 @@ export default (props) => {
                 navPrev={<div></div>}
                 hideKeyboardShortcutsPanel
                 isOutsideRange={isOutsideRange}
-                initialVisibleMonth={() => moment(month, 'MM-YYYY')}
+                initialVisibleMonth={() => moment(month, 'MM/YYYY')}
                 numberOfMonths={1}
                 noBorder
                 startDate={startDate}
@@ -52,7 +52,7 @@ export default (props) => {
                 onFocusChange={(focusedInput) => setFocusedInput(focusedInput)}
                 isDayBlocked={day => {
                     if (availableDates
-                        .findIndex(date => day.format('YYYY-MM-DD') === moment(date).format('YYYY-MM-DD')) === -1){
+                        .findIndex(date => day.format('YYYY/MM/DD') === moment(date).format('YYYY/MM/DD')) === -1){
                         return true
                     }
                     return false;

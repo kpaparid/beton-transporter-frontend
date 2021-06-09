@@ -6,34 +6,22 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../reducers/redux";
 // import { loadTransactionsData } from "../pages/reducers/loadTransactionsData";
 import { TableRow, TablerowContents, HeaderRow } from './MyTableRow';
-import { MyTextArea } from './MyTextArea';
 import { loadToursData } from "../reducers/loadToursData";
+import { useShownTourTable, useCheckedAll, useChecked, useShownLabels, useAllLabels, useGetVisibleLabels } from "./MyConsts"
 
 
-export const TourTable = (props) => {
+export const TourTable = () => {
     
   const dispatch = useDispatch();
     const stateAPIStatus = useLoadToursData();    
-    const shownTourTable = useSelector(shownToursSelector, shallowEqual)
+    const shownTourTable = useShownTourTable()
     const totalTours = shownTourTable.length;
-  
-    function shownToursSelector(state){
-      const shownId = state.tourTable.shownId
-      const table = []
-      
-      shownId.forEach(item => {
-        var flag = true;
-        flag && state.tourTable.allLabelsId.forEach(label => {
-          if (state.tourTable.filteredOutValues[label] &&
-            state.tourTable.filteredOutValues[label].findIndex(f => f === state.tourTable.byId[item][label]) !== -1) {
-              flag = false;
-          }
-        })
-        flag && table.push({ id: item, value: state.tourTable.byId[item] })
-      })
-
-      return [...table]
-    }
+    const checkedAll = useCheckedAll()
+    const editMode = useSelector(state => state.tourTable.editMode)
+    const shownLabels = useShownLabels()
+    const checked = useChecked()
+    const visibleLabels = useGetVisibleLabels()
+    console.log(visibleLabels)
   
     function useLoadToursData() {
       const [stateAPIStatus, setAPIStatus] = useState('idle');
@@ -65,14 +53,7 @@ export const TourTable = (props) => {
         type: ACTIONS.TOGGLE_CHECK_ALL,
       });
     }
-    const checkedAll = useSelector((state) => {
-      const checkedIdLength = state.tourTable.checkedId.length
-      const allIdLength = state.tourTable.allId.length
-      return checkedIdLength === allIdLength
-    });
-    
-  
-    function handleCheckboxClick(id, event) {
+    function handleCheckboxClick(id) {
       dispatch({
         type: ACTIONS.CHECK_ONE,
         payload: {
@@ -80,28 +61,7 @@ export const TourTable = (props) => {
         }
       });
     }
-    const checked = useSelector(selectorMenu)
-    function selectorMenu(state) {
-      const { tourTable } = state;      
-      if(tourTable.shownId.length > 0 && tourTable.checkedId.length > 0) {
-        const unchecked = tourTable.shownId.map(tour => ({[tour] : ''})).reduce((prev, curr) => ({...prev, ...curr}))
-        const checked = tourTable.checkedId.map(tour => ({[tour] : 'checked'})).reduce((prev, curr) => ({...prev, ...curr}))
-        return {...unchecked, ...checked};
-      }
-      if(tourTable.shownId.length > 0) {
-        const unchecked = tourTable.shownId.map(tour => ({[tour] : ''})).reduce((prev, curr) => ({...prev, ...curr}))
-        return unchecked;
-      }
-      }
     
-    const editMode = useSelector(state => state.tourTable.editMode)
-
-    const shownLabels = useSelector(sortedLabelsSelector)
-    function sortedLabelsSelector(state) {
-      const c = state.tourTable.checkedLabelsId
-      const shownLabels = [...c].sort((a, b) => state.tourTable.labelsById[a].priority - state.tourTable.labelsById[b].priority)
-      return shownLabels
-    }
     
     return (
       <Card border="light" className="table-wrapper table-responsive shadow table">
@@ -109,7 +69,7 @@ export const TourTable = (props) => {
           <Table className="user-table align-items-center">
             <thead className="thead-light">
               <HeaderRow
-                 headers={shownLabels}
+                 headers={visibleLabels.map(l => l.text)}
                  checked={checkedAll}
                  handleAllClick={handleAllClick}
                  checkbox
@@ -122,7 +82,7 @@ export const TourTable = (props) => {
                   index={index}
                   checked={checked[t.id]}
                   handleCheckboxClick={handleCheckboxClick}
-                  checkedColumns={shownLabels}
+                  checkedColumns={visibleLabels}
                   editMode={editMode}
                   checkbox
                 />)}

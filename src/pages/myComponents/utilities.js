@@ -16,6 +16,7 @@ const fillBottomWhites = (n, arr) => {
 }
 export const fillWhites = (arr, index, numRows) => {
     
+    
     const arr1 = fillTopWhites(arr, index)
     const whites = numRows - arr1.length    
     const newArr = fillBottomWhites(whites, arr1)
@@ -24,8 +25,8 @@ export const fillWhites = (arr, index, numRows) => {
 export const rotateArray = (arr, k) => arr.slice(k).concat(arr.slice(0, k));
 
 export const calcCalendarRows = (date, labels) => {
-    const startofMonth = moment(date, "MM-YYYY").startOf('month').format('dddd');
-    const endOfMonth = parseInt(moment(date, "MM-YYYY").endOf('month').format('DD'));
+    const startofMonth = moment(date, "MM/YYYY").startOf('month').format('dddd');
+    const endOfMonth = parseInt(moment(date, "MM/YYYY").endOf('month').format('DD'));
     const rows = (endOfMonth === 31 && labels.findIndex(day => day === startofMonth) === 5 ) || 
                     (endOfMonth >= 30 && labels.findIndex(day => day === startofMonth) === 6 )? 
                     6 : 5
@@ -36,10 +37,10 @@ export const transpose = (arr, numRows = arr.length) => {
 }
 export const calcIndexedCalendarDays = (date, labels) => {
     const numRows = calcCalendarRows(date, labels)
-    const days =[...Array(moment(date, 'MM-YYYY').daysInMonth()).keys()]
+    const days =[...Array(moment(date, 'MM/YYYY').daysInMonth()).keys()]
     .map(d => {
         const day = d + 1
-        const da = moment(day.toString() + `-` + date.toString(), "DD-MM-YYYY")
+        const da = moment(day.toString() + `/` + date.toString(), "DD/MM/YYYY")
         return { [da.format("dddd")] : [parseInt(da.format("DD"))] }
     }).reduce((prev, curr) => {
 

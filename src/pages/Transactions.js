@@ -10,28 +10,29 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../pages/reducers/redux";
 import { TourTable } from "./myComponents/MyTourTable";
 import moment from "moment";
-import MyOwnCalendar from "./myComponents/MyOwnCalendar";
-
+import { HourSelector, HourSelectorDropdown, MonthSelectorDropdown } from "./myComponents/MyOwnCalendar";
+import MyModal from "./myComponents/MyModal";
+import AddRowModal from "./myComponents/AddRowModal";
+import { useTourTable, useTourDate, useCheckedExists, useAllLabels } from "./myComponents/MyConsts"
 
 export default () => {
-
   const dispatch = useDispatch();
-  const tourTable = useSelector(state => state.tourTable)
-  const tourDate = moment(useSelector(state => state.tourTable.tourDate), "MM-YYYY").format("MMMM YYYY")
+
+  const tourTable = useTourTable()
+  const tourDate = useTourDate()
+  const checkedExists = useCheckedExists()
+  const allLabels = useAllLabels()
+
+  const handleAddRow = () => setShowModalDefault(true);
+  const [showModalDefault, setShowModalDefault] = useState(false);
+  const handleClose = () => setShowModalDefault(false);
+
   useEffect(() => {
     console.log('rerender')
     console.log(tourTable)
   }, [tourTable]);
 
 
-  const checkedExists = useSelector(selectorCheckedExists)
-
-  function selectorCheckedExists(state) {
-    const { tourTable } = state;
-    
-    return tourTable.checkedId.length !== 0 ? true : false
-
-  }
   const toggleEditMode = () => {
     dispatch({
       type: ACTIONS.EDIT_TOGGLE,
@@ -56,7 +57,6 @@ export default () => {
     closeAllCheckBoxes()
     clearChanges()
     toggleEditMode()
-    console.log(tourTable)
   }
   const handleDownload = () => {
 
@@ -72,8 +72,15 @@ export default () => {
       type: ACTIONS.DELETE_CHANGES,
     });
   }
+
   return (
     <>
+      <AddRowModal
+        labels={allLabels}
+        onClose={handleClose}
+        show={showModalDefault}
+      >
+      </AddRowModal>
       <div className="d-block pt-4 mb-4 mb-md-0">
         <Breadcrumb className="d-none d-md-inline-block" listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}>
           <Breadcrumb.Item><FontAwesomeIcon icon={faHome} /></Breadcrumb.Item>
@@ -93,14 +100,16 @@ export default () => {
             </Dropdown.Menu>
           </Dropdown>
           <h5 className="m-0 py-0 px-2">Touren Alle Werke</h5>
-          <MyOwnCalendar value={tourDate}></MyOwnCalendar>
+          <MonthSelectorDropdown value={tourDate}></MonthSelectorDropdown>
 
         </div>
         <div className="flex-wrap d-flex">
           <ButtonGroup className="btn-toolbar mt-2 flex-wrap justify-content-end" variant="danger">
-            <EditBtn onClick={handleEditEnable} text="Edit" />
-            <SaveBtn onClick={handleSave} text="Speichern" />
-            <BreakBtn onClick={handleEditDisable} text="Abbruch" />
+
+            <EditBtn onClick={handleEditEnable} value="Edit" />
+            <MyBtn value="Add Row" onClick={handleAddRow}></MyBtn>
+            <SaveBtn onClick={handleSave} value="Speichern" />
+            <BreakBtn onClick={handleEditDisable} value="Abbruch" />
             <DownloadBtn onClick={handleDownload} />
           </ButtonGroup>
         </div>

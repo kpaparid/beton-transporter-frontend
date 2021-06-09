@@ -45,7 +45,7 @@ const myInitialState = {
         allLabelsId: [],
         checkedLabelsId: [],
         labelsById: {},
-        tourDate: '12-2021',
+        tourDate: '12/2021',
 
         filteredOutValues: {}
     }
@@ -76,7 +76,7 @@ function MyReducer(state = myInitialState, action) {
             const newAllLabelsId = labels.map( label => label.id)
             const checkedLabelsId = [...newAllLabelsId]
 
-            const newShownId = newTourTableAllId.filter( id => (moment(newTourTableById[id].datum, 'DD-MM-YYYY').format('MM-YYYY') === state.tourTable.tourDate))
+            const newShownId = newTourTableAllId.filter( id => (moment(newTourTableById[id].datum, 'DD/MM/YYYY').format('MM/YYYY') === state.tourTable.tourDate))
 
 
             return {
@@ -258,13 +258,13 @@ function MyReducer(state = myInitialState, action) {
             };
         } 
         case ACTIONS.TOURTABLE_CHANGE_TOURDATE: {
-            const oldMonth = moment(state.tourTable.tourDate, "MM-YYYY").format("MMM")
-            const oldYear = moment(state.tourTable.tourDate, "MM-YYYY").format("YYYY")
+            const oldMonth = moment(state.tourTable.tourDate, "MM/YYYY").format("MMM")
+            const oldYear = moment(state.tourTable.tourDate, "MM/YYYY").format("YYYY")
             const { month=oldMonth, yearIncrement=0 } = action.payload;
             
             const newMonth = moment(month, 'MMM').format('MM')            
             const newYear = moment().year(parseInt(oldYear) + yearIncrement).format('YYYY')
-            const newDate = moment().year(newYear).month(parseInt(newMonth) -1).format('MM-YYYY')
+            const newDate = moment().year(newYear).month(parseInt(newMonth) -1).format('MM/YYYY')
 
             return {
                 ...state,
