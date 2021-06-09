@@ -9,7 +9,7 @@ import { rotateArray, calcIndexedCalendarDays } from './utilities';
 import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faCalendar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import MyTextArea from './MyTextArea';
-
+import { Portal } from 'react-portal';
 export const HourSelectorDropdown = (props) => {
     const { value=moment('00:00', 'HH:mm').format('HH:mm'), id = 'hourSelector', onChange, minWidth} = props
     const date = useSelector(state => state.tourTable.tourDate)
@@ -209,6 +209,7 @@ export const DateSelectorDropdown = (props) => {
                         minWidth={"150px"}
                     />
                 </Dropdown.Toggle>
+                <Portal>
                 <Dropdown.Menu className="p-0">
                     <DayCalendar
                         singleDate
@@ -218,6 +219,7 @@ export const DateSelectorDropdown = (props) => {
                     >
                     </DayCalendar>
                 </Dropdown.Menu>
+                </Portal>
             </Dropdown>
         </>
     )

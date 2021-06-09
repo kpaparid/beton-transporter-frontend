@@ -64,9 +64,9 @@ export const TourTable = () => {
     
     
     return (
-      <Card border="light" className="table-wrapper table-responsive shadow table">
+      <Card border="light">
         <Card.Body className="px-1">
-          <Table className="user-table align-items-center">
+          <Table responsive className="align-items-center table-flush align-items-center">
             <thead className="thead-light">
               <HeaderRow
                  headers={visibleLabels.map(l => l.text)}

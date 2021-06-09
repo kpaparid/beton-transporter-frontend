@@ -11,7 +11,7 @@ export const MyModal = (props) => {
     return (
         <>
             <Modal
-                as={Modal.Dialog} centered show={show} onHide={onClose}>
+                as={Modal.Body} fullscreen={false} show={show} onHide={onClose}>
                 <Modal.Header className="justify-content-center">
                     <Modal.Title className="h6">{title}</Modal.Title>
                     <Header></Header>
@@ -23,6 +23,20 @@ export const MyModal = (props) => {
                     <Footer></Footer>
                 </Modal.Footer>
             </Modal>
+
+            {/* <Modal
+                as={Modal.Dialog} centered show={show} onHide={onClose}>
+                <Modal.Header className="justify-content-center">
+                    <Modal.Title className="h6">{title}</Modal.Title>
+                    <Header></Header>
+                </Modal.Header>
+                <Modal.Body>
+                    <Body></Body>
+                </Modal.Body>
+                <Modal.Footer className="justify-content-center">
+                    <Footer></Footer>
+                </Modal.Footer>
+            </Modal> */}
         </>
     )
 }
