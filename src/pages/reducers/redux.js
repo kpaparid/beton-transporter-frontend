@@ -67,8 +67,6 @@ function MyReducer(state = myInitialState, action) {
                 filter:[...new Set(table.map(row=>row[item]))].map(item => ({checked:true, value: item}))}))            
             
             
-            
-            
             const newTourTableById = table.map((item, index) => ({  ['Tour'+index] : {...item}  })).reduce((prev, curr) => ({...prev, ...curr}))
             const newTourTableAllId = Object.keys(newTourTableById)
             

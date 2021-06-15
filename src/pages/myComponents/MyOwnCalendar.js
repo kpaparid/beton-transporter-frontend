@@ -6,23 +6,162 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from '../reducers/redux';
 import { HeaderRow } from './MyTableRow';
 import { rotateArray, calcIndexedCalendarDays } from './utilities';
-import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faCalendar, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import MyTextArea from './MyTextArea';
+import { MyTextArea, TextAreaGroup } from './MyTextArea';
 import { Portal } from 'react-portal';
+
+
+export const DurationDropdownSelector = (props) => {
+    const { format = 'H[h] mm[m]', value = moment('0h 00m', format).format(format),
+        id = 'timeSelector', onChange, minWidth, seperator = ' ', isLimited = true,
+        disabledHours = false, disabledMinutes = false,
+        validation = false, invalidation = false } = props
+    const [text, setText] = useState(value)
+    const splitText = text.split(seperator)
+
+    const formattedText = (disabledMinutes && disabledHours) ? '0' + seperator + '0' : disabledHours ? parseInt(text) : disabledMinutes ?
+        parseInt(text) : parseInt(splitText[0]) + seperator + parseInt(splitText[1])
+
+    console.log('value ' + value)
+    console.log('formatted: ' + formattedText)
+    function handleHourChange(value) {
+        console.log('value eksw' + value)
+        setText(value)
+        console.log(formattedText)
+    }
+    useEffect(() => {
+        onChange && onChange(text)
+    }, [text]);
+
+    function handleChange(text) {
+        console.log('eksw ' + text)
+        setText(text)
+    }
+    // const id, type, minWidth, readOnly, validation, invalidation, measurement, maxRows, onChange, values
+
+    const data1 = {
+        id: 'hour', type: 'hour', minWidth: '40px', readOnly: false, 'validation': false,
+        'invalidation': false, measurement: 'hours', maxRows: 2, onChange: handleChange, 'value': formattedText
+    }
+    const data2 = {
+        id: 'minute', type: 'minute', minWidth: '40px', readOnly: false, 'validation': false,
+        'invalidation': false, measurement: 'min', maxRows: 2, onChange: handleChange, 'value': formattedText
+    }
+    const data = [data1, data2]
+    return (
+        <>
+            <Dropdown>
+                <Dropdown.Toggle split variant="white" className="p-0 border-0 d-flex flex-nowrap">
+                    <TextAreaGroup
+                        data={data}
+                    />
+                </Dropdown.Toggle>
+                {(!disabledMinutes && !disabledHours) &&
+                    <Portal>
+                        <Dropdown.Menu className="p-0">
+                            <DurationSelector
+                                time={text}
+                                onChange={handleHourChange}
+                                seperator={seperator}
+                                isLimited={isLimited}
+                                disabledHours={disabledHours}
+                                disabledMinutes={disabledMinutes}
+                            >
+                            </DurationSelector>
+                        </Dropdown.Menu>
+                    </Portal>
+                }
+            </Dropdown>
+        </>
+    )
+}
+
+export const DurationSelector = (props) => {
+
+    const { seperator = ' ', time = '00' + seperator + '00', onChange, isLimited = false, disabledHours = false, disabledMinutes = false } = props
+    const [currentTime, setCurrentTime] = useState(time)
+
+    const currentHour = !disabledHours &&
+        (!disabledHours && !disabledMinutes ?
+            parseInt(currentTime.split(seperator)[0])
+            : parseInt(currentTime))
+    const currentMinute = !disabledMinutes &&
+        (!disabledHours && !disabledMinutes ?
+            parseInt(currentTime.split(seperator)[1])
+            : parseInt(currentTime))
+
+    function handleButtonClicks(event) {
+        const id = event.currentTarget.id
+        switch (id) {
+            case 'incr_hour': {
+                return currentHour === 23 && isLimited ?
+                    setCurrentTime('00' + (!disabledMinutes ? (seperator + currentMinute) : '')) :
+                    setCurrentTime((currentHour + 1) + (!disabledMinutes ?
+                        (seperator + currentMinute) : ''))
+            }
+            case 'decr_hour': {
+                return currentHour === 0 && isLimited ?
+                    setCurrentTime('23' + (!disabledMinutes ? (seperator + currentMinute) : '')) :
+                    setCurrentTime((currentHour - 1) + (!disabledMinutes ?
+                        (seperator + currentMinute) : ''))
+            }
+            case 'incr_min': {
+                return currentMinute === 59 && isLimited ?
+                    setCurrentTime((!disabledHours ? (currentHour + seperator) : '') + '00') :
+                    setCurrentTime((!disabledHours ?
+                        (currentHour + seperator) : '') + (currentMinute + 1))
+            }
+            case 'decr_min': {
+                return currentMinute === 0 && isLimited ?
+                    setCurrentTime((!disabledHours ? (currentHour + seperator) : '') + '59') :
+                    setCurrentTime((!disabledHours ?
+                        (currentHour + seperator) : '') + (currentMinute - 1))
+            }
+        }
+    }
+    function handleHourTextAreaChange(value) {
+        const v = value === '' ? '00' : value
+        setCurrentTime(v + (!disabledMinutes ? (seperator + currentMinute) : ''))
+    }
+    function handleMinTextAreaChange(value) {
+        const v = value === '' ? '00' : value
+        console.log(currentHour + seperator + v)
+        setCurrentTime((!disabledHours ? (currentHour + seperator) : '') + v)
+    }
+    useEffect(() => {
+        console.log('......................')
+        console.log('currTime: ' + currentTime)
+        console.log('currentHour: ' + currentHour)
+        console.log('currentMinute: ' + currentMinute)
+        onChange && onChange(currentTime)
+    }, [currentTime]);
+
+    const availableMinutes = isLimited && [...Array(60).keys()]
+    const availableHours = isLimited && [...Array(24).keys()]
+    const data = {
+        handleButtonClicks, availableMinutes, availableHours, handleHourTextAreaChange,
+        handleMinTextAreaChange, currentHour, currentMinute, disabledHours, disabledMinutes, seperator,
+    }
+    return (
+        <DumbHourSelector data={data}></DumbHourSelector>
+    )
+
+}
+
 export const HourSelectorDropdown = (props) => {
-    const { value=moment('00:00', 'HH:mm').format('HH:mm'), id = 'hourSelector', onChange, minWidth} = props
+    const { format = 'HH:mm', value = moment('00:00', format).format(format), id = '1', onChange, minWidth } = props
     const date = useSelector(state => state.tourTable.tourDate)
     const [text, setText] = useState(value)
 
 
-    console.log('value '+ value)
-    console.log('isvalid eksw ' +moment(value, 'HH:mm', true).isValid())
+    console.log('value ' + value)
+    console.log('isvalid eksw ' + moment(value, format, true).isValid())
     function handleHourChange(value) {
         console.log('value eksw')
         setText(value)
     }
-    
+
 
     useEffect(() => {
         onChange && moment(text, "HH:mm", true).isValid() && onChange(text)
@@ -33,129 +172,216 @@ export const HourSelectorDropdown = (props) => {
             <Dropdown>
                 <Dropdown.Toggle split variant="white" className="p-0 border-0">
                     <MyTextArea
-                        id={'hourselector'+id}
+                        id={'hourselector' + id}
                         type='time'
                         value={text}
                         invalidation={true}
                         readOnly
-                        minWidth={"130px"}
+                        minWidth={minWidth}
                     />
                 </Dropdown.Toggle>
-                <Dropdown.Menu className="p-0">
-                    <HourSelector
-                        time={value}
-                        onChange={handleHourChange}
-                    >
-                    </HourSelector>
-                </Dropdown.Menu>
+                <Portal>
+                    <Dropdown.Menu className="p-0">
+                        <HourSelector
+                            time={value}
+                            onChange={handleHourChange}
+                            format={format}
+                        >
+                        </HourSelector>
+                    </Dropdown.Menu>
+                </Portal>
             </Dropdown>
         </>
     )
 }
 
 export const HourSelector = (props) => {
-const { time=moment('00:00, HH:mm').format('HH:mm'), onChange} = props
-const [currentTime, setCurrentTime] = useState(moment(time, 'HH:mm').isValid() && time)
-const currentHour = parseInt(moment(currentTime, 'HH:mm').format('HH'))
-const currentMinute = parseInt(moment(currentTime, 'HH:mm').format('mm'))
+    const { format = 'HH:mm', time = moment('00:00, ' + format).format(format), onChange } = props
 
-function handleButtonClicks(event){
-    const id = event.currentTarget.id
-    console.log(currentHour)
-    switch (id) {
-        case 'incr_hour': {
-            return currentHour === 23 ?
-                setCurrentTime(moment('00' + ':' + currentMinute, 'HH:mm').format('HH:mm')) :
-                setCurrentTime(moment((currentHour + 1) + ':' + currentMinute, 'HH:mm').format('HH:mm'))
-        }
-        case 'decr_hour': {
-            return currentHour === 0 ?
-                setCurrentTime(moment('23' + ':' + currentMinute, 'HH:mm').format('HH:mm')) :
-                setCurrentTime(moment((currentHour - 1) + ':' + currentMinute, 'HH:mm').format('HH:mm'))
-        }
-        case 'incr_min': {
-            return currentMinute === 59 ?
-                setCurrentTime(moment(currentHour + ':' + '00', 'HH:mm').format('HH:mm')) :
-                setCurrentTime(moment(currentHour + ':' + (currentMinute + 1), 'HH:mm').format('HH:mm'))
-        }
-        case 'decr_min': {
-            return currentMinute === 0 ?
-                setCurrentTime(moment(currentHour + ':' + '59', 'HH:mm').format('HH:mm')) :
-                setCurrentTime(moment(currentHour + ':' + (currentMinute - 1), 'HH:mm').format('HH:mm'))
+    const [currentTime, setCurrentTime] = useState(moment(time, format).isValid() && time)
+    const currentHour = parseInt(moment(currentTime, format).format('HH'))
+    const currentMinute = parseInt(moment(currentTime, format).format('mm'))
+
+    function handleButtonClicks(event) {
+        const id = event.currentTarget.id
+        console.log(currentHour)
+        switch (id) {
+            case 'incr_hour': {
+                return currentHour === 23 ?
+                    setCurrentTime(moment('00' + ':' + currentMinute, format).format(format)) :
+                    setCurrentTime(moment((currentHour + 1) + ':' + currentMinute, format).format(format))
+            }
+            case 'decr_hour': {
+                return currentHour === 0 ?
+                    setCurrentTime(moment('23' + ':' + currentMinute, format).format(format)) :
+                    setCurrentTime(moment((currentHour - 1) + ':' + currentMinute, format).format(format))
+            }
+            case 'incr_min': {
+                return currentMinute === 59 ?
+                    setCurrentTime(moment(currentHour + ':' + '00', format).format(format)) :
+                    setCurrentTime(moment(currentHour + ':' + (currentMinute + 1), format).format(format))
+            }
+            case 'decr_min': {
+                return currentMinute === 0 ?
+                    setCurrentTime(moment(currentHour + ':' + '59', format).format(format)) :
+                    setCurrentTime(moment(currentHour + ':' + (currentMinute - 1), format).format(format))
+            }
         }
     }
-}
-function handleHourTextAreaChange(value){
-    const v = value === '' ? '00' : value
-    console.log('allaxe hour area')
-    // console.log(parseInt(value))
-    setCurrentTime(moment(v  +':'+ currentMinute, 'HH:mm').format('HH:mm'))
-}
-function handleMinTextAreaChange(value){
-    const v = value === '' ? '00' : value
-    console.log('allaxe min area')
-    console.log(currentHour +':'+ v)
-    setCurrentTime(moment(currentHour +':'+ v, 'HH:mm').format('HH:mm'))
-}
-useEffect(() => {
-    console.log('currTime: '+currentTime)
-    onChange(currentTime)
-}, [currentTime]);
-const data = {currentTime, handleButtonClicks, handleHourTextAreaChange, handleMinTextAreaChange}
-return(
-    <DumbHourSelector data={data}></DumbHourSelector>
-)
+    function handleHourTextAreaChange(value) {
+        const v = value === '' ? '00' : value
+        console.log('allaxe hour area')
+        setCurrentTime(moment(v + ':' + currentMinute, format).format(format))
+    }
+    function handleMinTextAreaChange(value) {
+        const v = value === '' ? '00' : value
+        console.log('allaxe min area')
+        console.log(currentHour + ':' + v)
+        setCurrentTime(moment(currentHour + ':' + v, format).format(format))
+    }
+    useEffect(() => {
+        console.log('currTime: ' + currentTime)
+        onChange && onChange(currentTime)
+    }, [currentTime]);
+
+    const availableMinutes = [...Array(60).keys()]
+    const availableHours = [...Array(24).keys()]
+    const data = { currentHour, currentMinute, availableMinutes, availableHours, handleButtonClicks, handleHourTextAreaChange, handleMinTextAreaChange, availableMinutes, availableHours }
+    return (
+        <DumbHourSelector data={data}></DumbHourSelector>
+    )
 }
 
 export const DumbHourSelector = (props) => {
-    const { currentTime, handleButtonClicks, handleHourTextAreaChange, handleMinTextAreaChange } = props.data
-    const time = moment(currentTime, 'HH:mm')
-    const availableHours = [...Array(24).keys()]
-    const availableMinutes = [...Array(60).keys()]
+    const { format = 'HH:mm', currentHour, currentMinute, seperator, handleButtonClicks, disabledHours = false, disabledMinutes = false,
+        handleHourTextAreaChange, handleMinTextAreaChange, width = "250px", minWidth = "80px", height = "100px" } = props.data
+    const { availableMinutes, availableHours } = props.data
+    console.log('curH' + currentHour)
+    console.log('curM' + currentMinute)
+
+
+
     return (
         <>
-            <Card border="light" className="shadow-sm flex-fill" style={{ width: "300px", minWidth: "300px" }}>
-                <Card.Body className="px-0">
-                    <div className="container">
-                        <div className="d-flex  container-fluid p-0">
-                            <div className="d-flex col-5">
-                                <span className="flex-fill"></span>
-                                <Button id="incr_hour" onClick={handleButtonClicks} className="text-center  flex-fill text-nowrap noboxshadow p-0" variant="white"><FontAwesomeIcon icon={faArrowUp}></FontAwesomeIcon></Button>
-                                <span className=" flex-fill"></span>
-                            </div>
-                            <div className="d-flex col-2"></div>
-                            <div className="d-flex col-5">
-                                <span className="flex-fill"></span>
-                                <Button id="incr_min" onClick={handleButtonClicks} className="text-center flex-fill text-nowrap noboxshadow p-0" variant="white"><FontAwesomeIcon icon={faArrowUp}></FontAwesomeIcon></Button>
-                                <span className="flex-fill"></span>
-                            </div>
-                        </div>
-                        <div className="d-flex  container-fluid py-2 p-0">
-                            <MyTextArea value={time.format('HH')} availableValues={availableHours} type="hour" onChange={handleHourTextAreaChange} rows={1} minWidth="50px" className="text-center m-0 col-5 text-nowrap" />
-                            <h5 className="text-center m-0 col-2 d-flex justify-content-center align-items-center">{':'}</h5>
-                            <MyTextArea value={time.format('mm')} availableValues={availableMinutes} type="minute" onChange={handleMinTextAreaChange} rows={1} minWidth="50px" className="text-center m-0 col-5 text-nowrap" />
-                        </div>
-
-                        <div className="d-flex  container-fluid p-0">
-                            <div className="d-flex col-5">
-                                <span className="flex-fill"></span>
-                                <Button id="decr_hour" onClick={handleButtonClicks} className="text-center  flex-fill text-nowrap noboxshadow p-0" variant="white"><FontAwesomeIcon icon={faArrowDown}></FontAwesomeIcon></Button>
-                                <span className=" flex-fill"></span>
-                            </div>
-                            <div className="d-flex col-2"></div>
-                            <div className="d-flex col-5">
-                                <span className="flex-fill"></span>
-                                <Button id="decr_min" onClick={handleButtonClicks} className="text-center flex-fill text-nowrap noboxshadow p-0" variant="white"><FontAwesomeIcon icon={faArrowDown}></FontAwesomeIcon></Button>
-                                <span className="flex-fill"></span>
-                            </div>
-                        </div>
+            <Card border="light"
+                className="shadow-sm flex-fill"
+                style={{ maxWidth: width, minWidth: minWidth }}>
+                <Card.Body className="px-1 py-2">
+                    <div className="container p-1 d-flex">
+                        {!disabledHours &&
+                            <HourComponent value={currentHour}
+                                availableValues={availableHours}
+                                onChange={handleHourTextAreaChange}
+                                onClick={handleButtonClicks}>
+                            </HourComponent>}
+                        {!disabledHours && !disabledMinutes && <Seperator value={seperator}></Seperator>}
+                        {!disabledMinutes &&
+                            <MinuteComponent value={currentMinute}
+                                availableValues={availableMinutes}
+                                onChange={handleMinTextAreaChange}
+                                onClick={handleButtonClicks}>
+                            </MinuteComponent>}
                     </div>
                 </Card.Body>
             </Card>
         </>
     )
 }
+function HourComponent(props) {
+    const { onChange, value, onClick, availableValues } = props
+    console.log(value)
+    if (!isNaN(value))
+        return (
+            <>
+                <div className="container-fluid px-2 justify-content-center" style={{ width: '120px' }}>
+                    <div className="d-flex py-1">
+                        <span className="flex-fill"></span>
+                        <Button id="incr_hour"
+                            style={{ width: '30px' }}
+                            onClick={onClick}
+                            className="text-center  flex-fill text-nowrap noboxshadow p-0"
+                            variant="white">
+                            <FontAwesomeIcon className='mt-2' icon={faSortUp}></FontAwesomeIcon>
+                        </Button>
+                        <span className=" flex-fill"></span>
+                    </div>
+                    <div className="d-flex py-1 justify-content-center">
+                        <MyTextArea measurement="hour"
+                            value={value}
+                            availableValues={availableValues}
+                            type="hour"
+                            onChange={onChange} rows={1}
+                            minWidth="50px"
+                            className="text-end m-0 text-nowrap pe-1" />
+                    </div>
+                    <div className="d-flex py-1">
+                        <span className="flex-fill"></span>
+                        <Button id="decr_hour"
+                            style={{ width: '30px' }}
+                            onClick={onClick}
+                            className="text-center  flex-fill text-nowrap noboxshadow p-0"
+                            variant="white">
+                            <FontAwesomeIcon className='mt-2' icon={faSortDown}></FontAwesomeIcon>
+                        </Button>
+                        <span className=" flex-fill"></span>
+                    </div>
+                </div>
+            </>
+        )
+    return <></>
+}
+function Seperator(props) {
+    const value = props.value
+    if (value) return (
+        <>
+            <div className="container-fluid px-2 py-0 justify-content-center d-flex">
+                <h5 className="text-center m-0  d-flex justify-content-center align-self-center">{value}</h5>
 
+            </div>
+        </>)
+    return <></>
+}
+function MinuteComponent(props) {
+    const { onChange, value, onClick, availableValues } = props
+    if (!isNaN(value)) return (
+        <>
+            <div className="container-fluid px-2 py-0 justify-content-center" style={{ width: '120px' }}>
+                <div className="d-flex py-1">
+                    <span className="flex-fill"></span>
+                    <Button id="incr_min"
+                        style={{ width: '30px' }}
+                        onClick={onClick}
+                        className="text-center  flex-fill text-nowrap noboxshadow p-0"
+                        variant="white">
+                        <FontAwesomeIcon className='mt-2' icon={faSortUp}></FontAwesomeIcon>
+                    </Button>
+                    <span className=" flex-fill"></span>
+                </div>
+                <div className="d-flex py-1 justify-content-center">
+                    <MyTextArea measurement="min"
+                        value={value}
+                        availableValues={availableValues}
+                        type="minute"
+                        onChange={onChange}
+                        rows={1} minWidth="50px"
+                        className="text-end m-0 text-nowrap pe-1 " />
+                </div>
+                <div className="d-flex py-1">
+                    <span className="flex-fill"></span>
+                    <Button id="decr_min"
+                        style={{ width: '30px' }}
+                        onClick={onClick}
+                        className="text-center  flex-fill text-nowrap noboxshadow p-0"
+                        variant="white">
+                        <FontAwesomeIcon className='mt-2' icon={faSortDown}></FontAwesomeIcon>
+                    </Button>
+                    <span className=" flex-fill"></span>
+                </div>
+            </div>
+        </>
+    )
+    return <></>
+}
 
 
 export const MonthSelectorDropdown = (props) => {
@@ -181,18 +407,19 @@ export const MonthSelectorDropdown = (props) => {
     )
 }
 export const DateSelectorDropdown = (props) => {
-    const { value, id = 'dateSelector', enabled = 'true', onChange } = props
-    const date = useSelector(state => state.tourTable.tourDate)
+    const { value, id = 'dateSelector', onChange } = props
     const [text, setText] = useState(value)
-    function handleDateChange(value) {
-        setText(value)
-    }
-    function handleTextAreaChange(value) {
+
+    const day = moment(text, 'DD/MM/YYYY').isValid && text
+    function handleChange(value) {
+        console.log('ON CHANGE DROPDOWN')
         setText(value)
     }
 
     useEffect(() => {
-        moment(text, "DD/MM/YYYY", true).isValid() && onChange(text)
+        
+        console.log('ON CHANGE DROPDOWN: '+value)
+        onChange(text)
     }, [text]);
 
     return (
@@ -204,27 +431,33 @@ export const DateSelectorDropdown = (props) => {
                         type='date'
                         value={text}
                         invalidation={true}
-                        onChange={handleTextAreaChange}
+                        onChange={handleChange}
                         // errorMessage={'Invalid Date (DD/MM/YYYY)'}
                         minWidth={"150px"}
+                        digitsSeperator='/'
+                        seperatorAt={[2,4]}
+                        // digits={8}
                     />
                 </Dropdown.Toggle>
                 <Portal>
-                <Dropdown.Menu className="p-0">
-                    <DayCalendar
-                        singleDate
-                        month={moment(value, 'DD/MM/YYYY').format('MM/YYYY')}
-                        onChange={handleDateChange}
-                        value={text}
-                    >
-                    </DayCalendar>
-                </Dropdown.Menu>
+                    <Dropdown.Menu className="p-0">
+                        <DayCalendar
+                            singleDate
+                            month={moment(value, 'DD/MM/YYYY').format('MM/YYYY')}
+                            onChange={handleChange}
+                            
+                            value={text}
+                        >
+                        </DayCalendar>
+                    </Dropdown.Menu>
                 </Portal>
             </Dropdown>
         </>
     )
 }
 export const DayCalendar = (props) => {
+
+
     const { month = moment().format("MM/YYYY"), singleDate = false, onChange, value, disableMonthSwap = false } = props
     const [currentMonth, setCurrentMonth] = useState(moment(month, "MM/YYYY"))
     const newDate = moment(currentMonth, "MM/YYYY").format("MMMM YYYY")
@@ -237,14 +470,9 @@ export const DayCalendar = (props) => {
         handleClick, handleMouseOver, clickedId,
         hoveredId, newDate, headers, tableDays, disableMonthSwap, handleIncrementMonth, handleDecrementMonth
     }
-    const date = moment(clickedId[0] + '/' + currentMonth, "DD/MM/YYYY").format("DD/MM/YYYY")
+    
     useEffect(() => {
-        if (singleDate) {
-            onChange && moment(date, "DD/MM/YYYY", true).isValid() && onChange(date)
-        }
-    }, [date]);
-
-    useEffect(() => {
+        console.log('changed month: '+month)
         if (!singleDate) {
             setClickedId([])
             setHoveredId()
@@ -252,18 +480,35 @@ export const DayCalendar = (props) => {
         } else {
             moment(month, "MM/YYYY", true).isValid() && setCurrentMonth(moment(month, "MM/YYYY"))
         }
-
     }, [month]);
+
     useEffect(() => {
+        console.log('changed value: ' + value) 
         if (moment(value, "DD/MM/YYYY", true).isValid()) {
+            console.log('?????????????????????????????? VALID')
+            console.log('?????????????????????????????? '+moment(value, "DD/MM/YYYY").format('DD'))
             setClickedId([parseInt(moment(value, "DD/MM/YYYY").format('DD'))])
             setCurrentMonth(moment(value, "DD/MM/YYYY").format('MM/YYYY'))
         }
         else {
+            
+            console.log('********************** INVALID')
             setClickedId([])
         }
     }, [value]);
-
+    useEffect(() => {
+        console.log('clicked Day: '+clickedId[0])
+    }, [clickedId]);
+    useEffect(() => {
+        console.log('current Month: '+currentMonth)
+    }, [currentMonth]);
+    const date = clickedId.length>0 && clickedId[0] + '/' + currentMonth
+    useEffect(() => {
+        console.log('changed date: '+date)
+        if (singleDate) {
+            onChange && moment(date, "DD/MM/YYYY", true).isValid() && onChange(date)
+        }
+    }, [date]);
 
     function handleIncrementMonth() {
         setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'M').format("MM/YYYY"))

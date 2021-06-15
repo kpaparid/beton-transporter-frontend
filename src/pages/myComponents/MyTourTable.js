@@ -8,6 +8,8 @@ import { ACTIONS } from "../reducers/redux";
 import { TableRow, TablerowContents, HeaderRow } from './MyTableRow';
 import { loadToursData } from "../reducers/loadToursData";
 import { useShownTourTable, useCheckedAll, useChecked, useShownLabels, useAllLabels, useGetVisibleLabels } from "./MyConsts"
+import { HourSelector } from "./MyOwnCalendar";
+import TextareaAutosize from "react-textarea-autosize";
 
 
 export const TourTable = () => {
@@ -21,7 +23,6 @@ export const TourTable = () => {
     const shownLabels = useShownLabels()
     const checked = useChecked()
     const visibleLabels = useGetVisibleLabels()
-    console.log(visibleLabels)
   
     function useLoadToursData() {
       const [stateAPIStatus, setAPIStatus] = useState('idle');
@@ -67,6 +68,7 @@ export const TourTable = () => {
       <Card border="light">
         <Card.Body className="px-1">
           <Table responsive className="align-items-center table-flush align-items-center">
+            
             <thead className="thead-light">
               <HeaderRow
                  headers={visibleLabels.map(l => l.text)}
@@ -74,6 +76,7 @@ export const TourTable = () => {
                  handleAllClick={handleAllClick}
                  checkbox
                 />
+                
             </thead>
             <tbody>
               {shownTourTable.map((t, index) =>

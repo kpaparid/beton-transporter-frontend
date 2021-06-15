@@ -10,10 +10,11 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from "../pages/reducers/redux";
 import { TourTable } from "./myComponents/MyTourTable";
 import moment from "moment";
-import { HourSelector, HourSelectorDropdown, MonthSelectorDropdown } from "./myComponents/MyOwnCalendar";
+import { HourSelector,TimeSelectorDropdown, HourSelectorDropdown, MonthSelectorDropdown } from "./myComponents/MyOwnCalendar";
 import MyModal from "./myComponents/MyModal";
 import AddRowModal from "./myComponents/AddRowModal";
 import { useTourTable, useTourDate, useCheckedExists, useAllLabels } from "./myComponents/MyConsts"
+import TextareaAutosize from "react-textarea-autosize";
 
 export default () => {
   const dispatch = useDispatch();
@@ -75,6 +76,26 @@ export default () => {
 
   return (
     <>
+    <TextareaAutosize
+                        
+                        maxRows={5}
+                        minRows={1}
+                        className={`align-middle fw-normal form-control whitedisabled border border-0 shadow-none `}
+                        style={{
+                            fontSize: '0.875rem',
+                            color: '#66799e',
+                            resize: 'none',
+                            minWidth: '94px',
+                            // width: 'auto',
+                            textAlign: 'center',
+                            backgroundImage: '',
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "top calc(0.375em + 0.2rem) left calc(0.1em + 0.275rem)",
+                            backgroundSize: "calc(0.75em + 0.55rem) calc(0.75em + 0.55rem)",
+                            paddingRight: '1rem',
+                            paddingLeft: '1rem',
+                        }}
+                    />
       <AddRowModal
         labels={allLabels}
         onClose={handleClose}

@@ -1,21 +1,36 @@
-import react from "react"
+import react, { useState, useEffect } from "react"
 import MyFormSelect from "./MyFormSelect"
-import { DateSelectorDropdown, HourSelectorDropdown } from "./MyOwnCalendar"
-import MyTextArea from "./MyTextArea"
-import { inputLabelsWidths, useGetAvailableValuesSelectInput } from "./MyConsts"
+import { DateSelectorDropdown, HourSelectorDropdown, DurationDropdownSelector } from "./MyOwnCalendar"
+import { MyTextArea } from "./MyTextArea"
+
 
 
 export default (props) => {
-    
-    const { label, onChange, type,
-        value, enabled, rows=1,
-        defaultValue = 'Select ' + value, validation = false, invalidation = false, errorMessage } = props
+
+    const { title, onChange, type,
+        value, enabled, rows = 1, minWidth = '100px', values = [],
+        defaultValue = 'Select ' + value, validation = false, invalidation = false, errorMessage, measurement='' } = props
     const id = 'inputModal-' + value
-    function handleOnChange(change){
+
+    // function handleOnChange(change) {
+    //     console.log('ready to update db')
+    //     console.log('value for DB: ' + change)
+        
+    // }
+    // useEffect(() => {
+    //     console.log(value)
+    // }, [newValue]);
+    const [newValue, setNewValue] = useState(value)
+    function handleOnChange(change) {
         console.log('ready to update db')
-        console.log('value for DB: '+ change)
+        console.log('value for DB: ' + change)
+        setNewValue(change)
+        
     }
-    const minWidth = inputLabelsWidths[label] ?  inputLabelsWidths[label] : '100px'
+    useEffect(() => {
+        console.log('change: '+value+' ===> ' + newValue)
+    }, [newValue]);
+
     if (!enabled) {
         return (
             <div
@@ -24,38 +39,42 @@ export default (props) => {
                     fontSize: '0.875rem',
                     color: '#66799e'
                 }}
-            >{value}
+            >{value+' '+measurement}
             </div>
         )
     }
     else if (type === 'text') {
         return (
-            <>            
-            <MyTextArea
-                id={id}
-                maxRows={5}
-                onChange={handleOnChange}
-                value={value}
-                validation={validation}
-                invalidation={invalidation}
-                errorMessage={errorMessage}
-                minWidth={minWidth}
-            />
+            <>
+                <MyTextArea
+                    label={title}
+                    id={id}
+                    maxRows={5}
+                    onChange={handleOnChange}
+                    value={newValue}
+                    validation={validation}
+                    invalidation={invalidation}
+                    errorMessage={errorMessage}
+                    minWidth={minWidth}
+                />
             </>
         )
     }
     else if (type === 'number' || type === 'distance') {
+        
         return (
             <MyTextArea
+                label={title}
                 id={id}
-                maxRows={2}
+                maxRows={3}
                 type='number'
-                value={value}
+                value={newValue}
                 validation={validation}
                 invalidation={invalidation}
                 errorMessage={errorMessage}
                 onChange={handleOnChange}
                 minWidth={minWidth}
+                measurement={measurement}
             />
         )
     }
@@ -64,9 +83,10 @@ export default (props) => {
             <>
                 <DateSelectorDropdown
                     id={id}
-                    enabled={true}
-                    value={value}
+                    value={newValue}
                     onChange={handleOnChange}
+                    validation={validation}
+                    invalidation={invalidation}
                     minWidth={minWidth}
                     maxRows={2}
                 ></DateSelectorDropdown>
@@ -75,44 +95,47 @@ export default (props) => {
         )
     }
     else if (type === 'constant') {
-        const values = useGetAvailableValuesSelectInput(label).filter(v => v !== value)
-        const def = value
-        console.log(def)
+
         return (
             <MyFormSelect
-                label={label}
+                label={title}
                 id={id}
                 values={values}
                 onChange={handleOnChange}
-                value={def}
-                defaultValue={def}
+                defaultValue={value}
                 minWidth={minWidth}
+                validation={validation}
+                invalidation={invalidation}
 
             />
         )
-    }else if (type === 'time') {
+    } else if (type === 'time') {
         return (
-            <HourSelectorDropdown 
-            id={id}
-            value={value}
-            minWidth={minWidth + 50}
+            <HourSelectorDropdown
+                id={id}
+                value={newValue}
+                minWidth={'100px'}
             > </HourSelectorDropdown>
         )
     }
-    
-    else {
+
+    else if (type === 'duration') {
+        console.log('MINUTE: ' + value)
         return (
-            <MyTextArea
-                id={id}
-                rows={rows}
-                type='text'
-                onChange={handleOnChange}
-                value={value}
-                validation={validation}
-                invalidation={invalidation}
-                errorMessage={errorMessage}
-                minWidth={minWidth}
-            />
+            <DurationDropdownSelector
+                id={'id'}
+                value={newValue}
+                //   seperator={'h '}
+                isLimited={false}
+                validation={false}
+                invalidation={false}
+                disabledHours
+                measurement={measurement}
+
+            ></DurationDropdownSelector>
         )
+    }
+    else {
+        <div>{newValue}</div>
     }
 }

@@ -1,0 +1,39 @@
+
+
+  .myinput-group{
+      box-shadow: none;
+      border: 0.0625rem solid rgba(46, 54, 80, 0.125);
+      border-color: red;
+	&:focus-within {
+            color: $input-focus-color;
+            background-color: $input-focus-bg;
+            
+            outline: 0;
+            @if $enable-shadows {
+              @include box-shadow($input-box-shadow, $input-focus-box-shadow);
+            } @else {
+              // Avoid using mixin so we can pass custom focus shadow properly
+              box-shadow: $input-focus-box-shadow;
+            }
+          
+        }
+        .is-invalid {
+            padding-right: 0.75rem;
+            padding-left: calc(1.5em + 1.1rem);
+            background-position: top calc(0.375em + 0.2rem) left calc(0.1em + 0.275rem);
+          }
+        .form-control{
+            box-shadow: none;
+            border: none;
+            &:focus{
+                border: none;
+            }
+        }
+}
+// .was-validated,
+// textarea.form-control.is-valid,
+// textarea.form-control.is-invalid {
+//   padding-right: 0.75rem;
+//   padding-left: calc(1.5em + 1.1rem);
+//   background-position: top calc(0.375em + 0.2rem) left calc(0.1em + 0.275rem);
+// }

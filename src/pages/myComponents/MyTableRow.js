@@ -5,7 +5,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from '../reducers/redux';
 import MyTextArea from './MyTextArea';
 import MyInput from './MyInput';
-
+import { inputLabelsWidths, useGetAvailableValuesSelectInput } from "./MyConsts"
 
 
 
@@ -44,7 +44,7 @@ export const TableRow = (props) => {
 };
 export const TablerowContents = (props) => {
   const { row, id, checkedColumns, checked, editMode } = props  
-
+  
   const dispatch = useDispatch();
     const handleEditChange = (id, key, change) => {
         
@@ -60,27 +60,39 @@ export const TablerowContents = (props) => {
   
   return <>
     {
-      checkedColumns.map((label) =>
-      
-        <td key={`$td-${row[label.id]}`}
+      checkedColumns.map((label) =>{
+        const minWidth = inputLabelsWidths[label.id] ?  inputLabelsWidths[label.id] : '100px'
+        const value = row[label.id]
+        const id= row[label.id] 
+        const type=label.type
+        const enabled=editMode && checked === 'checked'
+        const defaultValue = label.text
+        const GetValues = (key) => useGetAvailableValuesSelectInput(key)
+        const values = GetValues(label.id).filter(v => v !== value)
+        const measurement=label.measurement
+        
+        return (
+        <td key={`$td-${id}`}
           className="text-center px-1 text-wrap"
         >
           <span>
             <MyInput
-              id={`$td-${row[label.id]}`}
-              value={row[label.id]}
-              enabled={editMode && checked === 'checked'}
+              id={id}
+              value={value}
+              enabled={enabled}
               onChange={handleEditChange}
-              type ={label.type}
-              rows={2}
-              defaultValue={label.text}
-              label={label.id}
+              type ={type}
+              defaultValue={defaultValue}
+              values={values}
               // validation
               invalidation
               errorMessage
+              minWidth={minWidth}              
+              measurement={measurement}
             />
           </span>
-        </td>)}
+        </td>
+      )})}
   </>
 }
 export const HeaderRow = (props) => {

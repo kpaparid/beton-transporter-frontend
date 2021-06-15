@@ -50,7 +50,6 @@ function checkedExistsSelector(state) {
     function sortedLabelsSelector(state) {
         const c = state.tourTable.checkedLabelsId
         const shownLabels = [...c].sort((a, b) => state.tourTable.labelsById[a].priority - state.tourTable.labelsById[b].priority)
-        console.log(shownLabels)
         return shownLabels
       }
       function availableValues(state, key){
