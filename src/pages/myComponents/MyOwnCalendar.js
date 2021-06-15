@@ -442,8 +442,9 @@ export const DateSelectorDropdown = (props) => {
                 <Portal>
                     <Dropdown.Menu className="p-0">
                         <DayCalendar
+                            id={id}
                             singleDate
-                            month={moment(value, 'DD/MM/YYYY').format('MM/YYYY')}
+                            // monthi={moment(value, 'DD/MM/YYYY').format('MM/YYYY')}
                             onChange={handleChange}
                             
                             value={text}
@@ -458,68 +459,97 @@ export const DateSelectorDropdown = (props) => {
 export const DayCalendar = (props) => {
 
 
-    const { month = moment().format("MM/YYYY"), singleDate = false, onChange, value, disableMonthSwap = false } = props
-    const [currentMonth, setCurrentMonth] = useState(moment(month, "MM/YYYY"))
-    const newDate = moment(currentMonth, "MM/YYYY").format("MMMM YYYY")
+    const { monthi = moment().format("MM/YYYY"), id,  singleDate = false, onChange, value, disableMonthSwap = false } = props
+
+    const [currentMonth, setCurrentMonth] = useState(moment(monthi, "MM/YYYY"))
+    // const newDate = moment(currentMonth, "MM/YYYY").format("MMMM YYYY")
     const [clickedId, setClickedId] = useState(moment(value, "DD/MM/YYYY", true).isValid() ? [parseInt(moment(value, "DD/MM/YYYY").format("DD"))] : [])
     const [hoveredId, setHoveredId] = useState()
     const labels = rotateArray(moment.weekdays(), 1)
     const headers = labels.map(day => day.substr(0, 2) + '.')
-    const tableDays = calcIndexedCalendarDays(currentMonth, labels)
+    
+    const [date, setDate] = useState(value)
+
+    const splitDate = date.split('/')
+    const days = date === '' ? '01' : date.indexOf('/') === 2 ? splitDate[0] : date
+    const month = date.indexOf('/') === 2 ? splitDate[1] : moment(monthi, 'MM/YYYY').format('MM')
+    const year = date.indexOf('/', 3) === 5 ? splitDate[2] : moment(monthi, 'MM/YYYY').format('YYYY')
+    const newDate = moment(month+'/'+year, 'MM/YYYY').format('MMMM YYYY')
+
+    const [tableDays, setTableDays] = useState(calcIndexedCalendarDays(moment().format('MM/YYYY'), labels))
+
+    useEffect(()=> {
+        
+        moment(value, 'DD/MM/YYYY', true).isValid() ? setDate(moment(value, 'DD/MM/YYYY').format('DD/MM/YYYY')) :
+                    moment(value, 'DD/MM/Y', true).isValid() ? setDate(moment(value, 'DD/MM/Y').format('DD/MM/YYYY')) :
+                        moment(value, 'DD/M', true).isValid() ? setDate(moment(value, 'DD/M').format('DD/MM') + '/' + moment(value, 'DD/MM/YYYY').format('YYYY')) :
+                            moment(value, 'D', true).isValid() ? setDate(moment(value, 'D').format('DD') + '/' + moment(value, 'DD/MM/YYYY').format('MM/YY')) : console.log('erri')
+
+
+    },[value])
+    
+    useEffect(()=> {
+        console.log('=======DATE: '+date)
+        console.log('days: ' +days)
+        console.log('month: ' + month)
+        console.log('year: ' + year)
+        console.log('===========/')
+        const newD = moment(date, 'DD/MM/YYYY').format('MM/YYYY')
+        const newTableDays = calcIndexedCalendarDays(newD, labels)
+        setTableDays(newTableDays)
+    },[date])
+    useEffect(()=> {
+        console.log('month change: ' + year)
+    },[month])
+    useEffect(()=> {
+        moment(days, 'DD', true).isValid ? setClickedId([parseInt(days)]) : setClickedId([])
+    },[days])
+    // useEffect(()=> {
+    //     moment(newDate, 'MMMM YYYY', true).isValid ? setClickedId([parseInt(days)]) : setClickedId([])
+    // },[newDate])
+
+    useEffect(()=> {
+        console.log('CLICKEDID: '+clickedId)
+    },[clickedId])
+
+
+
+
+    // const tableDays = calcIndexedCalendarDays(moment(date, 'DD/MM/YYYY').format('MM/YYYY'), labels)
+    
+
     const data = {
         handleClick, handleMouseOver, clickedId,
         hoveredId, newDate, headers, tableDays, disableMonthSwap, handleIncrementMonth, handleDecrementMonth
     }
     
-    useEffect(() => {
-        console.log('changed month: '+month)
-        if (!singleDate) {
-            setClickedId([])
-            setHoveredId()
-            setCurrentMonth(moment(month, "MM/YYYY"))
-        } else {
-            moment(month, "MM/YYYY", true).isValid() && setCurrentMonth(moment(month, "MM/YYYY"))
-        }
-    }, [month]);
 
-    useEffect(() => {
-        console.log('changed value: ' + value) 
-        if (moment(value, "DD/MM/YYYY", true).isValid()) {
-            console.log('?????????????????????????????? VALID')
-            console.log('?????????????????????????????? '+moment(value, "DD/MM/YYYY").format('DD'))
-            setClickedId([parseInt(moment(value, "DD/MM/YYYY").format('DD'))])
-            setCurrentMonth(moment(value, "DD/MM/YYYY").format('MM/YYYY'))
-        }
-        else {
-            
-            console.log('********************** INVALID')
-            setClickedId([])
-        }
-    }, [value]);
-    useEffect(() => {
-        console.log('clicked Day: '+clickedId[0])
-    }, [clickedId]);
-    useEffect(() => {
-        console.log('current Month: '+currentMonth)
-    }, [currentMonth]);
-    const date = clickedId.length>0 && clickedId[0] + '/' + currentMonth
-    useEffect(() => {
-        console.log('changed date: '+date)
+    function sendOutside(dat){
         if (singleDate) {
-            onChange && moment(date, "DD/MM/YYYY", true).isValid() && onChange(date)
+            console.log('sending Outside '+dat)
+            onChange && onChange(dat)
         }
-    }, [date]);
+    }
 
     function handleIncrementMonth() {
-        setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'M').format("MM/YYYY"))
+        // setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'months').format("MM/YYYY"))
+        sendOutside(moment(date, 'DD/MM/YYYY').add(1, 'months').format('DD/MM/YYYY'))
     }
     function handleDecrementMonth() {
-        setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'M').format("MM/YYYY"))
+        // setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'months').format("MM/YYYY"))
+        sendOutside(moment(date, 'DD/MM/YYYY').subtract(1, 'months').format('DD/MM/YYYY'))
     }
     function handleClick(event) {
         const id = parseInt(event.target.id.replace('Btn', ''))
         if (singleDate && clickedId.length === 1) {
             setClickedId([id])
+
+            if( singleDate ) {
+                const newDay = moment(id, 'D').format('DD')
+                const newDate = moment(newDay + '/' + moment(date, 'DD/MM/YYYY').format('MM/YYYY'), 'DD/MM/YYYY').format('DD/MM/YYYY')
+                sendOutside(newDate)
+            }
+
         }
         else if (!singleDate && clickedId.length === 2) {
             setClickedId([])
@@ -532,6 +562,8 @@ export const DayCalendar = (props) => {
         else setClickedId([...clickedId, id]
             .sort((a, b) => a - b)
         )
+        
+        
     }
     function handleMouseOver(event) {
         const id = parseInt(event.target.id.replace('Btn', ''))
@@ -550,9 +582,9 @@ const DumbDayCalendar = (props) => {
             <Card border="light" className="shadow-sm flex-fill" style={{ width: "300px", minWidth: "300px" }}>
                 <Card.Body className="px-3">
                     <div className="container-fluid d-flex py-3 px-1 justify-content-around align-items-center">
-                        {!disableMonthSwap && <Button onClick={handleIncrementMonth} size="sm"><FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon></Button>}
+                        {!disableMonthSwap && <Button onClick={handleDecrementMonth} size="sm"><FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon></Button>}
                         <h5 className="text-center m-0">{newDate}</h5>
-                        {!disableMonthSwap && <Button onClick={handleDecrementMonth} size="sm"><FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon></Button>}
+                        {!disableMonthSwap && <Button onClick={handleIncrementMonth} size="sm"><FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon></Button>}
                     </div>
                     <Table className="user-table align-items-center">
                         <thead className="thead-light rounded-bottom">
