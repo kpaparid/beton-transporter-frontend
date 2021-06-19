@@ -5,7 +5,7 @@ import moment from "moment";
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { ACTIONS } from '../reducers/redux';
 import { HeaderRow } from './MyTableRow';
-import { rotateArray, calcIndexedCalendarDays } from './utilities';
+import { rotateArray, calcIndexedCalendarDays, convertArrayToObject } from './utilities';
 import { faArrowDown, faArrowLeft, faArrowRight, faArrowUp, faCalendar, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MyTextArea, TextAreaGroup } from './MyTextArea';
@@ -13,54 +13,63 @@ import { Portal } from 'react-portal';
 
 
 export const DurationDropdownSelector = (props) => {
-    const { format = 'H[h] mm[m]', value = moment('0h 00m', format).format(format),
-        id = 'timeSelector', onChange, minWidth, seperator = ' ', isLimited = true,
+    const { value = '0-0',
+        id = 'timeSelector', onChange, minWidth,  maxWidth,  seperator = '-', isLimited = true,
         disabledHours = false, disabledMinutes = false,
         validation = false, invalidation = false } = props
-    const [text, setText] = useState(value)
-    const splitText = text.split(seperator)
 
-    const formattedText = (disabledMinutes && disabledHours) ? '0' + seperator + '0' : disabledHours ? parseInt(text) : disabledMinutes ?
-        parseInt(text) : parseInt(splitText[0]) + seperator + parseInt(splitText[1])
+        const splitValue = value.split(seperator) 
+        // console.log([...splitValue])
+        const [text, setText] = useState(convertArrayToObject(splitValue.map((v, index) => {
+            const l = index === 0 ? 'hour' : 'minute'
+            return {[l]: v}
+        })))
+        
+        function handleChange(type, value) {
+            console.log('REEEEEEEEEEEEEEEEE: '+value)
+            console.log('REEEEEEEEEEEEEEEEE: '+type)
+            console.log('REEEEEEEEEEEEEEEEE: '+text[type])
+            setText({...text, [type]: value === '0' ? value : value.replace(/^0+/, '')})
+        }
+    
+        useEffect(() => {            
+            // console.log('ON CHANGE DROPDOWN: ')
+            // console.log(text)
+            // onChange(text)
+        }, [text]);
 
-    console.log('value ' + value)
-    console.log('formatted: ' + formattedText)
-    function handleHourChange(value) {
-        console.log('value eksw' + value)
-        setText(value)
-        console.log(formattedText)
-    }
-    useEffect(() => {
-        onChange && onChange(text)
-    }, [text]);
+        function handleHourChange(value){
+            console.log('hourChange')
+            console.log(value)
+            const splitValue = value.split(seperator) 
+            setText(convertArrayToObject(splitValue.map((v, index) => {
+                const l = index === 0 ? 'hour' : 'minute'
+                return {[l]: v}
+            })))
+        }
 
-    function handleChange(text) {
-        console.log('eksw ' + text)
-        setText(text)
-    }
-    // const id, type, minWidth, readOnly, validation, invalidation, measurement, maxRows, onChange, values
 
-    const data1 = {
-        id: 'hour', type: 'hour', minWidth: '40px', readOnly: false, 'validation': false,
-        'invalidation': false, measurement: 'hours', maxRows: 2, onChange: handleChange, 'value': formattedText
-    }
-    const data2 = {
-        id: 'minute', type: 'minute', minWidth: '40px', readOnly: false, 'validation': false,
-        'invalidation': false, measurement: 'min', maxRows: 2, onChange: handleChange, 'value': formattedText
-    }
-    const data = [data1, data2]
+    const data = Object.keys(text).map((type, index) =>  ({
+            id: id+index, type: type, minWidth: minWidth, maxWidth: maxWidth, readOnly: false, 'validation': false,
+            'invalidation': false, measurement: type === 'hour' ? 'h' : 'min', maxRows: 4, onChange: handleChange, 'value': text[type]
+    }))
+
     return (
         <>
             <Dropdown>
-                <Dropdown.Toggle split variant="white" className="p-0 border-0 d-flex flex-nowrap">
+                <Dropdown.Toggle split variant="white" 
+                        key={id+'toggle'} className="p-0 border-0 d-flex flex-nowrap w-100">
                     <TextAreaGroup
+                        key={id}
+                        id={id}
                         data={data}
                     />
                 </Dropdown.Toggle>
                 {(!disabledMinutes && !disabledHours) &&
                     <Portal>
-                        <Dropdown.Menu className="p-0">
+                        <Dropdown.Menu className="p-0" key={'dropdownMenu'+id}>
                             <DurationSelector
+                                
                                 time={text}
                                 onChange={handleHourChange}
                                 seperator={seperator}
@@ -80,8 +89,8 @@ export const DurationDropdownSelector = (props) => {
 export const DurationSelector = (props) => {
 
     const { seperator = ' ', time = '00' + seperator + '00', onChange, isLimited = false, disabledHours = false, disabledMinutes = false } = props
-    const [currentTime, setCurrentTime] = useState(time)
-
+    const [currentTime, setCurrentTime] = useState(time.hour + seperator + time.minute)
+    console.log(time)
     const currentHour = !disabledHours &&
         (!disabledHours && !disabledMinutes ?
             parseInt(currentTime.split(seperator)[0])
@@ -155,10 +164,9 @@ export const HourSelectorDropdown = (props) => {
     const [text, setText] = useState(value)
 
 
-    console.log('value ' + value)
-    console.log('isvalid eksw ' + moment(value, format, true).isValid())
+    // console.log('value ' + value)
     function handleHourChange(value) {
-        console.log('value eksw')
+        // console.log('value eksw')
         setText(value)
     }
 
@@ -170,7 +178,7 @@ export const HourSelectorDropdown = (props) => {
     return (
         <>
             <Dropdown>
-                <Dropdown.Toggle split variant="white" className="p-0 border-0">
+                <Dropdown.Toggle split variant="white" className="w-100 p-0 border-0">
                     <MyTextArea
                         id={'hourselector' + id}
                         type='time'
@@ -408,17 +416,16 @@ export const MonthSelectorDropdown = (props) => {
 }
 export const DateSelectorDropdown = (props) => {
     const { value, id = 'dateSelector', onChange } = props
-    const [text, setText] = useState(value)
 
-    const day = moment(text, 'DD/MM/YYYY').isValid && text
+    const [text, setText] = useState(value)
     function handleChange(value) {
-        console.log('ON CHANGE DROPDOWN')
+        console.log('ON CHANGE DROPDOWN setText: '+value)
         setText(value)
     }
 
     useEffect(() => {
         
-        console.log('ON CHANGE DROPDOWN: '+value)
+        console.log('ON CHANGE DROPDOWN: '+text)
         onChange(text)
     }, [text]);
 
@@ -436,7 +443,6 @@ export const DateSelectorDropdown = (props) => {
                         minWidth={"150px"}
                         digitsSeperator='/'
                         seperatorAt={[2,4]}
-                        // digits={8}
                     />
                 </Dropdown.Toggle>
                 <Portal>
@@ -460,9 +466,6 @@ export const DayCalendar = (props) => {
 
 
     const { monthi = moment().format("MM/YYYY"), id,  singleDate = false, onChange, value, disableMonthSwap = false } = props
-
-    const [currentMonth, setCurrentMonth] = useState(moment(monthi, "MM/YYYY"))
-    // const newDate = moment(currentMonth, "MM/YYYY").format("MMMM YYYY")
     const [clickedId, setClickedId] = useState(moment(value, "DD/MM/YYYY", true).isValid() ? [parseInt(moment(value, "DD/MM/YYYY").format("DD"))] : [])
     const [hoveredId, setHoveredId] = useState()
     const labels = rotateArray(moment.weekdays(), 1)
@@ -479,12 +482,13 @@ export const DayCalendar = (props) => {
     const [tableDays, setTableDays] = useState(calcIndexedCalendarDays(moment().format('MM/YYYY'), labels))
 
     useEffect(()=> {
-        
         moment(value, 'DD/MM/YYYY', true).isValid() ? setDate(moment(value, 'DD/MM/YYYY').format('DD/MM/YYYY')) :
-                    moment(value, 'DD/MM/Y', true).isValid() ? setDate(moment(value, 'DD/MM/Y').format('DD/MM/YYYY')) :
-                        moment(value, 'DD/M', true).isValid() ? setDate(moment(value, 'DD/M').format('DD/MM') + '/' + moment(value, 'DD/MM/YYYY').format('YYYY')) :
-                            moment(value, 'D', true).isValid() ? setDate(moment(value, 'D').format('DD') + '/' + moment(value, 'DD/MM/YYYY').format('MM/YY')) : console.log('erri')
-
+            moment(value, 'DD/MM/Y', true).isValid() ?
+                setDate(moment(value, 'DD/MM/Y').format('DD/MM/YYYY')) :
+                moment(value, 'DD/M', true).isValid() ?
+                    setDate(moment(value, 'DD/M').format('DD/MM') + '/' + moment(value, 'DD/MM/YYYY').format('YYYY')) :
+                    moment(value, 'D', true).isValid() ?
+                        setDate(moment(value, 'D').format('DD') + '/' + moment(value, 'DD/MM/YYYY').format('MM/YY')) : console.log('seperator')
 
     },[value])
     
@@ -499,24 +503,8 @@ export const DayCalendar = (props) => {
         setTableDays(newTableDays)
     },[date])
     useEffect(()=> {
-        console.log('month change: ' + year)
-    },[month])
-    useEffect(()=> {
         moment(days, 'DD', true).isValid ? setClickedId([parseInt(days)]) : setClickedId([])
     },[days])
-    // useEffect(()=> {
-    //     moment(newDate, 'MMMM YYYY', true).isValid ? setClickedId([parseInt(days)]) : setClickedId([])
-    // },[newDate])
-
-    useEffect(()=> {
-        console.log('CLICKEDID: '+clickedId)
-    },[clickedId])
-
-
-
-
-    // const tableDays = calcIndexedCalendarDays(moment(date, 'DD/MM/YYYY').format('MM/YYYY'), labels)
-    
 
     const data = {
         handleClick, handleMouseOver, clickedId,
@@ -524,19 +512,17 @@ export const DayCalendar = (props) => {
     }
     
 
-    function sendOutside(dat){
+    function sendOutside(date){
         if (singleDate) {
-            console.log('sending Outside '+dat)
-            onChange && onChange(dat)
+            console.log('sending Outside '+date)
+            onChange && onChange(date)
         }
     }
 
     function handleIncrementMonth() {
-        // setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'months').format("MM/YYYY"))
         sendOutside(moment(date, 'DD/MM/YYYY').add(1, 'months').format('DD/MM/YYYY'))
     }
     function handleDecrementMonth() {
-        // setCurrentMonth(moment(currentMonth, "MM/YYYY").add(1, 'months').format("MM/YYYY"))
         sendOutside(moment(date, 'DD/MM/YYYY').subtract(1, 'months').format('DD/MM/YYYY'))
     }
     function handleClick(event) {

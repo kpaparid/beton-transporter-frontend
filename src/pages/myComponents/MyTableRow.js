@@ -61,7 +61,8 @@ export const TablerowContents = (props) => {
   return <>
     {
       checkedColumns.map((label) =>{
-        const minWidth = inputLabelsWidths[label.id] ?  inputLabelsWidths[label.id] : '100px'
+        const minWidth = inputLabelsWidths[label.id]['minWidth'] ?  inputLabelsWidths[label.id]['minWidth'] : '50px'
+        const maxWidth = inputLabelsWidths[label.id]['maxWidth'] ?  inputLabelsWidths[label.id]['maxWidth'] : '100px'
         const value = row[label.id]
         const id= row[label.id] 
         const type=label.type
@@ -79,7 +80,8 @@ export const TablerowContents = (props) => {
             <MyInput
               id={id}
               value={value}
-              enabled={enabled}
+              // enabled={enabled}
+              enabled={true}
               onChange={handleEditChange}
               type ={type}
               defaultValue={defaultValue}
@@ -87,7 +89,8 @@ export const TablerowContents = (props) => {
               // validation
               invalidation
               errorMessage
-              minWidth={minWidth}              
+              minWidth={minWidth}   
+              maxWidth={maxWidth}              
               measurement={measurement}
             />
           </span>

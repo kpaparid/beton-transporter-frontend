@@ -8,27 +8,20 @@ import { MyTextArea } from "./MyTextArea"
 export default (props) => {
 
     const { title, onChange, type,
-        value, enabled, rows = 1, minWidth = '100px', values = [],
-        defaultValue = 'Select ' + value, validation = false, invalidation = false, errorMessage, measurement='' } = props
+        value, enabled, rows = 1, minWidth = '100px', maxWidth = '50px', values = [],
+        defaultValue = 'Select ' + value, validation = false, invalidation = false, 
+        errorMessage, measurement='' } = props
     const id = 'inputModal-' + value
 
-    // function handleOnChange(change) {
-    //     console.log('ready to update db')
-    //     console.log('value for DB: ' + change)
-        
-    // }
-    // useEffect(() => {
-    //     console.log(value)
-    // }, [newValue]);
     const [newValue, setNewValue] = useState(value)
     function handleOnChange(change) {
-        console.log('ready to update db')
-        console.log('value for DB: ' + change)
+        // console.log('ready to update db')
+        console.log('value for DB: ' +newValue +' ===> '+ change )
         setNewValue(change)
         
     }
     useEffect(() => {
-        console.log('change: '+value+' ===> ' + newValue)
+        // console.log('change: '+value+' ===> ' + newValue)
     }, [newValue]);
 
     if (!enabled) {
@@ -36,6 +29,7 @@ export default (props) => {
             <div
                 style={{
                     minWidth: minWidth,
+                    maxWidth: maxWidth,
                     fontSize: '0.875rem',
                     color: '#66799e'
                 }}
@@ -74,6 +68,7 @@ export default (props) => {
                 errorMessage={errorMessage}
                 onChange={handleOnChange}
                 minWidth={minWidth}
+                maxWidth={maxWidth}
                 measurement={measurement}
             />
         )
@@ -88,6 +83,7 @@ export default (props) => {
                     validation={validation}
                     invalidation={invalidation}
                     minWidth={minWidth}
+                    maxWidth={maxWidth}
                     maxRows={2}
                 ></DateSelectorDropdown>
 
@@ -104,6 +100,7 @@ export default (props) => {
                 onChange={handleOnChange}
                 defaultValue={value}
                 minWidth={minWidth}
+                maxWidth={maxWidth}
                 validation={validation}
                 invalidation={invalidation}
 
@@ -114,22 +111,25 @@ export default (props) => {
             <HourSelectorDropdown
                 id={id}
                 value={newValue}
-                minWidth={'100px'}
+                minWidth={minWidth}
+                maxWidth={maxWidth}
             > </HourSelectorDropdown>
         )
     }
 
     else if (type === 'duration') {
-        console.log('MINUTE: ' + value)
         return (
             <DurationDropdownSelector
-                id={'id'}
-                value={newValue}
+                id={id}
+                // value={newValue}
+                value={'15-20'}
                 //   seperator={'h '}
                 isLimited={false}
                 validation={false}
                 invalidation={false}
-                disabledHours
+                minWidth={minWidth}
+                maxWidth={maxWidth}
+                // disabledHours
                 measurement={measurement}
 
             ></DurationDropdownSelector>
