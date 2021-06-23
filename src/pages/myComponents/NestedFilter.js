@@ -3,7 +3,7 @@ import MyCheckbox from "./MyCheckbox";
 import MyCalendar from "./MyCalendar";
 import { useSelector } from 'react-redux';
 import { Dropdown } from '@themesberg/react-bootstrap';
-import { DayCalendar } from "./MyOwnCalendar";
+import { DateSelector, DayCalendar } from "./MyOwnCalendar";
 
 export default (props) => {
     const { index, labels, labelId, data } = props
@@ -37,12 +37,12 @@ export default (props) => {
         const availableDates = useSelector(selectorMenu)
         return (
             <Dropdown.Menu className="dropdown-menu-right p-0">
-                <DayCalendar
+                <DateSelector
                     // value={value}
                     month={tourDate}
                     disableMonthSwap
                 >
-                </DayCalendar>
+                </DateSelector>
             </Dropdown.Menu>
         )
     }

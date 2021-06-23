@@ -3,6 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { availableValues, visibleLabelsSelector, checkedExistsSelector, shownToursSelector, selectorMenu, checkedAllSelector, sortedLabelsSelector } from "./MySelectors"
 
 import moment from "moment";
+import { validateNumber, validateNumberSeperator } from "./utilities";
 
 const useTourTable = () => useSelector(state => state.tourTable)
 const useTourDate = () => useSelector(state => moment(state.tourTable.tourDate, "MM/YYYY").format("MMMM YYYY"))
@@ -37,7 +38,8 @@ const inputLabelsWidths = {
 const calcInvalidation = (text, type, invalidation) => !invalidation ? false :
 text === '' ? false :
             type === 'text' ? false :
-                type === 'number' && !isNaN(text.replaceAll('.', '')) ? false :
+            // type === 'number' && !isNaN(text.replaceAll('.', '').replaceAll(',', '')) && (text.match(new RegExp(',', "g")) || []).length <= 1? false :
+            type === 'number' && validateNumber(text) && validateNumberSeperator(text) && (text.match(new RegExp(',', "g")) || []).length <= 1? false :
                     type === 'date' && moment(text, "DD/MM/YYYY", true).isValid() ? false :
                         type === 'time' && moment(text, "H:mm", true).isValid() ? false :
                             type === 'hour' && moment(text, "HH", true).isValid() ? false :
@@ -47,7 +49,8 @@ text === '' ? false :
 const calcValidation =(text, type, validation) => !validation ? false :
 text === '' ? false :
     type === 'text' ? true :
-        type === 'number' && !isNaN(text.replaceAll('.','')) ? true :
+    // type === 'number' && !isNaN(text.replaceAll('.', '').replaceAll(',', '')) && (text.match(new RegExp(',', "g")) || []).length <= 1 ? true :
+        type === 'number' && validateNumber(text) && (text.match(new RegExp(',', "g")) || []).length <= 1 ? true :
             type === 'date' && moment(text, "DD/MM/YYYY", true).isValid() ? true :
                 type === 'time' && moment(text, "HH:mm", true).isValid() ? true :
                     type === 'hour' && moment(text, "HH", true).isValid() ? true :

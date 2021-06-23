@@ -3,6 +3,60 @@ import React, { useEffect, useState } from 'react';
 import moment from "moment";
 import BigNumber from 'bignumber.js';
 
+export function convertToThousands(number, decimal=0) {
+    // console.log('num ' +number)
+    const n = BigNumber((number +'').replaceAll('.', '').replaceAll(',', '.'))
+    const value = decimal === 0 ? n.toFormat() : n.toFormat(decimal)
+    const i = value.indexOf('.')
+    // console.log(i)
+    const v = value.replaceAll(',','.')
+    if(i!== -1) {
+        // console.log('val -- '+v.substring(0, i) + ',' + v.substring(i + 1))
+        return v.substring(0, i) + ',' + v.substring(i + 1);
+    }
+    // console.log('val '+v)
+    return v
+}
+export function countNumberSeperators(number) {
+    return (number.match(/\./g) || []).length
+}
+export function getDifferenceOfStrings(str1, str2){
+    // console.log(str1)
+    // console.log(str2)
+    const longString = str1.length > str2.length ? str1 : str2
+    const shortString = str1.length > str2.length ? str2 : str1
+    console.log('COMPARING: '+longString +' => '+shortString)
+    var l = 0;
+    var s = 0;
+    const outliers = []
+    while(l < longString.length && s < longString.length){
+        if ( longString[l] === shortString[s] ) {
+            l++
+            s++
+        }else{
+            outliers.push(l)
+            // console.log('pushing '+longString[l])
+            l++
+        }
+    }
+    return {value: outliers.map(i => longString[i]), index: outliers}
+
+}
+export function convertToLocalNumber(number){
+    return (number + '').replaceAll('.','').replaceAll(',','.')
+}
+export function validateNumberSeperator(number){
+   const dotIndexes =[...(number+'')].map((v, i) => ({value: v, index: i})).filter(c => c.value === '.')
+   .map(_=> ((number+'').length - _.index) % 4 === 0 ? true : false
+   ).indexOf(false) === -1 ? true : false
+    return dotIndexes
+}
+
+export function validateNumber(number){
+    const num = convertToLocalNumber(number)
+    return !(BigNumber(num).isNaN()) && !(number+'').includes(' ')
+}
+
 const fillTopWhites = (arr, index) => {
     if((arr[0] - (index + 1)) > 0) return [' ', ...arr]
     return [...arr]
@@ -64,13 +118,7 @@ export const calcIndexedCalendarDays = (date, labels) => {
  export function convertArrayToObject(array) {
     return array.reduce((prev, curr) => ({...prev, ...curr}))
 }
-export function convertToThousands(number) {
-    const value = BigNumber((number +'').replaceAll('.', '')).toFormat().replaceAll(',', '.');
-    return value
-}
-export function countNumberSeperators(number) {
-    return (number.match(/\./g) || []).length
-}
+
 export function colorizeBorder(ref, isValid=false, isInvalid=false, focused=false) {
     const red = '250, 82, 82'
     const green = '5, 166, 119'
@@ -89,3 +137,4 @@ export function colorizeBorder(ref, isValid=false, isInvalid=false, focused=fals
         ref.current.style.border = '1.5px solid rgb(' + borderColor + ')'
     }
 }
+
