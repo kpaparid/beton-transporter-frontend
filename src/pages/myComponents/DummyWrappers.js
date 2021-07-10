@@ -27,7 +27,7 @@ export const DummyWrapperRef = (props) => {
     <div data="wrapper" className={" p-0 border-0"} style={wrapperStyles}>
       <div
         className={
-          `d-flex flex-nowrap justify-content-center align-items-start
+          `d-flex flex-nowrap justify-content-center align-items-end
                         flex-fill fw-normal form-control whitedisabled shadow-none ` +
           outsideBorder
         }

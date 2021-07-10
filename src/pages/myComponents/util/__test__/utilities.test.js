@@ -1,4 +1,9 @@
-import { formatTime } from "../utilities";
+import {
+  convertToLocalNumber,
+  convertToThousands,
+  formatTime,
+  validateNumber,
+} from "../utilities";
 import { screen } from "@testing-library/react";
 
 // formatTime(
@@ -71,4 +76,14 @@ test("formatTime availableValues", () => {
   expect(
     formatTime("12:25", false, false, ":", false, false, true, [], [])
   ).toBe("00:00");
+});
+test("validateNumber", () => {
+  expect(validateNumber(20)).toBe(true);
+  expect(validateNumber("20")).toBe(true);
+  expect(validateNumber("20a")).toBe(false);
+});
+test("convertNumber", () => {
+  expect(convertToThousands(2000)).toBe("2.000");
+  expect(convertToThousands("2000")).toBe("2.000");
+  expect(convertToThousands("2d00")).toBe("2d00");
 });

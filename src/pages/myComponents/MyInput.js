@@ -5,6 +5,7 @@ import { HourSelectorDropdown } from "./HourSelector";
 import MyFormSelect from "./MyFormSelect";
 import { DateSelectorDropdown } from "./MyOwnCalendar";
 import { MyTextArea } from "./TextArea/MyTextArea";
+import { convertToThousands } from "./util/utilities";
 export const MyInput = (props) => {
   const {
     title,
@@ -54,7 +55,10 @@ export const MyInput = (props) => {
           isValid: false,
           isInvalid: false,
           measurement,
-          change: value,
+          change:
+            type === "number" || type === "distance"
+              ? convertToThousands(value)
+              : value,
           hidden: false,
           outsideBorder: "border-0",
           textWrap: true,

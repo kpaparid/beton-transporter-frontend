@@ -26,6 +26,9 @@ export function removeLeadingZeroes(text, number) {
 
 export function convertToThousands(number, decimal = 0) {
   // console.log("num " + number);
+  if (!validateNumber(number)) {
+    return number;
+  }
   const n = BigNumber((number + "").replace(/\./g, "").replace(/,/g, "."));
   const value = decimal === 0 ? n.toFormat() : n.toFormat(decimal);
   const i = value.indexOf(".");
