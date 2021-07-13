@@ -12,15 +12,19 @@ import { MyTextArea, TextAreaGroup } from "../TextArea/MyTextArea";
 
 import { faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { formatTime, addToTime, removeLeadingZeroes } from "../util/utilities";
+import {
+  formatTime,
+  addToTime,
+  removeLeadingZeroes,
+  calcInvalidation,
+  calcValidation,
+} from "../util/utilities";
 import { MyDropdown } from "../MyDropdown";
-import { calcInvalidation, calcValidation } from "../MyConsts";
 
 export const TimeSelectorDropdown = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
     const fallbackRef = useRef(null);
     const domRef = ref || fallbackRef;
-
     const ref1 = useRef(null);
     const ref2 = useRef(null);
     const refGroup = [ref1, ref2];
@@ -40,6 +44,8 @@ export const TimeSelectorDropdown = forwardRef(
       availableMinutes,
       availableHours,
       maxWidth,
+      dropdownMinWidth = !disabledHours && !disabledMinutes ? "100px" : "50px",
+      dropdownMaxWidth = !disabledHours && !disabledMinutes ? "250px" : "100px",
     } = children;
     const [isValid, setIsValid] = useState(false);
     const [isInvalid, setIsInvalid] = useState(false);
@@ -51,22 +57,17 @@ export const TimeSelectorDropdown = forwardRef(
         : disabledMinutes
         ? "hour"
         : "minute";
-    console.log(value);
-    console.log(validationType);
     function handleChangeDropdown(value) {
-      console.log("handleChangeDropdown: " + value);
       setText(value);
       onChange(value);
     }
     useEffect(() => {
-      console.log("sending inside onChange " + text);
       setIsValid(calcValidation(text, validationType, validation, isUnlimited));
       setIsInvalid(calcInvalidation(text, "time", invalidation, isUnlimited));
       onChange && onChange(text);
     }, [invalidation, isUnlimited, onChange, text, validation, validationType]);
 
     function handleChangeTextareaGroup(value, index) {
-      console.log(value, index);
       const newValue =
         index === 0
           ? value + delimiter + text.split(delimiter)[1]
@@ -75,7 +76,6 @@ export const TimeSelectorDropdown = forwardRef(
     }
     function handleChangeTextArea(value) {
       setText(value);
-      console.log("WTFFFFFFFFFFFFFFF");
     }
     const children2 = {
       ariaLabel,
@@ -120,12 +120,15 @@ export const TimeSelectorDropdown = forwardRef(
           ariaLabel,
           id,
           time: text,
+          // time: "23",
           isUnlimited: isUnlimited,
           disabledHours,
           disabledMinutes,
           disableReset,
           availableMinutes,
           availableHours,
+          minWidth: dropdownMinWidth,
+          maxWidth: dropdownMaxWidth,
           onChange: handleChangeDropdown,
         }}
       </TimeSelector>
@@ -148,8 +151,6 @@ export const TimeSelector = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
     const {
       id,
-      onFocus,
-      onBlur,
       delimiter = ":",
       time = "00" + delimiter + "00",
       onChange,
@@ -160,6 +161,7 @@ export const TimeSelector = forwardRef(
       hideDelimiter = false,
       disabledHours = false,
       disabledMinutes = false,
+      maxWidth,
       ariaLabel = "timeselector",
     } = children;
 
@@ -178,7 +180,6 @@ export const TimeSelector = forwardRef(
     const currentMinute = newTime.split(delimiter)[1];
 
     useEffect(() => {
-      console.log("new time: " + time);
       setNewTime(
         formatTime(
           time,
@@ -192,7 +193,6 @@ export const TimeSelector = forwardRef(
     }, [delimiter, disableReset, isUnlimited, time]);
     function handleButtonClicks(event) {
       const id = event.currentTarget.id;
-      console.log(newTime);
       switch (id) {
         case "Btn_hour_incr": {
           const t = addToTime(
@@ -262,8 +262,6 @@ export const TimeSelector = forwardRef(
     const fallbackRef2 = useRef(null);
     const domRef = ref || { fallbackRef1, fallbackRef2 };
     const data = {
-      onFocus,
-      onBlur,
       id,
       currentHour,
       currentMinute,
@@ -275,6 +273,7 @@ export const TimeSelector = forwardRef(
       disabledHours,
       disabledMinutes,
       ariaLabel,
+      maxWidth,
     };
     return <TimeSelectorComponent ref={domRef}>{data}</TimeSelectorComponent>;
   }
@@ -284,8 +283,6 @@ const TimeSelectorComponent = forwardRef(
     const {
       ariaLabel,
       id,
-      onFocus,
-      onBlur,
       currentHour,
       currentMinute,
       delimiter,
@@ -298,16 +295,14 @@ const TimeSelectorComponent = forwardRef(
       availableHours,
       hideDelimiter,
     } = children;
-    console.log(currentHour);
-    console.log(currentMinute);
 
     return (
       <Card
         border="light"
-        className="shadow-sm flex-fill"
-        style={{ maxWidth: maxWidth, minWidth: minWidth }}
+        className="shadow-sm flex-fill p-2"
+        // style={{ maxWidth: maxWidth, minWidth: minWidth }}
       >
-        <Card.Body className="px-2 py-0">
+        <Card.Body className="p-0">
           <div className="container p-0 d-flex">
             {!disabledHours && (
               <SelectorComponent ref={ref.ref1}>
@@ -320,11 +315,10 @@ const TimeSelectorComponent = forwardRef(
                   availableValues: availableHours,
                   onClick: handleButtonClicks,
                   disabled: true,
-                  onFocus: onFocus,
-                  onBlur: onBlur,
+                  minWidth: minWidth,
                   maxWidth: disabledMinutes
-                    ? maxWidth
-                    : parseInt(maxWidth) / 2 - 30 + "px",
+                    ? parseInt(maxWidth) - 25 + "px"
+                    : parseInt(maxWidth) / 2 - 25 + "px",
                 }}
               </SelectorComponent>
             )}
@@ -342,11 +336,10 @@ const TimeSelectorComponent = forwardRef(
                   availableValues: availableMinutes,
                   onClick: handleButtonClicks,
                   disabled: true,
-                  onFocus: onFocus,
-                  onBlur: onBlur,
+                  minWidth: minWidth,
                   maxWidth: disabledHours
-                    ? maxWidth
-                    : parseInt(maxWidth) / 2 - 30 + "px",
+                    ? parseInt(maxWidth) - 25 + "px"
+                    : parseInt(maxWidth) / 2 - 25 + "px",
                 }}
               </SelectorComponent>
             )}
@@ -360,7 +353,7 @@ function Delimiter(props) {
   if (props.value)
     return (
       <>
-        <div className="container-fluid px-2 py-0 justify-content-center d-flex">
+        <div className="flex-fill px-2 py-0 justify-content-center d-flex">
           <h5 className="text-center m-0  d-flex justify-content-center align-self-center">
             {props.value}
           </h5>
@@ -381,24 +374,20 @@ const SelectorComponent = forwardRef(
       onClick,
       availableValues,
       type,
-      minWidth = "30px",
+      minWidth = "50px",
       maxWidth = "60px",
-      onFocus,
-      onBlur,
     } = children;
     const children2 = {
       id: id + "_selectorComponent",
       type,
       value,
-      minWidth,
-      maxWidth,
+      minWidth: parseInt(minWidth) - 5 + "px",
+      maxWidth: parseInt(maxWidth) - 5 + "px",
       onChange,
       className: "text-end m-0 text-nowrap pe-1 ",
       availableValues,
-      onFocus,
-      onBlur,
       disabled,
-      maxRows: 1,
+      maxRows: 2,
     };
     return (
       <div
@@ -412,10 +401,10 @@ const SelectorComponent = forwardRef(
             data-testid="incr"
             aria-label={ariaLabel + "_incr"}
             id={"Btn_" + id + "_incr"}
-            style={{ width: "30px" }}
+            // style={{ width: "30px" }}
             onClick={onClick}
             onMouseDown={(e) => e.preventDefault()}
-            className="text-center  flex-fill text-nowrap noboxshadow p-0"
+            className="text-center  flex-fill text-nowrap noboxshadow p-0 w-100"
             variant="white"
           >
             <FontAwesomeIcon className="mt-2" icon={faSortUp}></FontAwesomeIcon>
@@ -432,10 +421,10 @@ const SelectorComponent = forwardRef(
             data-testid="decr"
             aria-label={ariaLabel + "_decr"}
             id={"Btn_" + id + "_decr"}
-            style={{ width: "30px" }}
+            // style={{ width: "30px" }}
             onClick={onClick}
             onMouseDown={(e) => e.preventDefault()}
-            className="text-center  flex-fill text-nowrap noboxshadow p-0"
+            className="text-center  flex-fill text-nowrap noboxshadow p-0 w-100"
             variant="white"
           >
             <FontAwesomeIcon

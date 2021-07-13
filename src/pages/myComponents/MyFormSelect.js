@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form } from "@themesberg/react-bootstrap";
 
-export default (props) => {
+export const MyFormSelect = (props) => {
   const {
     label,
     values,
@@ -9,11 +9,14 @@ export default (props) => {
     defaultValue,
     minWidth = "100px",
     maxWidth = "150px",
+    onChange,
   } = props;
   // console.log(values)
-
+  function handleChange(e) {
+    onChange(e.target.value);
+  }
   return (
-    <Form>
+    <Form onSubmit={(e) => e.preventDefault()}>
       <Form.Group>
         {label && <Form.Label>{label}</Form.Label>}
         <Form.Select
@@ -25,6 +28,7 @@ export default (props) => {
             textAlign: "center",
             textAlignLast: "center",
           }}
+          onChange={handleChange}
         >
           <option defaultValue>{defaultValue}</option>
           {values.map((value, index) => (

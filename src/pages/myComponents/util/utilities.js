@@ -2,52 +2,125 @@ import React, { useEffect, useState } from "react";
 
 import moment from "moment";
 import BigNumber from "bignumber.js";
+/* global BigInt */
+export const calcInvalidation = (
+  text,
+  type,
+  invalidation,
+  isUnlimited = false
+) => {
+  const delimiter = ":";
+  if (!invalidation || text === "" || type === "text") return false;
+  switch (type) {
+    case "number":
+      return validateNumber(text) &&
+        validateNumberSeparator(text) &&
+        (text.match(new RegExp(",", "g")) || []).length <= 1
+        ? false
+        : true;
+    case "date":
+      return !moment(text, "DD/MM/YYYY", true).isValid();
+    case "time":
+      return isUnlimited
+        ? isNaN(text.replace(delimiter, ""))
+        : !moment(text, "H" + delimiter + "m", true).isValid();
+    case "hour":
+      return isUnlimited
+        ? isNaN(text)
+        : !moment(
+            text + delimiter + "00",
+            "H" + delimiter + "mm",
+            true
+          ).isValid()
+        ? false
+        : true;
+    case "minute":
+      return isUnlimited
+        ? isNaN(text)
+        : !moment(
+            "00" + delimiter + text,
+            "HH" + delimiter + "m",
+            true
+          ).isValid()
+        ? false
+        : true;
+    default:
+      break;
+  }
+};
+export const calcValidation = (
+  text,
+  type,
+  validation = true,
+  isUnlimited = false
+) => {
+  const delimiter = ":";
+  if (!validation) return false;
+  if (text === "" || type === "text") return true;
+  switch (type) {
+    case "number":
+      return validateNumber(text) &&
+        validateNumberSeparator(text) &&
+        (text.match(new RegExp(",", "g")) || []).length <= 1
+        ? true
+        : false;
+    case "date":
+      return moment(text, "DD/MM/YYYY", true).isValid();
+    case "time":
+      return isUnlimited
+        ? !isNaN(text.replace(delimiter, ""))
+        : moment(text, "H" + delimiter + "m", true).isValid();
+    case "hour":
+      return isUnlimited
+        ? isNaN(text)
+        : !moment(
+            text + delimiter + "00",
+            "H" + delimiter + "mm",
+            true
+          ).isValid()
+        ? true
+        : false;
+    case "minute":
+      return isUnlimited
+        ? !isNaN(text)
+        : !moment(
+            "00" + delimiter + text,
+            "HH" + delimiter + "m",
+            true
+          ).isValid()
+        ? true
+        : false;
+    default:
+      break;
+  }
+};
+export function parseBigInt(value) {
+  if (!value || value === "") return "0";
+  const negative = value[0] === "-" ? true : false;
+  const clearedValue = negative
+    ? removeLeadingZeroes(value.replace(/[^\d-]/g, "").slice(-1))
+    : removeLeadingZeroes(value.replace(/[^\d]/g, ""));
+  const number = clearedValue.replace(/[^\d]/g, "");
 
-export function removeLeadingZeroes(text, number) {
-  console.log(text);
-  console.log(number);
-  // const right = text.substr(text.length - number, text.length);
-  const right =
-    BigNumber(text.substr(text.length - number, text.length)).c &&
-    BigNumber(text.substr(text.length - number, text.length)).c[0] !== 0
-      ? BigNumber(text.substr(text.length - number, text.length))
-      : "";
-
-  console.log("right: " + right);
-
-  const left =
-    BigNumber(text.substr(0, text.length - number)).c &&
-    BigNumber(text.substr(0, text.length - number)).c[0] !== 0
-      ? BigNumber(text.substr(0, text.length - number))
-      : "";
-  console.log("left: " + left);
-  return left + right;
+  return negative ? "-" + number : number;
 }
-
 export function convertToThousands(number, decimal = 0) {
-  // console.log("num " + number);
   if (!validateNumber(number)) {
     return number;
   }
   const n = BigNumber((number + "").replace(/\./g, "").replace(/,/g, "."));
   const value = decimal === 0 ? n.toFormat() : n.toFormat(decimal);
   const i = value.indexOf(".");
-  // console.log("comma: ", value);
   const v = value.replace(/,/g, ".");
   if (i !== -1) {
-    // console.log("val -- " + v.substring(0, i) + "," + v.substring(i + 1));
     return v.substring(0, i) + "," + v.substring(i + 1);
   } else return v;
 }
-export function countNumberSeparators(number) {
-  return (number.match(/\./g) || []).length;
-}
+export const countNumberSeparators = (number) =>
+  (number.match(/\./g) || []).length;
 export function getDifferenceOfStrings(str1, str2) {
-  // console.log(str1)
-  // console.log(str2)
   const longString = str1.length > str2.length ? str1 : str2;
   const shortString = str1.length > str2.length ? str2 : str1;
-  // console.log("COMPARING: " + longString + " => " + shortString);
   var l = 0;
   var s = 0;
   const outliers = [];
@@ -62,6 +135,7 @@ export function getDifferenceOfStrings(str1, str2) {
   }
   return { value: outliers.map((i) => longString[i]), index: outliers };
 }
+
 export function convertToLocalNumber(number) {
   return (number + "").replace(/\./g, "").replace(/,/g, ".");
 }
@@ -120,11 +194,10 @@ export const calcCalendarRows = (date, labels) => {
       : 5;
   return rows;
 };
-export const transpose = (arr, numRows = arr.length) => {
-  return new Array(numRows)
+export const transpose = (arr, numRows = arr.length) =>
+  new Array(numRows)
     .fill()
     .map((_, colIndex) => arr.map((row) => row[colIndex]));
-};
 export const calcIndexedCalendarDays = (date, labels) => {
   const numRows = calcCalendarRows(date, labels);
   const days = [...Array(moment(date, "MM/YYYY").daysInMonth()).keys()]
@@ -150,17 +223,14 @@ export const calcIndexedCalendarDays = (date, labels) => {
   );
   return transpose(filledIndexWithEmptyDays, numRows);
 };
-export function convertArrayToObject(array) {
-  return array.reduce((prev, curr) => ({ ...prev, ...curr }));
-}
-
+export const convertArrayToObject = (array) =>
+  array.reduce((prev, curr) => ({ ...prev, ...curr }));
 export function colorizeBorder(
   ref,
   isValid = false,
   isInvalid = false,
   focused = false
 ) {
-  // console.log("colorize");
   const red = "250, 82, 82";
   const green = "5, 166, 119";
   const grey = "46,54, 80";
@@ -174,10 +244,6 @@ export function colorizeBorder(
     ? darkblue
     : lightblue;
   const color = isInvalid ? red : isValid ? green : grey;
-  // console.log("color: ", borderColor);
-  // console.log("color: ", color);
-  // console.log("color: ", isValid);
-  // console.log("color: ", isInvalid);
   if (focused) {
     ref.current.style.boxShadow = "0 0 0 0.2rem rgb(" + color + ", 25%)";
     ref.current.style.border = "1.5px solid rgb(" + borderColor + ")";
@@ -186,13 +252,30 @@ export function colorizeBorder(
     ref.current.style.border = "1.5px solid rgb(" + borderColor + ")";
   }
 }
+export function addValueToTimeUnit(value, number) {
+  return removeLeadingZeroes(addValueToString(value, number), 2);
+}
+export function clearThousandsSeparators(number) {
+  return number.replace(/,/g, "").replace(/\./g, "");
+}
 export function addValueToString(value, number) {
-  const newValue = parseInt(value) + number + "";
-  return newValue.trim() === ""
-    ? "00"
-    : newValue.length === 1
-    ? "0" + newValue
-    : newValue;
+  const newValue = BigInt(BigInt(value) + BigInt(number)).toLocaleString();
+  return clearThousandsSeparators(newValue);
+}
+export function removeLeadingZeroes(text, number = 0) {
+  if (!text) return "";
+  const symbol = text[0] === "-" ? "-" : "";
+  const newText = clearThousandsSeparators(
+    BigInt(text).toLocaleString().replace("-", "")
+  );
+  const size = number < newText.length ? 0 : number - newText.length;
+  const arrayOfZeroes =
+    size === 0
+      ? ""
+      : symbol === "-"
+      ? new Array(size - 1).fill("0").join("")
+      : new Array(size).fill("0").join("");
+  return symbol + arrayOfZeroes + newText;
 }
 export function addToTime(
   time,
@@ -206,14 +289,15 @@ export function addToTime(
   availableMinutes = [...Array(60).keys()],
   availableHours = [...Array(24).keys()]
 ) {
-  console.log("unlim: " + isUnlimited + "   val: " + time);
   const splitValue = time.split(delimiter);
   if (splitValue.length > 1) {
     const hour =
-      type === "hour" ? addValueToString(splitValue[0], amount) : splitValue[0];
+      type === "hour"
+        ? addValueToTimeUnit(splitValue[0], amount)
+        : splitValue[0];
     const minute =
       type === "minute"
-        ? addValueToString(splitValue[1], amount)
+        ? addValueToTimeUnit(splitValue[1], amount)
         : splitValue[1];
     const newTime = hour + delimiter + minute;
     return formatTime(
@@ -249,7 +333,6 @@ export function formatTime(
         : disableReset
         ? "00"
         : availableValues[0];
-    // console.log("value:", value);
     return isUnlimited
       ? parseInt(hour) <= 0
         ? "00"
@@ -267,14 +350,6 @@ export function formatTime(
       ? "0" + hour
       : hour;
   }
-  // console.log(
-  //   "formatting Time: " +
-  //     time +
-  //     "  " +
-  //     disabledHours +
-  //     disabledMinutes +
-  //     isUnlimited
-  // );
   const domTime = time.includes(delimiter)
     ? time
     : disabledHours
@@ -283,22 +358,19 @@ export function formatTime(
     ? time + delimiter + "00"
     : time;
 
-  // console.log(domTime);
   const formattedHour = disabledHours
     ? "00"
-    : formUnit(parseInt(domTime.split(delimiter)[0]) + "", availableHours);
+    : formUnit(parseBigInt(domTime.split(delimiter)[0]) + "", availableHours);
   const formattedMinute = disabledMinutes
     ? "00"
-    : formUnit(parseInt(domTime.split(delimiter)[1]) + "", availableMinutes);
+    : formUnit(parseBigInt(domTime.split(delimiter)[1]) + "", availableMinutes);
 
   return formattedHour + delimiter + formattedMinute;
 }
 export function formatTimeInput(value, digitsSeparator) {
-  console.log("formatting: " + value);
   return value;
 }
 export function formatDateInput(value, digitsSeparator) {
-  console.clear();
   var count = (value.match(new RegExp(digitsSeparator, "g")) || []).length;
   var newValue = value;
   if (count === 1 && value.indexOf(digitsSeparator) === 2) newValue = value;
@@ -430,10 +502,8 @@ export function keyDownController(event) {
   var newValue = value;
   if (event.ctrlKey) {
     if ((key === "x" || key === "X") && cursorStart !== cursorEnd) {
-      console.log("Ctrl Cut");
       newValue = value.substr(0, cursorStart) + value.substr(cursorEnd);
     } else if (key === "Delete") {
-      console.log("Ctrl Del");
       const indexOfSpace = value.substr(cursorStart).indexOf(" ");
       newValue =
         indexOfSpace === -1
@@ -442,7 +512,6 @@ export function keyDownController(event) {
             value.substr(indexOfSpace + cursorStart + 1);
       cursor = indexOfSpace === -1 ? newValue.length : cursorStart;
     } else if (key === "Backspace") {
-      console.log("Ctrl Backspace");
       const indexOfSpace = value.substr(0, cursorStart).lastIndexOf(" ");
       newValue =
         indexOfSpace === -1
@@ -451,22 +520,18 @@ export function keyDownController(event) {
       cursor = indexOfSpace === -1 ? 0 : cursorStart;
     }
   } else if (key === " ") {
-    console.log("Space");
     newValue =
       value.substr(0, cursorStart) + " " + value.substr(cursorEnd) === " "
         ? ""
         : value.substr(0, cursorStart) + " " + value.substr(cursorEnd);
-    console.log("NEW VALUE: " + newValue);
     cursor = cursorStart + 1;
   } else if (key === "Backspace") {
-    console.log("deleting from: " + cursorStart + "    to: " + cursorEnd);
     newValue =
       cursorStart === cursorEnd
         ? value.substr(0, cursorStart - 1) + value.substr(cursorEnd)
         : value.substr(0, cursorStart) + value.substr(cursorEnd);
     cursor = cursorStart === cursorEnd ? cursorStart - 1 : cursorStart;
   } else if (key === "Delete") {
-    console.log("deleting from: " + cursorStart + "    to: " + cursorEnd);
     newValue =
       cursorStart === cursorEnd
         ? value.substr(0, cursorStart) + value.substr(cursorEnd + 1)
@@ -490,7 +555,6 @@ export function keyPasteController(event) {
   const value = event.target.value;
   const cursorStart = event.target.selectionStart;
   const cursorEnd = event.target.selectionEnd;
-  console.log("Paste");
   const text = event.clipboardData ? event.clipboardData.getData("Text") : "";
   const newValue =
     value.substr(0, cursorStart) + text + value.substr(cursorEnd);

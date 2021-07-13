@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  useCallback,
+} from "react";
 import { Form } from "@themesberg/react-bootstrap";
 import TextareaAutosize from "react-textarea-autosize";
+import { imgValid, imgInvalid } from "../MyConsts";
+import AutosizeInput from "react-input-autosize";
 import {
   calcInvalidation,
   calcValidation,
-  imgValid,
-  imgInvalid,
-} from "../MyConsts";
-import AutosizeInput from "react-input-autosize";
-import {
   countNumberSeparators,
   colorizeBorder,
   getDifferenceOfStrings,
@@ -62,7 +65,6 @@ export const MyTextArea = forwardRef(
     const domRef = ref || fallbackRef;
     const [change, setChange] = useState(value);
     function handleOnChange(text) {
-      console.log("Sending: " + text);
       onChange && onChange(text);
     }
     const children2 = {
@@ -97,7 +99,6 @@ export const MyTextArea = forwardRef(
       isValid,
       isInvalid,
     };
-    // console.log(ref);
     useEffect(() => {
       switch (type) {
         case "number": {
@@ -156,6 +157,8 @@ const TextAreaComponent = forwardRef(
     const inputFormRef = useRef(null);
     const dummyTextRef = useRef(null);
     const dummyWrapperRef = useRef(null);
+    const measurementRef = useRef(null);
+    const invalidRef = useRef(null);
     const [focused, setFocused] = useState(focus);
     const [overflow, setOverflow] = useState("hidden");
     // const isInvalid = calcInvalidation(change + "", type, invalidation);
@@ -178,19 +181,18 @@ const TextAreaComponent = forwardRef(
     const [textWidth, setTextWidth] = useState(minWidth);
     const [width, setWidth] = useState(minWidth);
     const dummyTextWidth =
-      dummyTextRef.current && getComputedStyle(dummyTextRef.current).width;
+      dummyTextRef.current &&
+      getComputedStyle(dummyTextRef.current).getPropertyValue("width");
     const data = {
       minWidth,
       maxWidth,
       isValid,
       isInvalid,
-      dummyWrapperRef,
       imgInvalid,
       imgValid,
-      dummyTextRef,
       measurement,
       change,
-      outsideBorder,
+      outsideBorder: outsideBorder + "border-2",
       measurementClassName,
     };
     const handleFocus = () => {
@@ -252,7 +254,9 @@ const TextAreaComponent = forwardRef(
           : 1;
       currentRows > maxRows ? setOverflow("auto") : setOverflow("hidden");
       dummyWrapperRef.current &&
-        setWidth(getComputedStyle(dummyWrapperRef.current).width);
+        setWidth(
+          getComputedStyle(dummyWrapperRef.current).getPropertyValue("width")
+        );
       if (textAreaMode) {
         inputTextAreaRef.current.focus({ preventScroll: true });
         inputTextAreaRef.current.selectionStart = cursorPosition;
@@ -276,15 +280,40 @@ const TextAreaComponent = forwardRef(
       textAreaMode,
       textWidth,
     ]);
-
     useEffect(() => {
-      if (Math.abs(parseInt(maxWidth) - parseInt(width)) <= 2) {
-        setTextAreaMode(true);
+      console.log("mesa");
+      const paddingWidth = 24 + 4;
+      const scrollWidth =
+        dummyTextRef.current && dummyTextRef.current.scrollWidth;
+      const measurementWidth = measurementRef.current
+        ? parseInt(
+            getComputedStyle(measurementRef.current).getPropertyValue("width")
+          )
+        : 0;
+      const invalidWidth = invalidRef.current
+        ? parseInt(
+            getComputedStyle(invalidRef.current).getPropertyValue("width")
+          )
+        : 0;
+      const realWidth =
+        paddingWidth + scrollWidth + measurementWidth + invalidWidth;
+      console.log(dummyTextRef.current);
+      console.log(paddingWidth + "\t" + scrollWidth + "\t" + measurementWidth);
+      console.log(maxWidth);
+      measurementRef.current && console.log(realWidth);
+      if (realWidth > parseInt(maxWidth)) {
+        console.log("textarea toggle");
+        // if (Math.abs(parseInt(maxWidth) - parseInt(width)) <= 0) {
+        // getComputedStyle(dummyTextRef.current).getPropertyValue("width");
+        !textAreaMode && setTextAreaMode(true);
       } else {
-        setTextWidth(getComputedStyle(dummyTextRef.current).width);
-        setTextAreaMode(false);
+        setTextWidth(
+          getComputedStyle(dummyTextRef.current).getPropertyValue("width")
+        );
+        textAreaMode && setTextAreaMode(false);
       }
-    }, [dummyTextWidth, maxWidth, width]);
+      // }, [dummyTextWidth, maxWidth, width]);
+    });
     useEffect(() => {
       colorizeBorder(divWrapperRef, isValid, isInvalid, focused);
     }, [isValid, isInvalid, focused]);
@@ -295,7 +324,7 @@ const TextAreaComponent = forwardRef(
           !disableFocus && handleFocus(e);
           onFocus && onFocus();
         }
-        // setCursorPosition(change.length);
+        setCursorPosition(change.length);
 
         if (textAreaMode) {
           inputTextAreaRef.current.focus({ preventScroll: true });
@@ -313,8 +342,10 @@ const TextAreaComponent = forwardRef(
       }
     }
     return (
-      <div className="d-block w-100">
-        <DummyWrapperRef data={data}></DummyWrapperRef>
+      <div className="d-block">
+        <DummyWrapperRef ref={{ dummyWrapperRef, dummyTextRef }}>
+          {{ ...data }}
+        </DummyWrapperRef>
         <Form
           onSubmit={(e) => {
             e.preventDefault();
@@ -354,6 +385,7 @@ const TextAreaComponent = forwardRef(
               >
                 {(isInvalid || isValid) && (
                   <div
+                    ref={invalidRef}
                     style={{
                       backgroundImage: isInvalid
                         ? imgInvalid
@@ -388,7 +420,7 @@ const TextAreaComponent = forwardRef(
                     required
                     placeholder={newPlaceholder}
                     disabled={disabled}
-                    className={`d-flex flex-fill whitedisabled  form-control border border-0 shadow-none py-0 px-1 ${textareaClassName}`}
+                    className={`d-flex flex-fill whitedisabled  form-control border border-0 shadow-none p-0 ${textareaClassName}`}
                     readOnly={readOnly}
                     onHeightChange={(height, metaData) =>
                       handleHeightChange(height, metaData.rowHeight)
@@ -409,8 +441,8 @@ const TextAreaComponent = forwardRef(
                   <div
                     ref={inputAutoSizeRef}
                     style={{
-                      width: "calc(5px + " + textWidth + ")",
-                      // width: textWidth,
+                      // width: parseFloat(textWidth) + 5 + "px",
+                      width: "100%",
                     }}
                   >
                     <AutosizeInput
@@ -430,10 +462,10 @@ const TextAreaComponent = forwardRef(
                       placeholder={newPlaceholder}
                       disabled={disabled}
                       autoComplete="off"
-                      className={`d-flex whitedisabled  border border-0 shadow-none py-0 px-0 `}
+                      className={`d-flex whitedisabled  border border-0 shadow-none p-0 `}
                       style={{
                         textAlign: measurement === "" ? "center" : "center",
-                        width: "98%",
+                        width: "100%",
                       }}
                       readOnly={readOnly}
                       onFocus={(e) => {
@@ -459,6 +491,7 @@ const TextAreaComponent = forwardRef(
                 {measurement !== "" && (
                   <>
                     <div
+                      ref={measurementRef}
                       className={`d-flex align-items-end fw-normal text-nowrap whitedisabled text-start border h-100 border-0 shadow-none ${measurementClassName}`}
                       value={measurement}
                       readOnly
@@ -512,11 +545,9 @@ export const TextAreaGroup = (props) => {
     setFocused(true);
   };
   const handleBlur = (e) => {
-    console.log("blur");
     setFocused(false);
   };
   useEffect(() => {
-    console.log("colorizing");
     colorizeBorder(divWrapperRef, isValid, isInvalid, focused);
   }, [focused, isInvalid, isValid]);
 

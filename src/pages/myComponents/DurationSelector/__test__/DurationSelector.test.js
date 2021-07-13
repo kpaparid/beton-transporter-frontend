@@ -25,7 +25,6 @@ function MyOuterComponent(props) {
   } = props;
   const [newValue, setNewValue] = useState(value);
   function handleOnChange(value) {
-    console.log("reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee " + value);
     setNewValue(value);
   }
   return (

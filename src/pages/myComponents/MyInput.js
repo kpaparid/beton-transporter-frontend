@@ -2,17 +2,17 @@ import react, { useState, useEffect, useRef } from "react";
 import { DummyWrapperRef } from "./DummyWrappers";
 import { TimeSelectorDropdown } from "./DurationSelector/DurationSelector";
 import { HourSelectorDropdown } from "./HourSelector";
-import MyFormSelect from "./MyFormSelect";
+import { MyFormSelect } from "./MyFormSelect";
 import { DateSelectorDropdown } from "./MyOwnCalendar";
 import { MyTextArea } from "./TextArea/MyTextArea";
-import { convertToThousands } from "./util/utilities";
+import { calcValidation, convertToThousands } from "./util/utilities";
 export const MyInput = (props) => {
   const {
     title,
     onChange,
     type,
     value,
-    enabled,
+    // enabled,
     rows = 1,
     minWidth = "20px",
     maxWidth = "150px",
@@ -24,32 +24,25 @@ export const MyInput = (props) => {
     measurement = "",
     id = "inputModal-",
   } = props;
+  const enabled = true;
   const ref = useRef(null);
   const [newValue, setNewValue] = useState(value);
-  function handleOnChange(change) {
-    // console.log('ready to update db')
-    console.log("value for DB: " + newValue + " ===> " + change);
-    setNewValue(change);
+  const [valid, setValid] = useState(false);
+  function handleOnChange(value) {
+    // setValid(calcValidation(value));
+    // setNewValue(value);
+    if (value !== newValue) {
+      console.log("value for DB: " + newValue + " ===> " + value);
+      setNewValue(value);
+      // onChange(value);
+    }
+    // onChange(value);
   }
-  // const data = {
-  //   minWidth,
-  //   maxWidth,
-  //   isValid,
-  //   isInvalid,
-  //   dummyWrapperRef,
-  //   imgInvalid,
-  //   imgValid,
-  //   dummyTextRef,
-  //   measurement,
-  //   change,
-  //   outsideBorder,
-  //   measurementClassName,
-  // };
 
   if (!enabled) {
     return (
-      <DummyWrapperRef
-        data={{
+      <DummyWrapperRef ref={ref}>
+        {{
           minWidth,
           maxWidth,
           isValid: false,
@@ -63,7 +56,7 @@ export const MyInput = (props) => {
           outsideBorder: "border-0",
           textWrap: true,
         }}
-      ></DummyWrapperRef>
+      </DummyWrapperRef>
     );
   } else if (type === "text") {
     return (
@@ -161,6 +154,8 @@ export const MyInput = (props) => {
           onChange: handleOnChange,
           isUnlimited: true,
           disabledMinutes: true,
+          dropdownMinWidth: "10px",
+          dropdownMaxWidth: "250px",
         }}
       </TimeSelectorDropdown>
     );
