@@ -21,6 +21,7 @@ import {
   keyDownController,
   formatValueAndSetCursor,
   keyPasteController,
+  keyPreventDefault,
 } from "../util/utilities";
 import { DummyWrapperRef } from "../DummyWrappers";
 
@@ -176,13 +177,10 @@ const TextAreaComponent = forwardRef(
         ? ""
         : "";
     const [rowHeight, setRowHeight] = useState(21);
-    const [cursorPosition, setCursorPosition] = useState(change.length);
+    const [cursorPosition, setCursorPosition] = useState();
     const [textAreaMode, setTextAreaMode] = useState();
     const [textWidth, setTextWidth] = useState(minWidth);
     const [width, setWidth] = useState(minWidth);
-    const dummyTextWidth =
-      dummyTextRef.current &&
-      getComputedStyle(dummyTextRef.current).getPropertyValue("width");
     const data = {
       minWidth,
       maxWidth,
@@ -192,22 +190,23 @@ const TextAreaComponent = forwardRef(
       imgValid,
       measurement,
       change,
-      outsideBorder: outsideBorder + "border-2",
+      outsideBorder: outsideBorder + "border-4",
       measurementClassName,
     };
-    const handleFocus = () => {
+    const handleFocus = (e) => {
       if (!disableFocus) {
         setFocused(true);
       }
       onFocus && onFocus(id);
     };
-    const handleBlur = () => {
+    const handleBlur = (e) => {
       if (!disableFocus) {
         setFocused(false);
       }
       onBlur && onBlur(id);
     };
     function handleKeyDown(event) {
+      keyPreventDefault(event);
       const controller = keyDownController(event);
       if (controller) {
         const { value, cursor } = formatValueAndSetCursor(
@@ -246,7 +245,6 @@ const TextAreaComponent = forwardRef(
     function handleHeightChange(_, rHeight) {
       rowHeight !== rHeight && setRowHeight(rHeight);
     }
-
     useEffect(() => {
       const currentRows =
         textAreaMode && inputTextAreaRef.current
@@ -259,16 +257,10 @@ const TextAreaComponent = forwardRef(
         );
       if (textAreaMode) {
         inputTextAreaRef.current.focus({ preventScroll: true });
-        inputTextAreaRef.current.selectionStart = cursorPosition;
-        inputTextAreaRef.current.selectionEnd = cursorPosition;
       } else {
         inputAutoSizeRef.current.children[0].firstChild.focus({
           preventScroll: true,
         });
-        inputAutoSizeRef.current.children[0].firstChild.selectionStart =
-          cursorPosition;
-        inputAutoSizeRef.current.children[0].firstChild.selectionEnd =
-          cursorPosition;
       }
     }, [
       change,
@@ -281,7 +273,6 @@ const TextAreaComponent = forwardRef(
       textWidth,
     ]);
     useEffect(() => {
-      console.log("mesa");
       const paddingWidth = 24 + 4;
       const scrollWidth =
         dummyTextRef.current && dummyTextRef.current.scrollWidth;
@@ -297,14 +288,7 @@ const TextAreaComponent = forwardRef(
         : 0;
       const realWidth =
         paddingWidth + scrollWidth + measurementWidth + invalidWidth;
-      console.log(dummyTextRef.current);
-      console.log(paddingWidth + "\t" + scrollWidth + "\t" + measurementWidth);
-      console.log(maxWidth);
-      measurementRef.current && console.log(realWidth);
       if (realWidth > parseInt(maxWidth)) {
-        console.log("textarea toggle");
-        // if (Math.abs(parseInt(maxWidth) - parseInt(width)) <= 0) {
-        // getComputedStyle(dummyTextRef.current).getPropertyValue("width");
         !textAreaMode && setTextAreaMode(true);
       } else {
         setTextWidth(
@@ -324,23 +308,30 @@ const TextAreaComponent = forwardRef(
           !disableFocus && handleFocus(e);
           onFocus && onFocus();
         }
-        setCursorPosition(change.length);
-
         if (textAreaMode) {
+          setCursorPosition(change.length);
           inputTextAreaRef.current.focus({ preventScroll: true });
-          inputTextAreaRef.current.selectionStart = cursorPosition;
-          inputTextAreaRef.current.selectionEnd = cursorPosition;
         } else {
           inputAutoSizeRef.current.children[0].firstChild.focus({
             preventScroll: true,
           });
+        }
+      }
+    }
+    useEffect(() => {
+      if (cursorPosition) {
+        if (inputAutoSizeRef.current.children[0]) {
           inputAutoSizeRef.current.children[0].firstChild.selectionStart =
             cursorPosition;
           inputAutoSizeRef.current.children[0].firstChild.selectionEnd =
             cursorPosition;
+        } else if (inputTextAreaRef.current) {
+          inputTextAreaRef.current.selectionStart = cursorPosition;
+          inputTextAreaRef.current.selectionEnd = cursorPosition;
         }
       }
-    }
+    });
+
     return (
       <div className="d-block">
         <DummyWrapperRef ref={{ dummyWrapperRef, dummyTextRef }}>
@@ -433,7 +424,8 @@ const TextAreaComponent = forwardRef(
                       resize: "none",
                       textAlign: measurement === "" ? "center" : "end",
                       overflow: overflow,
-                      width: textWidth,
+                      // width: textWidth,
+                      width: "100%",
                     }}
                   />
                 )}
@@ -462,7 +454,7 @@ const TextAreaComponent = forwardRef(
                       placeholder={newPlaceholder}
                       disabled={disabled}
                       autoComplete="off"
-                      className={`d-flex whitedisabled  border border-0 shadow-none p-0 `}
+                      className={`d-flex whitedisabled  border border-0 shadow-none rounded-0 p-0 `}
                       style={{
                         textAlign: measurement === "" ? "center" : "center",
                         width: "100%",
@@ -492,7 +484,7 @@ const TextAreaComponent = forwardRef(
                   <>
                     <div
                       ref={measurementRef}
-                      className={`d-flex align-items-end fw-normal text-nowrap whitedisabled text-start border h-100 border-0 shadow-none ${measurementClassName}`}
+                      className={`d-flex align-items-end fw-normal text-nowrap whitedisabled text-start rounded-0 border h-100 border-0 shadow-none ${measurementClassName}`}
                       value={measurement}
                       readOnly
                       style={{

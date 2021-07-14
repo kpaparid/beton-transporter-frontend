@@ -560,3 +560,8 @@ export function keyPasteController(event) {
     value.substr(0, cursorStart) + text + value.substr(cursorEnd);
   return { value: newValue, cursor: cursorStart };
 }
+export function keyPreventDefault(event) {
+  if (!event.ctrlKey && event.key.length === 1) {
+    event.preventDefault();
+  }
+}

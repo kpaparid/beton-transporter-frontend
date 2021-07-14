@@ -58,8 +58,10 @@ export const TimeSelectorDropdown = forwardRef(
         ? "hour"
         : "minute";
     function handleChangeDropdown(value) {
-      setText(value);
-      onChange(value);
+      if (text !== value) {
+        setText(value);
+        onChange(value);
+      }
     }
     useEffect(() => {
       setIsValid(calcValidation(text, validationType, validation, isUnlimited));
@@ -72,10 +74,10 @@ export const TimeSelectorDropdown = forwardRef(
         index === 0
           ? value + delimiter + text.split(delimiter)[1]
           : text.split(delimiter)[0] + delimiter + value;
-      setText(newValue);
+      text !== newValue && setText(newValue);
     }
     function handleChangeTextArea(value) {
-      setText(value);
+      text !== value && setText(value);
     }
     const children2 = {
       ariaLabel,
