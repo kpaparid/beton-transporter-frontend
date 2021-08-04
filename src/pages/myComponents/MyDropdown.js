@@ -1,5 +1,5 @@
 import { Dropdown } from "@themesberg/react-bootstrap";
-import React, { useState, forwardRef } from "react";
+import React, { useState, forwardRef, useEffect } from "react";
 import { Portal } from "react-portal";
 
 const CustomToggle = forwardRef(({ children, onClick }, ref) => {
@@ -34,18 +34,20 @@ const CustomMenu = forwardRef(
 );
 
 export const MyDropdown = (props) => {
+  const { disabled = false, ariaLabel, MenuComponent, ToggleComponent } = props;
   const [show, setShow] = useState(false);
+
   return (
     <Dropdown
       data-testid="dropdown"
-      aria-label={props.ariaLabel + "_dropdown"}
-      show={show}
+      aria-label={ariaLabel + "_dropdown"}
+      show={!disabled && show}
       onToggle={(_t, _e, metadata) => {
         metadata.source ? setShow(true) : setShow(false);
       }}
     >
       <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-        {props.ToggleComponent}
+        {ToggleComponent}
       </Dropdown.Toggle>
       <Portal>
         <Dropdown.Menu
@@ -54,7 +56,7 @@ export const MyDropdown = (props) => {
           as={CustomMenu}
         >
           <Dropdown.Item className="p-0" eventKey="1">
-            {props.MenuComponent}
+            {MenuComponent}
           </Dropdown.Item>
         </Dropdown.Menu>
       </Portal>

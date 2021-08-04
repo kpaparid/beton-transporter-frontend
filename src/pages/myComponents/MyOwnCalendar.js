@@ -11,9 +11,10 @@ import {
 } from "./util/utilities";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MyTextArea, TextAreaGroup } from "./TextArea/MyTextArea";
 import { Portal } from "react-portal";
 import { MyDropdown } from "./MyDropdown";
+import MyTextArea from "./TextArea/MyTextArea";
+import TextareaAutosize from "react-textarea-autosize";
 
 export const MonthSelectorDropdown = (props) => {
   const { value } = props;
@@ -33,18 +34,28 @@ export const MonthSelectorDropdown = (props) => {
     </>
   );
 };
-export const DateSelectorDropdown = (props) => {
-  const { value, id = "dateSelector", onChange, maxWidth, minWidth } = props;
+export const DateSelectorDropdown = React.memo((props) => {
+  const {
+    value,
+    id = "dateSelector",
+    onChange,
+    maxWidth,
+    minWidth,
+    disabled = false,
+  } = props;
+  // console.log(props);
   const [text, setText] = useState(value);
   const [focused, setFocused] = useState(false);
   function handleChange(value) {
     console.log("ON CHANGE DROPDOWN setText: " + value);
     setText(value);
   }
+  function handleInputChange(e) {
+    setText(e.target.value);
+  }
   useEffect(() => {
-    console.log("ON CHANGE DROPDOWN: " + text);
-    onChange(text);
-  }, [onChange, text]);
+    onChange && onChange(text);
+  }, [text]);
   const children = {
     id: id,
     type: "date",
@@ -52,15 +63,24 @@ export const DateSelectorDropdown = (props) => {
     invalidation: true,
     onChange: handleChange,
     focus: focused,
-    // errorMessage={"Invalid Date (DD/MM/YYYY)"}
     minWidth,
     maxWidth,
     digitsSeperator: "/",
     seperatorAt: [2, 4],
+    disabled,
   };
   const ref = useRef(null);
   const data = {
-    ToggleComponent: <MyTextArea ref={ref}>{children}</MyTextArea>,
+    disabled,
+    // ToggleComponent: <MyTextArea   ref={ref}>{children}</MyTextArea>,
+    // ToggleComponent: <input onChange={handleInputChange} value={text}></input>,
+    ToggleComponent: (
+      <TextareaAutosize
+        value={text}
+        onChange={handleInputChange}
+        // onBlur={onBlur}
+      />
+    ),
     MenuComponent: (
       <DateSelector
         id={id}
@@ -80,35 +100,9 @@ export const DateSelectorDropdown = (props) => {
       <div className="d-block w-100">
         <MyDropdown {...data}></MyDropdown>
       </div>
-
-      {/* <div className="d-block w-100">
-        <Dropdown>
-          <Dropdown.Toggle
-            split
-            variant="white"
-            className="p-0 border-0 shadow-none"
-            onFocus={() => setFocused(true)}
-            onBlur={(e) => setFocused(false)}
-          >
-            <MyTextArea ref={ref}>{children}</MyTextArea>
-          </Dropdown.Toggle>
-          <Portal>
-            <Dropdown.Menu className="p-0">
-              <DateSelector
-                id={id}
-                singleDate
-                onChange={handleChange}
-                value={text}
-                maxWidth={maxWidth}
-                minWidth={minWidth}
-              ></DateSelector>
-            </Dropdown.Menu>
-          </Portal>
-        </Dropdown>
-      </div> */}
     </>
   );
-};
+});
 
 export const MonthSelector = (props) => {
   const { value, date } = props;

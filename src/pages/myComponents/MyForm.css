@@ -1,0 +1,162 @@
+.wrapper {
+  height: 100%;
+  font-size: 0.875rem;
+  color: black !important;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  box-shadow: none;
+  border: solid 1.5px transparent;
+  transition: border 0.2s ease;
+}
+.wrapper:hover {
+  /* background-color: white; */
+}
+.text-span {
+  overflow: hidden;
+  text-overflow: inherit;
+
+  padding-right: 4px;
+  padding-left: 4px;
+}
+.wrapper:hover .text-span {
+  overflow: auto;
+  text-overflow: inherit;
+}
+.wrapper:focus-within {
+  background-color: white;
+  box-shadow: 0 0 0 0.2rem rgb(46, 54, 80, 50%);
+}
+.wrapper select {
+  height: 25px;
+  color: black;
+  border: none;
+  width: 100%;
+  background-color: transparent;
+  padding-right: 0rem !important;
+  padding-left: 0rem !important;
+}
+.wrapper select:focus {
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+.wrapper select:focus-visible {
+  outline: none;
+}
+.wrapper .dummy {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  background-repeat: no-repeat;
+  background-size: calc(0.75em + 1.55rem) calc(0.55em + 0.8rem);
+  background-position: left;
+
+  min-height: 25px;
+  visibility: visible;
+  height: auto;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.wrapper.wrapper-editable.selection .dummy {
+  padding-right: 1.8rem;
+}
+.wrapper.invalid .dummy {
+  padding-left: 2rem;
+  padding-right: 1rem;
+}
+.wrapper.valid .dummy {
+  padding-left: 2rem;
+  padding-right: 1rem;
+}
+.wrapper.wrapper-editable {
+  border: 1.5px solid rgb(46, 54, 80, 100%);
+}
+.wrapper.wrapper-editable.valid {
+  transition: border 1s;
+  border: 1.5px solid rgb(5, 166, 119, 100%);
+}
+.wrapper.wrapper-editable.invalid {
+  transition: border 1s;
+  border: 1.5px solid rgb(250, 82, 82, 100%);
+}
+.wrapper.wrapper-editable.valid .dummy {
+  padding-left: 2rem;
+}
+.wrapper.wrapper-editable.invalid .dummy {
+  padding-left: 2rem;
+}
+.wrapper.wrapper-editable.valid:focus-within {
+  border: 1.5px solid rgb(5, 166, 119, 50%);
+  box-shadow: 0 0 0 0.2rem rgb(5, 166, 119, 50%);
+}
+.wrapper.wrapper-editable.invalid:focus-within {
+  border: 1.5px solid rgb(250, 82, 82, 50%);
+  box-shadow: 0 0 0 0.2rem rgb(250, 82, 82, 50%);
+}
+
+.wrapper.wrapper-editable .dummy {
+  min-height: 0;
+  visibility: hidden;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.wrapper.wrapper-editable .dummy.dummy-visible {
+  min-height: 25px;
+  visibility: visible;
+  height: auto;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background-image: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+input,
+textarea {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  resize: none;
+  vertical-align: bottom;
+  padding-right: 0.25rem;
+  padding-left: 0.25rem;
+  overflow: hidden;
+}
+textarea:focus-visible {
+  outline: 0;
+}
+
+input,
+textarea :focus {
+  outline: none;
+}
+.text-container {
+  /* width: fit-content; */
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.measurement {
+  visibility: none;
+  transition: all 0.5s ease;
+  visibility: visible;
+}
+.wrapper.wrapper-editable .finalwrappi {
+  height: inherit;
+}
+.wrapper .finalwrappi {
+  height: 0px;
+}
+.wrapper .finalwrappi textarea {
+  visibility: hidden;
+}
+.wrapper.wrapper-editable .finalwrappi textarea {
+  visibility: visible;
+}

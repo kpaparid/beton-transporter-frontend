@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Container, Modal } from "@themesberg/react-bootstrap";
 import MyTextArea from "./TextArea/MyTextArea";
 import MyFormSelect from "./MyFormSelect";
-import { MyInput } from "./MyInput";
+import MyInput from "./MyInput";
 export const MyModal = (props) => {
   const {
     Header = () => <></>,
@@ -10,7 +10,7 @@ export const MyModal = (props) => {
     Footer = () => <></>,
   } = props;
   const { show, onClose, title } = props;
-  console.log(!isNaN("1a"));
+  // console.log(!isNaN("1a"));
 
   return (
     <>

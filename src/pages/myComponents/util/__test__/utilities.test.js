@@ -11,67 +11,105 @@ import {
   removeLeadingZeroes,
   validateNumber,
 } from "../utilities";
+test("handleChangeTextArea", () => {
+  const convertToTime = (value) =>
+    formatTime({
+      time: value,
+      isUnlimited: true,
+      // disableInitialization,
+    });
+  function handleChangeTextArea(value, text) {
+    const vl = formatTime({
+      time: value,
+      disableInitialization: true,
+    });
+    console.log(vl);
+    const valid = calcValidation(vl, "time");
+    console.log(valid);
+    return !valid ? vl : text !== convertToTime(value) && convertToTime(value);
+  }
+
+  expect(handleChangeTextArea("15d")).toBe("15d");
+  expect(handleChangeTextArea("15d:23")).toBe("15d:23");
+  expect(handleChangeTextArea(":15d")).toBe(":15d");
+});
+
 test("formatTime default", () => {
-  expect(formatTime("15:23")).toBe("15:23");
+  expect(formatTime({ time: "15:23" })).toBe("15:23");
+});
+test("formatTime disabledInitialization", () => {
+  expect(formatTime({ time: "15:2d3", disableInitialization: true })).toBe(
+    "15:2d3"
+  );
+  expect(formatTime({ time: "152d3", disableInitialization: true })).toBe(
+    "152d3"
+  );
+  expect(
+    formatTime({
+      time: "152d3",
+      disableInitialization: true,
+      disabledHours: true,
+    })
+  ).toBe("00:152d3");
+  expect(
+    formatTime({
+      time: "152d3",
+      disableInitialization: true,
+      disabledMinutes: true,
+    })
+  ).toBe("152d3:00");
 });
 test("formatTime text", () => {
-  expect(formatTime("15asd")).toBe("15:00");
-  expect(formatTime("15asd", true)).toBe("00:15");
-  expect(formatTime("asd")).toBe("00:00");
+  expect(formatTime({ time: "15asd" })).toBe("15:00");
+  expect(formatTime({ time: "15asd", disabledHours: true })).toBe("00:15");
+  expect(formatTime({ time: "asd" })).toBe("00:00");
 });
 test("formatTime Empty Delimiter", () => {
-  expect(formatTime("15")).toBe("15:00");
-  expect(formatTime("65")).toBe("00:00");
+  expect(formatTime({ time: "15" })).toBe("15:00");
+  expect(formatTime({ time: "65" })).toBe("00:00");
 });
 test("formatTime Empty Value", () => {
-  expect(formatTime("")).toBe("00:00");
-  expect(formatTime("    ")).toBe("00:00");
+  expect(formatTime({ time: "" })).toBe("00:00");
+  expect(formatTime({ time: "    " })).toBe("00:00");
 });
 test("formatTime Disabled Unit", () => {
-  expect(formatTime("15:23", true, false, ":", false, true, true)).toBe(
-    "00:23"
-  );
-  expect(formatTime("15:23", false, true, ":", false, true, true)).toBe(
-    "15:00"
-  );
+  expect(formatTime({ time: "15:23", disabledHours: true })).toBe("00:23");
+  expect(formatTime({ time: "15:23", disabledMinutes: true })).toBe("15:00");
 });
 test("formatTime Unlimited", () => {
-  expect(formatTime("65", false, false, ":", false, true, true)).toBe("65:00");
   expect(
-    formatTime("621231232112312321312321", false, false, ":", false, true, true)
+    formatTime({ time: "65", disabledMinutes: true, isUnlimited: true })
+  ).toBe("65:00");
+  expect(
+    formatTime({ time: "621231232112312321312321", isUnlimited: true })
   ).toBe("621231232112312321312321:00");
-  expect(formatTime("600:655", true, false, ":", false, false, true)).toBe(
-    "00:00"
-  );
-  expect(formatTime("65:655", false, false, ":", false, true, true)).toBe(
-    "65:655"
-  );
+  expect(formatTime({ time: "600:655" })).toBe("00:00");
+  expect(formatTime({ time: "65:655", isUnlimited: true })).toBe("65:655");
 });
 test("formatTime LeadingZeroes", () => {
-  expect(formatTime("6:2", false, false, ":", false, true, false)).toBe("6:2");
-  expect(formatTime("6:2", false, false, ":", false, true, true)).toBe("06:02");
+  expect(formatTime({ time: "6:2", leadingZeros: false })).toBe("6:2");
+  expect(formatTime({ time: "6:2" })).toBe("06:02");
 });
 test("formatTime reset", () => {
   console.log("-01".replace(/[^\d.-]/g, ""));
-  expect(formatTime("06:-01", false, false, ":", true, true, true)).toBe(
-    "06:00"
-  );
-  expect(formatTime("06:-01", false, false, ":", false, false, true)).toBe(
-    "06:59"
-  );
-  expect(formatTime("-1:00", false, false, ":", false, false, true)).toBe(
-    "23:00"
-  );
-  expect(formatTime("-1:00", false, false, ":", true, false, true)).toBe(
-    "00:00"
-  );
+  expect(
+    formatTime({ time: "06:-01", disableReset: true, isUnlimited: true })
+  ).toBe("06:00");
+  expect(formatTime({ time: "06:-01" })).toBe("06:59");
+  expect(formatTime({ time: "-1:00" })).toBe("23:00");
+  expect(formatTime({ time: "-1:00", disableReset: true })).toBe("00:00");
 });
 test("formatTime availableValues", () => {
   expect(
-    formatTime("23:65", false, false, ":", false, true, false, [23], [65])
+    formatTime({
+      time: "23:65",
+      isUnlimited: true,
+      availableMinutes: [23],
+      availableHours: [65],
+    })
   ).toBe("23:65");
   expect(
-    formatTime("12:25", false, false, ":", false, false, true, [], [])
+    formatTime({ time: "12:25", availableMinutes: [], availableHours: [] })
   ).toBe("00:00");
 });
 test("validateNumber", () => {
@@ -122,7 +160,7 @@ test("addValueToUnit", () => {
 test("clearThousandsSeparators", () => {
   expect(clearThousandsSeparators("111.222,333")).toBe("111222333");
 });
-test("clearThousandsSeparators", () => {
+test("calcValidation", () => {
   expect(calcValidation("12/10/2021", "date")).toBe(true);
   expect(calcValidation("12/10/20255", "date")).toBe(false);
 
@@ -141,4 +179,9 @@ test("clearThousandsSeparators", () => {
   expect(calcValidation("15.2d10", "number")).toBe(false);
   expect(calcValidation("15.2.10", "number")).toBe(false);
   expect(calcValidation("152.10", "number")).toBe(false);
+  expect(calcValidation("30", "number", true)).toBe(true);
+  expect(calcInvalidation("30", "number", true)).toBe(false);
+
+  expect(calcInvalidation("13/11/2021", "date", true)).toBe(false);
+  expect(calcInvalidation("13/11/2d021", "date", true)).toBe(true);
 });

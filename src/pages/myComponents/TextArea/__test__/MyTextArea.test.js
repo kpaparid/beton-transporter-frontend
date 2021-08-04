@@ -44,7 +44,7 @@ test("number entry 0 at the start", async () => {
   render(<MyOuterComponent type="number" value={1500} />);
   fireEvent.keyDown(screen.getByLabelText("test_test"), {
     key: "0",
-    target: { selectionStart: 0 },
+    target: { selectionStart: 0, selectionEnd: 0 },
   });
   await expect(screen.getByLabelText("test_test")).toHaveValue("1.500");
 });

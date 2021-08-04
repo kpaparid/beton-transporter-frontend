@@ -2,7 +2,27 @@ import React, { useEffect, useState } from "react";
 
 import moment from "moment";
 import BigNumber from "bignumber.js";
+import { darkblue, green, grey, lightblue, red } from "../MyConsts";
 /* global BigInt */
+
+export function formatInput(value, type) {
+  switch (type) {
+    case "number":
+    case "distance": {
+      return formatNumberInput(value);
+    }
+    case "date": {
+      return formatDateInput(value);
+    }
+    case "time": {
+      return formatTimeInput(value);
+    }
+    default:
+      return value;
+  }
+}
+export const calcColor = (color, percent = "100%") =>
+  `rgb(${color}, ${percent})`;
 export const calcInvalidation = (
   text,
   type,
@@ -223,19 +243,14 @@ export const calcIndexedCalendarDays = (date, labels) => {
   );
   return transpose(filledIndexWithEmptyDays, numRows);
 };
-export const convertArrayToObject = (array) =>
-  array.reduce((prev, curr) => ({ ...prev, ...curr }));
+export const convertArrayToObject = (array = []) =>
+  array !== [] ? array.reduce((prev, curr) => ({ ...prev, ...curr })) : [];
 export function colorizeBorder(
   ref,
   isValid = false,
   isInvalid = false,
   focused = false
 ) {
-  const red = "250, 82, 82";
-  const green = "5, 166, 119";
-  const grey = "46,54, 80";
-  const lightblue = "209, 215, 224";
-  const darkblue = "86, 97, 144";
   const borderColor = isInvalid
     ? red
     : isValid
@@ -244,6 +259,7 @@ export function colorizeBorder(
     ? darkblue
     : lightblue;
   const color = isInvalid ? red : isValid ? green : grey;
+  console.log("colorize");
   if (focused) {
     ref.current.style.boxShadow = "0 0 0 0.2rem rgb(" + color + ", 25%)";
     ref.current.style.border = "1.5px solid rgb(" + borderColor + ")";
@@ -300,30 +316,32 @@ export function addToTime(
         ? addValueToTimeUnit(splitValue[1], amount)
         : splitValue[1];
     const newTime = hour + delimiter + minute;
-    return formatTime(
-      newTime,
+    return formatTime({
+      time: newTime,
       disabledHours,
       disabledMinutes,
       delimiter,
       disableReset,
       isUnlimited,
       availableHours,
-      availableMinutes
-    );
+      availableMinutes,
+    });
   }
 }
 
-export function formatTime(
-  time,
-  disabledHours = false,
-  disabledMinutes = false,
-  delimiter = ":",
-  disableReset = false,
-  isUnlimited = false,
-  leadingZeros = true,
-  availableMinutes = [...Array(60).keys()],
-  availableHours = [...Array(24).keys()]
-) {
+export function formatTime(props) {
+  const {
+    time,
+    disabledHours = false,
+    disabledMinutes = false,
+    delimiter = ":",
+    disableReset = false,
+    disableInitialization = false,
+    isUnlimited = false,
+    leadingZeros = true,
+    availableMinutes = [...Array(60).keys()],
+    availableHours = [...Array(24).keys()],
+  } = props;
   function formUnit(value, availableValues) {
     const hour =
       value !== "" &&
@@ -360,17 +378,24 @@ export function formatTime(
 
   const formattedHour = disabledHours
     ? "00"
+    : disableInitialization
+    ? domTime.split(delimiter)[0]
     : formUnit(parseBigInt(domTime.split(delimiter)[0]) + "", availableHours);
   const formattedMinute = disabledMinutes
     ? "00"
+    : disableInitialization
+    ? domTime.split(delimiter)[1]
     : formUnit(parseBigInt(domTime.split(delimiter)[1]) + "", availableMinutes);
 
-  return formattedHour + delimiter + formattedMinute;
+  return formattedMinute
+    ? formattedHour + delimiter + formattedMinute
+    : formattedHour;
 }
 export function formatTimeInput(value, digitsSeparator) {
   return value;
 }
 export function formatDateInput(value, digitsSeparator) {
+  // console.log(value);
   var count = (value.match(new RegExp(digitsSeparator, "g")) || []).length;
   var newValue = value;
   if (count === 1 && value.indexOf(digitsSeparator) === 2) newValue = value;

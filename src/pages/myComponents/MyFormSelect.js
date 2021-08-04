@@ -1,41 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { Form } from "@themesberg/react-bootstrap";
+import MyTextArea from "./TextArea/MyTextArea";
 
 export const MyFormSelect = (props) => {
   const {
     label,
-    values,
+    availableValues,
     id,
-    defaultValue,
+    value,
     minWidth = "100px",
     maxWidth = "150px",
     onChange,
+    labelIsDisabled = false,
   } = props;
-  // console.log(values)
-  function handleChange(e) {
-    onChange(e.target.value);
-  }
+
   return (
-    <Form onSubmit={(e) => e.preventDefault()}>
-      <Form.Group>
-        {label && <Form.Label>{label}</Form.Label>}
-        <Form.Select
-          key={id}
-          style={{
-            width: "auto",
-            minWidth: minWidth,
-            fontSize: "0.875rem",
-            textAlign: "center",
-            textAlignLast: "center",
-          }}
-          onChange={handleChange}
-        >
-          <option defaultValue>{defaultValue}</option>
-          {values.map((value, index) => (
-            <option key={`${id}-${index}`}>{value}</option>
-          ))}
-        </Form.Select>
-      </Form.Group>
-    </Form>
+    <>
+      {!labelIsDisabled && label && <Form.Label>{label}</Form.Label>}
+      <select
+        key={id}
+        style={{
+          minWidth: minWidth,
+          fontSize: "inherit",
+          textAlign: "center",
+          textAlignLast: "center",
+        }}
+        onChange={onChange}
+      >
+        {availableValues.map((value, index) => (
+          <option key={`${id}-${index}`}>{value}</option>
+        ))}
+      </select>
+    </>
+  );
+};
+export const FormSelectArea = (props) => {
+  const { id, defaultValue, minWidth, maxWidth, onChange, disabled } = props;
+  return !disabled ? (
+    <MyFormSelect {...props}></MyFormSelect>
+  ) : (
+    <MyTextArea>
+      {{
+        id,
+        maxRows: 3,
+        value: defaultValue,
+        invalidation: true,
+        onChange,
+        minWidth,
+        maxWidth,
+        disabled,
+      }}
+    </MyTextArea>
   );
 };

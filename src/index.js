@@ -13,15 +13,13 @@
 
 // * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Please contact us to request a removal.
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
 import { HashRouter } from "react-router-dom";
-import { Provider } from "react-redux"
-
+import { Provider } from "react-redux";
 
 // core styles
 import "./scss/volt.scss";
-
 
 // vendor styles
 import "@fortawesome/fontawesome-free/css/all.css";
@@ -31,23 +29,17 @@ import "react-datetime/css/react-datetime.css";
 
 import HomePage from "./pages/HomePage";
 import ScrollToTop from "./components/ScrollToTop";
-import { createReduxStore } from './pages/reducers/redux';
+import { store } from "./pages/myComponents/MyConsts";
 
 // import "react-dates/initialize";
 // import "react-dates/lib/css/_datepicker.css";
 
-
-
-
 ReactDOM.render(
-
-  <Provider store={createReduxStore()}>
+  <Provider store={store}>
     <HashRouter>
       <ScrollToTop />
       <HomePage />
     </HashRouter>
-
-  </Provider>
-  ,
+  </Provider>,
   document.getElementById("root")
 );

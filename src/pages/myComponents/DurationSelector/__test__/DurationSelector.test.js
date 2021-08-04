@@ -74,3 +74,8 @@ test("increase minute on 150 disabled-unlimited", async () => {
   fireEvent.click(screen.getByLabelText("test_minute_incr"));
   await expect(screen.getByLabelText("test_test")).toHaveValue("00:151");
 });
+
+test("increase minute on 150 disabled-unlimited", async () => {
+  const { debug } = render(<MyOuterComponent value={"1d50"} />);
+  await expect(screen.getByLabelText("test_test")).toHaveValue("1d50");
+});

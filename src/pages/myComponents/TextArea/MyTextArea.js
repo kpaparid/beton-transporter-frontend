@@ -4,6 +4,7 @@ import React, {
   useRef,
   forwardRef,
   useCallback,
+  useMemo,
 } from "react";
 import { Form } from "@themesberg/react-bootstrap";
 import TextareaAutosize from "react-textarea-autosize";
@@ -22,84 +23,31 @@ import {
   formatValueAndSetCursor,
   keyPasteController,
   keyPreventDefault,
+  formatInput,
 } from "../util/utilities";
 import { DummyWrapperRef } from "../DummyWrappers";
 
-export const MyTextArea = forwardRef(
+export const MyTextArea1 = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
     const {
-      ariaLabel = "input",
       value = "",
-      rows = 1,
-      minRows = 1,
-      maxRows = 4,
-      // className = "",
       measurement = "",
-      label,
       validation = false,
       invalidation = false,
       disabled = false,
-      readOnly = false,
       id = "textarea",
-      onChange,
-      errorMessage,
       type = "text",
-      outsideBorder = "",
+      outsideBorder = disabled ? "border-0" : "",
       minWidth = "10px",
-      placeholder = "",
-      availableValues,
       maxWidth = "200px",
-      digits,
-      digitsSeparator = type === "date" ? "/" : "",
-      seperatorAt = [],
-      disableFocus = false,
-      onFocus,
-      onBlur,
-      measurementClassName = "",
-      textareaClassName = "",
-      focus = false,
-      getFocus,
       isValid = calcValidation(value + "", type, validation),
       isInvalid = calcInvalidation(value + "", type, invalidation),
     } = children;
-    const fallbackRef = useRef(null);
-    const domRef = ref || fallbackRef;
-    const [change, setChange] = useState(value);
-    function handleOnChange(text) {
-      onChange && onChange(text);
+    function handleSubmit(e) {
+      e.preventDefault();
     }
-    const children2 = {
-      ariaLabel,
-      change,
-      type,
-      validation,
-      invalidation,
-      label,
-      measurement,
-      disabled,
-      readOnly,
-      minWidth,
-      handleOnChange,
-      value,
-      placeholder,
-      id,
-      maxRows,
-      outsideBorder,
-      rows,
-      minRows,
-      className,
-      focus,
-      onFocus,
-      onBlur,
-      disableFocus,
-      measurementClassName,
-      textareaClassName,
-      maxWidth,
-      digitsSeperator: digitsSeparator,
-      getFocus,
-      isValid,
-      isInvalid,
-    };
+
+    const [change, setChange] = useState();
     useEffect(() => {
       switch (type) {
         case "number": {
@@ -118,16 +66,61 @@ export const MyTextArea = forwardRef(
           setChange(value);
       }
     }, [type, value]);
-    return <TextAreaComponent ref={domRef}>{children2}</TextAreaComponent>;
+    if (true) {
+      return (
+        <div className="d-block">
+          <Form
+            onSubmit={handleSubmit}
+            key={`f-${id}}`}
+            className="d-flex flex-fill w-100"
+            style={{
+              minWidth: minWidth,
+              maxWidth: maxWidth,
+            }}
+          >
+            {false && (
+              <Form.Label className="fw-bolder w-100">{false}</Form.Label>
+            )}
+            {/* <Form.Group */}
+            <div
+              className={"d-flex flex-nowrap p-0 w-100"}
+              style={{ borderRadius: "inherit" }}
+            >
+              <div
+                data="wrapper"
+                className={
+                  "d-flex justify-content-center p-0 rounded w-100 " +
+                  outsideBorder
+                }
+                style={{
+                  // transition: "all 0.2s ease",
+                  border: "1px solid rgb(209, 215, 224)",
+                }}
+              >
+                <div
+                  className={` d-flex flex-nowrap justify-content-center align-items-start
+                        flex-fill fw-normal form-control whitedisabled border border-0 shadow-none `}
+                  style={{
+                    alignItems: measurement === "" ? "baseline" : "inherit",
+                  }}
+                >
+                  <div className="text-center">{change}</div>
+                </div>
+              </div>
+            </div>
+          </Form>
+        </div>
+      );
+    }
   }
 );
 
-const TextAreaComponent = forwardRef(
+const MyTextArea = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
     const {
       ariaLabel,
-      change,
       type,
+      value,
       validation,
       invalidation,
       label,
@@ -135,8 +128,8 @@ const TextAreaComponent = forwardRef(
       disabled,
       readOnly,
       minWidth,
-      maxWidth,
-      handleOnChange,
+      maxWidth = "200px",
+      onChange,
       placeholder,
       onFocus,
       onBlur,
@@ -152,18 +145,22 @@ const TextAreaComponent = forwardRef(
       digitsSeparator,
     } = children;
 
-    const inputTextAreaRef = ref;
-    const inputAutoSizeRef = ref;
+    const change = value;
+    const fallbackRef = useRef(null);
+    const domRef = ref || fallbackRef;
+    const inputTextAreaRef = domRef;
+    const inputAutoSizeRef = domRef;
     const divWrapperRef = useRef(null);
     const inputFormRef = useRef(null);
+    const measurementRef = useRef(null);
+
     const dummyTextRef = useRef(null);
     const dummyWrapperRef = useRef(null);
-    const measurementRef = useRef(null);
     const invalidRef = useRef(null);
     const [focused, setFocused] = useState(focus);
-    const [overflow, setOverflow] = useState("hidden");
-    // const isInvalid = calcInvalidation(change + "", type, invalidation);
-    // const isValid = calcValidation(change + "", type, validation);
+    function handleSubmit(e) {
+      e.preventDefault();
+    }
     const areaType =
       type === "number" || type === "time" || type === "date" ? "tel" : "text";
     const newPlaceholder =
@@ -176,36 +173,199 @@ const TextAreaComponent = forwardRef(
         : type === "hour"
         ? ""
         : "";
-    const [rowHeight, setRowHeight] = useState(21);
-    const [cursorPosition, setCursorPosition] = useState();
-    const [textAreaMode, setTextAreaMode] = useState();
-    const [textWidth, setTextWidth] = useState(minWidth);
-    const [width, setWidth] = useState(minWidth);
-    const data = {
-      minWidth,
-      maxWidth,
-      isValid,
-      isInvalid,
-      imgInvalid,
-      imgValid,
-      measurement,
-      change,
-      outsideBorder: outsideBorder + "border-4",
-      measurementClassName,
-    };
+
+    // const textAreaMode = false;
+
     const handleFocus = (e) => {
+      console.log("focus");
       if (!disableFocus) {
         setFocused(true);
       }
       onFocus && onFocus(id);
     };
     const handleBlur = (e) => {
+      console.log("blur");
       if (!disableFocus) {
         setFocused(false);
       }
       onBlur && onBlur(id);
     };
-    function handleKeyDown(event) {
+
+    // useEffect(() => {
+    //   if (inputTextAreaRef.current) {
+    //     inputTextAreaRef.current.focus({ preventScroll: true });
+    //   } else {
+    //     inputAutoSizeRef.current.children[0].firstChild.focus({
+    //       preventScroll: true,
+    //     });
+    //   }
+    // }, [change, inputAutoSizeRef, inputTextAreaRef, maxRows, textAreaMode]);
+    function handleClick(e) {
+      if (!disabled) {
+        if (e.target.name !== "input-field" && e.target.name !== "textarea") {
+          if (!focused) {
+            !disableFocus && handleFocus(e);
+            onFocus && onFocus();
+          }
+          inputTextAreaRef.current &&
+            inputTextAreaRef.current.focus({ preventScroll: true });
+          inputAutoSizeRef.current &&
+            inputAutoSizeRef.current.children[0].firstChild.focus({
+              preventScroll: true,
+            });
+          // if (textAreaMode) {
+          //   // setCursorPosition(change.length);
+          //   inputTextAreaRef.current.focus({ preventScroll: true });
+          // } else {
+          //   inputAutoSizeRef.current.children[0].firstChild.focus({
+          //     preventScroll: true,
+          //   });
+          // }
+        }
+      }
+    }
+    useEffect(() => {
+      colorizeBorder(divWrapperRef, isValid, isInvalid, focused);
+    }, [isValid, isInvalid, focused]);
+
+    return (
+      <div className="d-block">
+        <Form
+          onSubmit={handleSubmit}
+          key={`f-${id}}`}
+          className="d-flex flex-fill w-100"
+          ref={inputFormRef}
+          style={{
+            minWidth: minWidth,
+            maxWidth: maxWidth,
+          }}
+        >
+          {label && (
+            <Form.Label className="fw-bolder w-100">{label}</Form.Label>
+          )}
+          {/* <Form.Group */}
+          <div
+            className={"d-flex flex-nowrap p-0 w-100"}
+            style={{ borderRadius: "inherit" }}
+          >
+            <div
+              data="wrapper"
+              ref={divWrapperRef}
+              className={
+                "d-flex justify-content-center p-0 rounded w-100 " +
+                outsideBorder
+              }
+              style={{
+                // transition: "all 0.2s ease",
+                border: "1px solid rgb(209, 215, 224)",
+              }}
+            >
+              <div
+                className={` d-flex flex-nowrap justify-content-center align-items-start
+                        flex-fill fw-normal form-control whitedisabled border border-0 shadow-none ${textareaClassName}`}
+                style={{
+                  alignItems: measurement === "" ? "baseline" : "inherit",
+                }}
+                onClick={handleClick}
+              >
+                {!disabled && (isInvalid || isValid) && (
+                  <InvalidComponent ref={invalidRef}>
+                    {{ isValid, isInvalid }}
+                  </InvalidComponent>
+                )}
+
+                <TextComponent
+                  ref={{
+                    inputTextAreaRef,
+                    inputAutoSizeRef,
+                    dummyTextRef,
+                    dummyWrapperRef,
+                  }}
+                >
+                  {{
+                    measurement,
+                    isInvalid,
+                    isValid,
+                    invalidRef,
+                    // textAreaMode,
+                    id,
+                    textareaClassName,
+                    onChange,
+                    type,
+                    digitsSeparator,
+                    // handleKeyDown,
+                    maxRows,
+                    change,
+                    // handlePaste,
+                    areaType,
+                    newPlaceholder,
+                    disabled,
+                    readOnly,
+                    handleFocus,
+                    handleBlur,
+                    ariaLabel,
+                    measurementClassName,
+                    disableFocus,
+                    focused,
+                    onFocus,
+                  }}
+                </TextComponent>
+                {measurement !== "" && (
+                  <MeasurementComponent
+                    ref={measurementRef}
+                    className={measurementClassName}
+                  >
+                    {{ measurement }}
+                  </MeasurementComponent>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* </Form.Group> */}
+        </Form>
+      </div>
+    );
+  }
+);
+
+const TextComponent = forwardRef(
+  ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
+    const {
+      inputTextAreaRef,
+      inputAutoSizeRef,
+      dummyTextRef,
+      dummyWrapperRef,
+    } = ref;
+    const {
+      measurement,
+      id,
+      textareaClassName,
+      maxRows,
+      change,
+      areaType,
+      newPlaceholder,
+      disabled,
+      readOnly,
+      handleFocus,
+      handleBlur,
+      ariaLabel,
+      onChange,
+      type,
+      digitsSeparator,
+      disableFocus,
+      focused,
+      onFocus,
+    } = children;
+
+    const [cursorPosition, setCursorPosition] = useState(0);
+
+    const data = {
+      imgInvalid,
+      imgValid,
+      measurement,
+      change,
+    };
+    const handleKeyDown = useCallback((event) => {
       keyPreventDefault(event);
       const controller = keyDownController(event);
       if (controller) {
@@ -218,9 +378,9 @@ const TextAreaComponent = forwardRef(
           digitsSeparator
         );
         setCursorPosition(cursor);
-        handleOnChange(value);
+        onChange(value);
       }
-    }
+    });
     function handlePaste(event) {
       const controller = keyPasteController(event);
       if (controller) {
@@ -238,275 +398,288 @@ const TextAreaComponent = forwardRef(
             ? value.length
             : difference.value.length;
         setCursorPosition(cursor + count);
-        handleOnChange(value);
+        onChange(value);
       }
     }
 
-    function handleHeightChange(_, rHeight) {
-      rowHeight !== rHeight && setRowHeight(rHeight);
-    }
+    const [textAreaMode, setTextAreaMode] = useState(false);
     useEffect(() => {
-      const currentRows =
-        textAreaMode && inputTextAreaRef.current
-          ? parseInt(inputTextAreaRef.current.scrollHeight / rowHeight)
-          : 1;
-      currentRows > maxRows ? setOverflow("auto") : setOverflow("hidden");
-      dummyWrapperRef.current &&
-        setWidth(
-          getComputedStyle(dummyWrapperRef.current).getPropertyValue("width")
-        );
-      if (textAreaMode) {
-        inputTextAreaRef.current.focus({ preventScroll: true });
-      } else {
-        inputAutoSizeRef.current.children[0].firstChild.focus({
-          preventScroll: true,
-        });
-      }
-    }, [
-      change,
-      cursorPosition,
-      inputAutoSizeRef,
-      inputTextAreaRef,
-      maxRows,
-      rowHeight,
-      textAreaMode,
-      textWidth,
-    ]);
-    useEffect(() => {
-      const paddingWidth = 24 + 4;
       const scrollWidth =
         dummyTextRef.current && dummyTextRef.current.scrollWidth;
-      const measurementWidth = measurementRef.current
-        ? parseInt(
-            getComputedStyle(measurementRef.current).getPropertyValue("width")
-          )
-        : 0;
-      const invalidWidth = invalidRef.current
-        ? parseInt(
-            getComputedStyle(invalidRef.current).getPropertyValue("width")
-          )
-        : 0;
-      const realWidth =
-        paddingWidth + scrollWidth + measurementWidth + invalidWidth;
-      if (realWidth > parseInt(maxWidth)) {
+      const clientWidth =
+        dummyTextRef.current && dummyTextRef.current.clientWidth;
+      if (scrollWidth !== clientWidth) {
         !textAreaMode && setTextAreaMode(true);
+        // inputTextAreaRef.current.focus({ preventScroll: true });
       } else {
-        setTextWidth(
-          getComputedStyle(dummyTextRef.current).getPropertyValue("width")
-        );
         textAreaMode && setTextAreaMode(false);
-      }
-      // }, [dummyTextWidth, maxWidth, width]);
-    });
-    useEffect(() => {
-      colorizeBorder(divWrapperRef, isValid, isInvalid, focused);
-    }, [isValid, isInvalid, focused]);
-
-    function handleClick(e) {
-      if (e.target.name !== "input-field" && e.target.name !== "textarea") {
-        if (!focused) {
-          !disableFocus && handleFocus(e);
-          onFocus && onFocus();
-        }
-        if (textAreaMode) {
-          setCursorPosition(change.length);
-          inputTextAreaRef.current.focus({ preventScroll: true });
-        } else {
-          inputAutoSizeRef.current.children[0].firstChild.focus({
-            preventScroll: true,
-          });
-        }
-      }
-    }
-    useEffect(() => {
-      if (cursorPosition) {
-        if (inputAutoSizeRef.current.children[0]) {
-          inputAutoSizeRef.current.children[0].firstChild.selectionStart =
-            cursorPosition;
-          inputAutoSizeRef.current.children[0].firstChild.selectionEnd =
-            cursorPosition;
-        } else if (inputTextAreaRef.current) {
-          inputTextAreaRef.current.selectionStart = cursorPosition;
-          inputTextAreaRef.current.selectionEnd = cursorPosition;
-        }
+        // inputAutoSizeRef.current &&
+        //   inputAutoSizeRef.current.children[0] &&
+        //   !inputAutoSizeRef.current.children[0].firstChild.focus() &&
+        //   inputAutoSizeRef.current.children[0].firstChild.focus({
+        //     preventScroll: true,
+        //   });
       }
     });
 
     return (
-      <div className="d-block">
-        <DummyWrapperRef ref={{ dummyWrapperRef, dummyTextRef }}>
-          {{ ...data }}
-        </DummyWrapperRef>
-        <Form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-          key={`f-${id}}`}
-          className="d-flex flex-fill w-100"
-          ref={inputFormRef}
-          style={{ width: width, minWidth: minWidth, maxWidth: maxWidth }}
-        >
-          {label && (
-            <Form.Label className="fw-bolder w-100">{label}</Form.Label>
-          )}
-          <Form.Group
-            className={"d-flex flex-nowrap p-0 w-100"}
-            style={{ borderRadius: "inherit" }}
-          >
-            <div
-              data="wrapper"
-              ref={divWrapperRef}
-              className={
-                "d-flex justify-content-center p-0 rounded w-100 " +
-                outsideBorder
-              }
-              style={{
-                transition: "all 0.2s ease",
-                border: "1px solid rgb(209, 215, 224)",
+      <>
+        <div className="d-flex flex-wrap w-100">
+          <DummyWrapperRef ref={{ dummyWrapperRef, dummyTextRef }}>
+            {data}
+          </DummyWrapperRef>
+          {textAreaMode && (
+            <TextArea ref={inputTextAreaRef} className={textareaClassName}>
+              {{
+                value: change,
+                areaType,
+                disabled,
+                handleFocus,
+                handleBlur,
+                handleKeyDown,
+                handlePaste,
+                id,
+                ariaLabel,
+                readOnly,
+                maxRows,
+                enableMeasurement: measurement !== "",
+                cursorPosition,
               }}
-            >
-              <div
-                className={` d-flex flex-nowrap justify-content-center align-items-start
-                        flex-fill fw-normal form-control whitedisabled border border-0 shadow-none ${textareaClassName}`}
-                style={{
-                  alignItems: measurement === "" ? "baseline" : "inherit",
-                }}
-                onClick={handleClick}
-                // onMouseDown={(e) => e.preventDefault()}
-              >
-                {(isInvalid || isValid) && (
-                  <div
-                    ref={invalidRef}
-                    style={{
-                      backgroundImage: isInvalid
-                        ? imgInvalid
-                        : isValid
-                        ? imgValid
-                        : "",
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize:
-                        "calc(0.75em + 0.55rem) calc(0.75em + 0.55rem)",
-                      paddingRight: "calc(20px + 0.35em)",
-                      paddingLeft: "0rem",
-                      width: "21px",
-                      height: "21px",
-                    }}
-                  ></div>
-                )}
-                {textAreaMode && (
-                  <TextareaAutosize
-                    name="textarea"
-                    ref={inputTextAreaRef}
-                    key={"textarea_field_" + id}
-                    id={"textarea_field_" + id}
-                    maxRows={maxRows}
-                    minRows={1}
-                    value={change}
-                    onChange={(e) => {
-                      e.preventDefault();
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onPaste={handlePaste}
-                    type={areaType}
-                    required
-                    placeholder={newPlaceholder}
-                    disabled={disabled}
-                    className={`d-flex flex-fill whitedisabled  form-control border border-0 shadow-none p-0 ${textareaClassName}`}
-                    readOnly={readOnly}
-                    onHeightChange={(height, metaData) =>
-                      handleHeightChange(height, metaData.rowHeight)
-                    }
-                    onFocus={(e) => handleFocus(e)}
-                    onBlur={(e) => handleBlur(e)}
-                    style={{
-                      fontSize: "0.875rem",
-                      color: "#66799e",
-                      resize: "none",
-                      textAlign: measurement === "" ? "center" : "end",
-                      overflow: overflow,
-                      // width: textWidth,
-                      width: "100%",
-                    }}
-                  />
-                )}
-                {!textAreaMode && (
-                  <div
-                    ref={inputAutoSizeRef}
-                    style={{
-                      // width: parseFloat(textWidth) + 5 + "px",
-                      width: "100%",
-                    }}
-                  >
-                    <AutosizeInput
-                      aria-label={ariaLabel + "_" + id}
-                      id={"input_field_" + id}
-                      name="input-field"
-                      value={change}
-                      key={"input_field_" + id}
-                      onChange={(e) => {
-                        e.preventDefault();
-                      }}
-                      onKeyDown={handleKeyDown}
-                      onPaste={handlePaste}
-                      type={areaType}
-                      required
-                      // autoFocus
-                      placeholder={newPlaceholder}
-                      disabled={disabled}
-                      autoComplete="off"
-                      className={`d-flex whitedisabled  border border-0 shadow-none rounded-0 p-0 `}
-                      style={{
-                        textAlign: measurement === "" ? "center" : "center",
-                        width: "100%",
-                      }}
-                      readOnly={readOnly}
-                      onFocus={(e) => {
-                        handleFocus(e);
-                      }}
-                      onBlur={(e) => {
-                        handleBlur(e);
-                      }}
-                      inputStyle={{
-                        fontSize: "0.875rem",
-                        color: "#66799e",
-                        border: 0,
-                        boxShadow: "none",
-                        outline: 0,
-                        padding: "0px",
-                        width: "100%",
-                        textAlign: measurement === "" ? "center" : "center",
-                        backgroundColor: "transparent",
-                      }}
-                    />
-                  </div>
-                )}
-                {measurement !== "" && (
-                  <>
-                    <div
-                      ref={measurementRef}
-                      className={`d-flex align-items-end fw-normal text-nowrap whitedisabled text-start rounded-0 border h-100 border-0 shadow-none ${measurementClassName}`}
-                      value={measurement}
-                      readOnly
-                      style={{
-                        fontSize: "0.875rem",
-                        color: "#66799e",
-                        width: "auto",
-                        paddingLeft: "0.3rem",
-                      }}
-                    >
-                      {measurement}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </Form.Group>
-        </Form>
-      </div>
+            </TextArea>
+          )}
+          {!textAreaMode && (
+            <TextAutoSize ref={inputAutoSizeRef} className={textareaClassName}>
+              {{
+                value: change,
+                areaType,
+                disabled,
+                placeholder: newPlaceholder,
+                handleFocus,
+                handleBlur,
+                handleKeyDown,
+                handlePaste,
+                id,
+                ariaLabel,
+                readOnly,
+                cursorPosition,
+              }}
+            </TextAutoSize>
+          )}
+        </div>
+      </>
     );
   }
 );
 
+const TextArea = forwardRef(
+  ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
+    const fallbackRef = useRef(null);
+    const domRef = ref || fallbackRef;
+    const {
+      value,
+      areaType,
+      disabled,
+      handleFocus,
+      handleBlur,
+      handleKeyDown,
+      handlePaste,
+      readOnly,
+      ariaLabel,
+      id,
+      maxRows = 1,
+      enableMeasurement,
+      cursorPosition,
+    } = children;
+    const [rowHeight, setRowHeight] = useState(21);
+    const [overflow, setOverflow] = useState("hidden");
+    const scrollHeight = ref.current && ref.current.scrollHeight;
+    useEffect(() => {
+      const currentRows = ref.current
+        ? parseInt(ref.current.scrollHeight / rowHeight)
+        : 1;
+      currentRows > maxRows ? setOverflow("auto") : setOverflow("hidden");
+    }, [scrollHeight]);
+    function handleHeightChange(_, rHeight) {
+      rowHeight !== rHeight.rowHeight && setRowHeight(rHeight.rowHeight);
+    }
+
+    useEffect(() => {
+      console.log("============");
+      console.log(domRef.current);
+      if (cursorPosition) {
+        if (domRef.current) {
+          console.log("cP", cursorPosition);
+          domRef.current.selectionStart = cursorPosition;
+          domRef.current.selectionEnd = cursorPosition;
+        }
+      }
+      console.log(domRef.current.selectionStart);
+    });
+
+    return (
+      <TextareaAutosize
+        aria-label={ariaLabel + "_" + id}
+        name="textarea"
+        ref={domRef}
+        key={"textarea_field_" + id}
+        id={"textarea_field_" + id}
+        maxRows={maxRows}
+        minRows={1}
+        value={value}
+        onChange={(e) => {
+          e.preventDefault();
+        }}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        type={areaType}
+        required
+        disabled={disabled}
+        className={`d-flex flex-fill whitedisabled  form-control border border-0 shadow-none p-0 ${className}`}
+        readOnly={readOnly}
+        onHeightChange={handleHeightChange}
+        // onFocus={handleFocus}
+        // onBlur={handleBlur}
+        style={{
+          fontSize: "0.875rem",
+          color: "#66799e",
+          resize: "none",
+          textAlign: enableMeasurement ? "center" : "end",
+          overflow: overflow,
+          // width: textWidth,
+          width: "100%",
+        }}
+      />
+    );
+  }
+);
+const TextAutoSize = React.memo(
+  forwardRef(
+    ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
+      const {
+        value,
+        areaType,
+        disabled,
+        placeholder,
+        handleFocus,
+        handleBlur,
+        handleKeyDown,
+        handlePaste,
+        readOnly,
+        ariaLabel,
+        id,
+        cursorPosition,
+      } = children;
+
+      const fallbackRef = useRef(null);
+      const domRef = ref || fallbackRef;
+      useEffect(() => {
+        if (cursorPosition) {
+          console.log("cP", cursorPosition);
+          if (domRef.current.children[0]) {
+            domRef.current.children[0].firstChild.selectionStart =
+              cursorPosition;
+            domRef.current.children[0].firstChild.selectionEnd = cursorPosition;
+          }
+        }
+      });
+      return (
+        <div
+          ref={domRef}
+          style={{
+            width: "100%",
+          }}
+        >
+          {/* <div>{value}</div> */}
+          <AutosizeInput
+            aria-label={ariaLabel + "_" + id}
+            id={"input_field_" + id}
+            name="input-field"
+            value={value}
+            key={"input_field_" + id}
+            onChange={(e) => {
+              e.preventDefault();
+            }}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            type={areaType}
+            required
+            // autoFocus
+            placeholder={placeholder}
+            disabled={disabled}
+            autoComplete="off"
+            className={
+              "d-flex whitedisabled  border border-0 shadow-none rounded-0 p-0 " +
+              className
+            }
+            style={{
+              textAlign: "center",
+              width: "100%",
+            }}
+            // readOnly={readOnly}
+            // onFocus={handleFocus}
+            // onBlur={handleBlur}
+            inputStyle={{
+              fontSize: "0.875rem",
+              color: "#66799e",
+              border: 0,
+              boxShadow: "none",
+              outline: 0,
+              padding: "0px",
+              width: "100%",
+              textAlign: "center",
+              backgroundColor: "transparent",
+            }}
+          />
+        </div>
+      );
+    }
+  )
+);
+const MeasurementComponent = forwardRef(
+  ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
+    const { measurement } = children;
+
+    return (
+      <>
+        <div
+          ref={ref}
+          className={`d-flex align-items-end fw-normal text-nowrap
+             whitedisabled text-start rounded-0 border h-100 border-0 shadow-none ${className}`}
+          value={measurement}
+          readOnly
+          style={{
+            fontSize: "0.875rem",
+            color: "#66799e",
+            width: "auto",
+            paddingLeft: "0.3rem",
+          }}
+        >
+          {measurement}
+        </div>
+      </>
+    );
+  }
+);
+const InvalidComponent = forwardRef(
+  ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
+    const { isInvalid, isValid } = children;
+
+    return (
+      <div
+        ref={ref}
+        style={{
+          backgroundImage: isInvalid ? imgInvalid : isValid ? imgValid : "",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "calc(0.75em + 0.55rem) calc(0.75em + 0.55rem)",
+          paddingRight: "calc(20px + 0.35em)",
+          paddingLeft: "0rem",
+          width: "21px",
+          height: "21px",
+        }}
+      ></div>
+    );
+  }
+);
 export const TextAreaGroup = (props) => {
   const {
     minWidth,
@@ -614,3 +787,4 @@ export const TextAreaGroup = (props) => {
     </div>
   );
 };
+export default MyTextArea;

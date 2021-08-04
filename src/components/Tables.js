@@ -239,6 +239,24 @@ export const PageTrafficTable = () => {
         <td>
           <ValueChange value={change} suffix="%" />
         </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
+        <td>
+          <ValueChange value={change} suffix="%" />
+        </td>
       </tr>
     );
   };
@@ -255,6 +273,12 @@ export const PageTrafficTable = () => {
               <th className="border-0">Category</th>
               <th className="border-0">Global Rank</th>
               <th className="border-0">Traffic Share</th>
+              <th className="border-0">Change</th>
+              <th className="border-0">Change</th>
+              <th className="border-0">Change</th>
+              <th className="border-0">Change</th>
+              <th className="border-0">Change</th>
+              <th className="border-0">Change</th>
               <th className="border-0">Change</th>
             </tr>
           </thead>

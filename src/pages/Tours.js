@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -19,7 +19,7 @@ import {
 } from "./myComponents/MyButtons";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { ACTIONS } from "./reducers/redux";
-import { TourTable } from "./myComponents/MyTourTable";
+import { MyTourTable } from "./myComponents/MyTourTable";
 import moment from "moment";
 import {
   HourSelector,
@@ -36,23 +36,22 @@ import {
   useAllLabels,
 } from "./myComponents/MyConsts";
 import TextareaAutosize from "react-textarea-autosize";
-
 export const Tours = () => {
   const dispatch = useDispatch();
 
-  const tourTable = useTourTable();
+  // const tourTable = useTourTable();
   const tourDate = useTourDate();
   const checkedExists = useCheckedExists();
-  const allLabels = useAllLabels();
+  // const allLabels = useAllLabels();
 
-  const handleAddRow = () => setShowModalDefault(true);
   const [showModalDefault, setShowModalDefault] = useState(false);
-  const handleClose = () => setShowModalDefault(false);
+  const handleAddRow = () => setShowModalDefault(true);
+  // const handleClose = () => setShowModalDefault(false);
 
-  useEffect(() => {
-    console.log("rerender");
-    console.log(tourTable);
-  }, [tourTable]);
+  // useEffect(() => {
+  //   console.log("rerender");
+  //   console.log(tourTable);
+  // }, [tourTable]);
 
   const toggleEditMode = () => {
     dispatch({
@@ -60,9 +59,9 @@ export const Tours = () => {
     });
   };
   const handleEditEnable = () => {
-    if (checkedExists) {
-      toggleEditMode();
-    }
+    // if (checkedExists) {
+    toggleEditMode();
+    // }
   };
   const handleEditDisable = () => {
     toggleEditMode();
@@ -93,11 +92,11 @@ export const Tours = () => {
 
   return (
     <>
-      <AddRowModal
+      {/* <AddRowModal
         labels={allLabels}
         onClose={handleClose}
         show={showModalDefault}
-      ></AddRowModal>
+      ></AddRowModal> */}
       <div className="d-block pt-4 mb-4 mb-md-0">
         <Breadcrumb
           className="d-none d-md-inline-block"
@@ -141,7 +140,8 @@ export const Tours = () => {
           </ButtonGroup>
         </div>
       </div>
-      <TourTable></TourTable>
+
+      <MyTourTable></MyTourTable>
     </>
   );
 };

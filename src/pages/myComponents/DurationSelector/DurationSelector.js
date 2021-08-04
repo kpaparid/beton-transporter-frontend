@@ -8,7 +8,7 @@ import React, {
   useReducer,
 } from "react";
 import { Button } from "@themesberg/react-bootstrap";
-import { MyTextArea, TextAreaGroup } from "../TextArea/MyTextArea";
+import MyTextArea, { TextAreaGroup } from "../TextArea/MyTextArea";
 
 import { faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -46,29 +46,50 @@ export const TimeSelectorDropdown = forwardRef(
       maxWidth,
       dropdownMinWidth = !disabledHours && !disabledMinutes ? "100px" : "50px",
       dropdownMaxWidth = !disabledHours && !disabledMinutes ? "250px" : "100px",
+      disabled = false,
     } = children;
     const [isValid, setIsValid] = useState(false);
     const [isInvalid, setIsInvalid] = useState(false);
 
-    const [text, setText] = useState(value);
+    const convertToTime = (value) =>
+      formatTime({
+        time: value,
+        disabledHours,
+        disabledMinutes,
+        delimiter,
+        disableReset,
+        isUnlimited,
+        availableMinutes,
+        availableHours,
+        // leadingZeros: false,
+      });
+
+    const [text, setText] = useState(convertToTime(value));
     const validationType =
       !disabledHours && !disabledMinutes
         ? "time"
         : disabledMinutes
         ? "hour"
         : "minute";
-    function handleChangeDropdown(value) {
-      if (text !== value) {
-        setText(value);
-        onChange(value);
-      }
-    }
+    const convertedText = !text.includes(delimiter)
+      ? text
+      : validationType === "minute"
+      ? text.split(delimiter)[1]
+      : validationType === "hour"
+      ? text.split(delimiter)[0]
+      : text;
     useEffect(() => {
       setIsValid(calcValidation(text, validationType, validation, isUnlimited));
       setIsInvalid(calcInvalidation(text, "time", invalidation, isUnlimited));
-      onChange && onChange(text);
-    }, [invalidation, isUnlimited, onChange, text, validation, validationType]);
+      onChange && onChange(convertedText);
+    }, [text]);
 
+    function handleChangeDropdown(value) {
+      if (text !== value) {
+        setText(value);
+        // onChange(value);
+      }
+    }
     function handleChangeTextareaGroup(value, index) {
       const newValue =
         index === 0
@@ -77,16 +98,25 @@ export const TimeSelectorDropdown = forwardRef(
       text !== newValue && setText(newValue);
     }
     function handleChangeTextArea(value) {
-      text !== value && setText(value);
+      console.log("defaultValue:", value);
+      const invalidProofedValue = formatTime({
+        time: value,
+        disabledHours,
+        disabledMinutes,
+        delimiter,
+        disableReset,
+        isUnlimited,
+        availableMinutes,
+        disableInitialization: true,
+        availableHours,
+      });
+      text !== invalidProofedValue && setText(invalidProofedValue);
     }
+
     const children2 = {
+      disabled,
       ariaLabel,
-      value:
-        validationType === "minute"
-          ? text.split(delimiter)[1]
-          : validationType === "hour"
-          ? text.split(delimiter)[0]
-          : text,
+      value: convertedText,
       measurement:
         validationType === "minute"
           ? "min"
@@ -122,7 +152,6 @@ export const TimeSelectorDropdown = forwardRef(
           ariaLabel,
           id,
           time: text,
-          // time: "23",
           isUnlimited: isUnlimited,
           disabledHours,
           disabledMinutes,
@@ -136,6 +165,7 @@ export const TimeSelectorDropdown = forwardRef(
       </TimeSelector>
     );
     const data = {
+      disabled,
       ToggleComponent: TextArea,
       MenuComponent: TimeSelect,
       ariaLabel,
@@ -168,14 +198,14 @@ export const TimeSelector = forwardRef(
     } = children;
 
     const [newTime, setNewTime] = useState(
-      formatTime(
+      formatTime({
         time,
-        disabledHours,
+        disabledHours: true,
         disabledMinutes,
         delimiter,
         disableReset,
-        isUnlimited
-      )
+        isUnlimited,
+      })
     );
 
     const currentHour = newTime.split(delimiter)[0];
@@ -183,14 +213,14 @@ export const TimeSelector = forwardRef(
 
     useEffect(() => {
       setNewTime(
-        formatTime(
+        formatTime({
           time,
           disabledHours,
           disabledMinutes,
           delimiter,
           disableReset,
-          isUnlimited
-        )
+          isUnlimited,
+        })
       );
     }, [delimiter, disableReset, isUnlimited, time]);
     function handleButtonClicks(event) {
