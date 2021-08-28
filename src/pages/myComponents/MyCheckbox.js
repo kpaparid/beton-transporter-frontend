@@ -7,26 +7,30 @@ import { useEffect, useState } from "react";
 import InputRange from "react-input-range";
 import { useSelector, useDispatch } from "react-redux";
 import { ACTIONS } from "../reducers/redux";
-
+import "./MyForm.css";
+import { isEqual } from "lodash";
 function MyCheckboxContainer(props) {
-  const { labels, text, index = "0", checked, handler } = props;
+  const { text, checked, handler } = props;
 
   return (
-    <div className="container-fluid p-0 py-1 px-2" key={index}>
+    <div
+      className="container-fluid p-0 py-1 px-2 revertio"
+      style={{ maxWidth: "250px" }}
+    >
       <Button
-        className="w-100"
-        id={"nested_checkbox_" + index}
         variant="white"
         onClick={handler}
         style={{ boxShadow: "0px 0px 0px" }}
+        className="w-100"
       >
-        <div className="container-fluid mycontainer d-flex justify-content-between">
-          <div>{text}</div>
-          <Form.Check
-            className="d-flex justify-content-between g-0 align-items-center"
-            id={`checkbox-${labels.id}-${index}`}
-            htmlFor={`checkbox-${labels.id}-${index}`}
+        <div className="container-fluid mycontainer w-100 d-flex justify-content-between">
+          <div
+            className="truncate-hovered-overflow"
+            onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
           >
+            {text}
+          </div>
+          <Form.Check className="d-flex justify-content-between g-0 align-items-center">
             <div className="align-items-center">
               <Form.Check.Input type="checkbox" disabled checked={checked} />
             </div>
@@ -36,8 +40,32 @@ function MyCheckboxContainer(props) {
     </div>
   );
 }
-
-export default (props) => {
+export const MyCheckboxFilter = React.memo(
+  ({ onToggleAll, onToggleOne, checkedAll = true, data }) => {
+    console.log(data);
+    return (
+      <>
+        <MyCheckboxContainer
+          text="Select All"
+          handler={() => onToggleAll(data.map((e) => e.text))}
+          checked={checkedAll}
+          // checked={true}
+        />
+        <Dropdown.Divider></Dropdown.Divider>
+        {data.map((item, index) => (
+          <MyCheckboxContainer
+            key={"MyCheckboxContainer" + index}
+            text={item.text}
+            checked={item.checked}
+            handler={() => onToggleOne(item.text)}
+          />
+        ))}
+      </>
+    );
+  },
+  isEqual
+);
+const MyCheckbox = (props) => {
   const { labels, data } = props;
   const dispatch = useDispatch();
 
@@ -51,7 +79,7 @@ export default (props) => {
   function toggleAll(label, data, event) {
     console.log("click nestedFilter All");
     dispatch({
-      type: ACTIONS.NESTEDFILTER_TOGGLEALL,
+      type: ACTIONS.NESTEDFILTER_TOGGLE_ALL,
       payload: {
         label: label,
         data: data[label],
@@ -61,7 +89,7 @@ export default (props) => {
   function toggleOne(label, value) {
     console.log("click nestedFilter Single");
     dispatch({
-      type: ACTIONS.NESTEDFILTER_TOGGLEONE,
+      type: ACTIONS.NESTEDFILTER_TOGGLE_ONE,
       payload: {
         label: label,
         value: value,
@@ -91,3 +119,4 @@ export default (props) => {
     </>
   );
 };
+export default MyCheckbox;

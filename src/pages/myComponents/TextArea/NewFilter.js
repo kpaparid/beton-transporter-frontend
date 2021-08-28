@@ -1,17 +1,87 @@
-import React from "react";
-import { useLayoutEffect, useState } from "react";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { forwardRef, useLayoutEffect } from "react";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { Form, ButtonGroup, Dropdown } from "@themesberg/react-bootstrap";
-import { labels } from "../../data/transactions";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ButtonGroup, Form, Dropdown } from "@themesberg/react-bootstrap";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import NestedFilter from "../NestedFilter";
+import "../MyForm.css";
+import { Portal } from "react-portal";
+import { isEqual } from "lodash";
+export const CustomDropdown = forwardRef(
+  (
+    {
+      variant = "tertiary",
+      value = "Dropdown Button",
+      as,
+      className = "",
+      menuClassName = "",
+      disabled = false,
+      children,
+    },
+    { ref, refList = [] }
+  ) => {
+    const [show, setShow] = useState(false);
+    // console.log(ref, refList);
+    return (
+      <Dropdown
+        as={as}
+        className={className}
+        disabled={disabled}
+        show={!disabled && show}
+        onToggle={(_t, _e, metadata) => {
+          const focusWithin = refList
+            .map(
+              (ref) =>
+                ref.current && ref.current.contains(document.activeElement)
+            )
+            .reduce((a, b) => a || b, false);
 
-import { useSelector, useDispatch, shallowEqual } from "react-redux";
-import { ACTIONS } from "../reducers/redux";
-import NestedFilter from "./NestedFilter";
+          metadata.source ||
+          (typeof focusWithin != "undefined" &&
+            focusWithin != null &&
+            focusWithin)
+            ? setShow(true)
+            : setShow(false);
+        }}
+      >
+        <Dropdown.Toggle
+          variant={variant}
+          id="dropdown-basic"
+          className="shadow-none py-1"
+        >
+          {value}
+        </Dropdown.Toggle>
+        <Portal>
+          <Dropdown.Menu ref={ref} className={"p-0 " + menuClassName}>
+            {children}
+          </Dropdown.Menu>
+        </Portal>
+      </Dropdown>
+    );
+  }
+);
 
-export const DropdownFilter = () => {
-  const dispatch = useDispatch();
+export const CheckboxRow = React.memo(
+  ({ checked = true, onChange, className = "", children }) => {
+    return (
+      <div className={"d-flex align-items-center " + className}>
+        <Form.Check
+          checked={checked}
+          className="align-items-center m-0 ps-3 pe-1 justify-content-start"
+          onChange={onChange}
+        ></Form.Check>
+
+        <div className="ps-2 pe-2 container-fluid d-flex justify-content-between">
+          {children}
+        </div>
+      </div>
+    );
+  },
+  isEqual
+);
+
+export const DropdownFilterYikes = (onChange) => {
   const data = useSelector(myDataSelector);
   const displayArrowByLabel = useSelector(tourTableUniqueLengthSelector);
   const labels = useSelector((state) => state.tourTable.labelsById);
@@ -27,15 +97,6 @@ export const DropdownFilter = () => {
     return checkedList;
   });
 
-  function handleChange(index, labelId, event) {
-    dispatch({
-      type: ACTIONS.TOGGLE_COLUMN,
-      payload: {
-        index: index,
-        labelId: labelId,
-      },
-    });
-  }
   function myDataSelector(state) {
     const values = state.tourTable.allLabelsId
       .map((label) => {
@@ -83,7 +144,7 @@ export const DropdownFilter = () => {
             htmlFor={`checkbox${index}`}
             checked={checked[labelId]}
             className="align-items-center m-0 ps-3 pe-1 justify-content-start mycheckbox"
-            onChange={(e) => handleChange(index, labelId, e)}
+            onChange={(e) => onChange(index, labelId, e)}
           ></Form.Check>
           <DropdownContent
             labelId={labelId}

@@ -1,69 +1,38 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useTourTable } from "./MyConsts";
-import {
-  Col,
-  Row,
-  Nav,
-  Card,
-  Image,
-  Button,
-  Table,
-  ProgressBar,
-  Pagination,
-  Form,
-} from "@themesberg/react-bootstrap";
-import { ACTIONS } from "../reducers/redux";
-import { MyTextArea } from "./TextArea/MyTextArea";
-import { loadToursData } from "../reducers/loadToursData";
-import { MyInput } from "./MyInput";
-import { HeaderRow } from "./MyTableRow";
-import { MyTable, TourTable5 } from "./TourTable2";
+import React, { memo, useRef, forwardRef } from "react";
+import { Card } from "@themesberg/react-bootstrap";
+import ReactTable from "./ReactTable";
+import { TableLabel } from "./Table/TableLabel";
 
-export const MyTourTable = (props) => {
-  const stateAPIStatus = useLoadToursData();
-  function useLoadToursData() {
-    const [stateAPIStatus, setAPIStatus] = useState("idle");
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-      setAPIStatus("loading");
-      loadToursData()
-        .then((data) => {
-          dispatch({
-            type: ACTIONS.LOAD_TOUR_TABLE,
-            payload: {
-              table: data.table,
-              labels: data.labels,
-            },
-          });
-          setAPIStatus("success");
-        })
-        .catch((error) => {
-          setAPIStatus("error");
-        });
-    }, [dispatch]);
-
-    return stateAPIStatus;
-  }
-  // const state = useSelector((state) => state.tourTable);
-  // useEffect(() => {
-  //   console.log("NEW State", state);
-  // }, [state]);
+export const MyTourTable = memo(({ title, filterDataSelector, ...rest }) => {
+  const skipResetRef = useRef(false);
   return (
     <Card border="light">
+      <Card.Header className="border-0">
+        <TableLabel ref={skipResetRef}>
+          {{ title, filterDataSelector }}
+        </TableLabel>
+      </Card.Header>
       <Card.Body className="px-1">
-        {stateAPIStatus !== "success" && (
-          <div className="w-100 h-100 text-center">
-            <h2>LOADING</h2>
-          </div>
-        )}
-        {stateAPIStatus === "success" && (
-          <>
-            <TourTable5></TourTable5>
-          </>
-        )}
+        <CardBody ref={skipResetRef}>{{ ...rest }}</CardBody>
       </Card.Body>
     </Card>
   );
-};
+});
+const CardBody = forwardRef(
+  ({ children: { stateAPIStatus, ...rest } }, ref) => {
+    if (stateAPIStatus === "loading")
+      return (
+        <div className="w-100 h-100 text-center">
+          <h2>LOADING</h2>
+        </div>
+      );
+    else if (stateAPIStatus === "success")
+      return <ReactTable ref={ref}>{{ ...rest }}</ReactTable>;
+    else if (stateAPIStatus === "error")
+      return (
+        <div className="w-100 h-100 text-center">
+          <h2>ERROR</h2>
+        </div>
+      );
+  }
+);

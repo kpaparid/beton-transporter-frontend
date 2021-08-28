@@ -8,24 +8,29 @@ export const MyFormSelect = (props) => {
     availableValues,
     id,
     value,
-    minWidth = "100px",
-    maxWidth = "150px",
     onChange,
+    onBlur,
     labelIsDisabled = false,
   } = props;
+  const [defaultValue, setDefaultValue] = useState(value);
 
+  useEffect(() => {
+    setDefaultValue(value);
+  }, [value]);
+  function handleChange(e) {
+    console.log("change");
+    setDefaultValue(e.target.value);
+    onChange(e);
+  }
   return (
     <>
       {!labelIsDisabled && label && <Form.Label>{label}</Form.Label>}
       <select
         key={id}
-        style={{
-          minWidth: minWidth,
-          fontSize: "inherit",
-          textAlign: "center",
-          textAlignLast: "center",
-        }}
-        onChange={onChange}
+        value={defaultValue}
+        onChange={handleChange}
+        onBlur={onBlur}
+        selected
       >
         {availableValues.map((value, index) => (
           <option key={`${id}-${index}`}>{value}</option>

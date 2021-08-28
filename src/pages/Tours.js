@@ -1,94 +1,48 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import {
-  Button,
-  ButtonGroup,
-  Breadcrumb,
-  Dropdown,
-} from "@themesberg/react-bootstrap";
+import { faHome } from "@fortawesome/free-solid-svg-icons";
+import { Breadcrumb } from "@themesberg/react-bootstrap";
 
-import { TransactionsTable } from "../components/Tables";
-import { DropdownFilter } from "./myComponents/Filter";
-import {
-  BreakBtn,
-  EditBtn,
-  MyBtn,
-  SaveBtn,
-  DownloadBtn,
-} from "./myComponents/MyButtons";
-import { useSelector, useDispatch, shallowEqual } from "react-redux";
-import { ACTIONS } from "./reducers/redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MyTourTable } from "./myComponents/MyTourTable";
-import moment from "moment";
+
 import {
-  HourSelector,
-  TimeSelectorDropdown,
-  HourSelectorDropdown,
-  MonthSelectorDropdown,
-} from "./myComponents/MyOwnCalendar";
-import MyModal from "./myComponents/MyModal";
-import AddRowModal from "./myComponents/AddRowModal";
-import {
-  useTourTable,
-  useTourDate,
-  useCheckedExists,
-  useAllLabels,
-} from "./myComponents/MyConsts";
-import TextareaAutosize from "react-textarea-autosize";
-export const Tours = () => {
+  editMode,
+  hiddenColumnsReselect,
+  nestedFilterTourData,
+  reactTableData,
+  tourDate,
+  visibleHeaders,
+} from "./myComponents/MySelectors";
+import { loadToursData } from "./reducers/loadToursData";
+import { ACTIONS } from "./reducers/redux";
+import { MonthSelectorDropdown } from "./myComponents/MyOwnCalendar";
+
+export const Tours = memo(() => {
   const dispatch = useDispatch();
-
-  // const tourTable = useTourTable();
-  const tourDate = useTourDate();
-  const checkedExists = useCheckedExists();
-  // const allLabels = useAllLabels();
-
-  const [showModalDefault, setShowModalDefault] = useState(false);
-  const handleAddRow = () => setShowModalDefault(true);
-  // const handleClose = () => setShowModalDefault(false);
-
-  // useEffect(() => {
-  //   console.log("rerender");
-  //   console.log(tourTable);
-  // }, [tourTable]);
-
-  const toggleEditMode = () => {
+  const dataSelector = reactTableData;
+  const headersSelector = visibleHeaders;
+  const hiddenColumnsSelector = hiddenColumnsReselect;
+  const editSelector = editMode;
+  const stateAPIStatus = useLoadToursData();
+  const dateSelector = tourDate;
+  const filterDataSelector = nestedFilterTourData;
+  const date = useSelector(dateSelector);
+  function handlerMonthChange(date) {
     dispatch({
-      type: ACTIONS.EDIT_TOGGLE,
-    });
-  };
-  const handleEditEnable = () => {
-    // if (checkedExists) {
-    toggleEditMode();
-    // }
-  };
-  const handleEditDisable = () => {
-    toggleEditMode();
-    closeAllCheckBoxes();
-    clearChanges();
-  };
-  const handleSave = () => {
-    dispatch({
-      type: ACTIONS.SAVE_CHANGES,
-    });
-    closeAllCheckBoxes();
-    clearChanges();
-    toggleEditMode();
-  };
-  const handleDownload = () => {
-    console.log("DOWNLOAD");
-  };
-  function closeAllCheckBoxes() {
-    dispatch({
-      type: ACTIONS.CLOSE_CHECK_ALL,
+      type: ACTIONS.TOURTABLE_CHANGE_TOURDATE,
+      payload: {
+        date: date,
+      },
     });
   }
-  function clearChanges() {
-    dispatch({
-      type: ACTIONS.DELETE_CHANGES,
-    });
-  }
+  const title = (
+    <MonthSelectorDropdown
+      title="Touren Alle Werke"
+      date={date}
+      onChange={handlerMonthChange}
+    />
+  );
 
   return (
     <>
@@ -109,39 +63,41 @@ export const Tours = () => {
           <Breadcrumb.Item active>Touren</Breadcrumb.Item>
         </Breadcrumb>
       </div>
-      <div className="d-flex justify-content-between flex-wrap align-items-center py-4">
-        <div className="d-flex align-items-center mt-2">
-          <Dropdown as={ButtonGroup} className="mb-2 me-2 ">
-            <Dropdown.Toggle split variant="tertiary">
-              Filter
-              <FontAwesomeIcon icon={faAngleDown} className="dropdown-arrow" />
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu
-              className="dropdown-menu-xs"
-              style={{ display: "inline-table", animation: "disable" }}
-            >
-              <DropdownFilter></DropdownFilter>
-            </Dropdown.Menu>
-          </Dropdown>
-          <h5 className="m-0 py-0 px-2">Touren Alle Werke</h5>
-          <MonthSelectorDropdown value={tourDate}></MonthSelectorDropdown>
-        </div>
-        <div className="flex-wrap d-flex">
-          <ButtonGroup
-            className="btn-toolbar mt-2 flex-wrap justify-content-end"
-            variant="danger"
-          >
-            <EditBtn onClick={handleEditEnable} value="Edit" />
-            <MyBtn value="Add Row" onClick={handleAddRow}></MyBtn>
-            <SaveBtn onClick={handleSave} value="Speichern" />
-            <BreakBtn onClick={handleEditDisable} value="Abbruch" />
-            <DownloadBtn onClick={handleDownload} />
-          </ButtonGroup>
-        </div>
-      </div>
-
-      <MyTourTable></MyTourTable>
+      <MyTourTable
+        {...{
+          title,
+          stateAPIStatus,
+          filterDataSelector,
+          dataSelector,
+          headersSelector,
+          hiddenColumnsSelector,
+          editSelector,
+        }}
+      />
     </>
   );
-};
+});
+function useLoadToursData() {
+  const [stateAPIStatus, setAPIStatus] = useState("idle");
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setAPIStatus("loading");
+    loadToursData()
+      .then((data) => {
+        dispatch({
+          type: ACTIONS.LOAD_TOUR_TABLE,
+          payload: {
+            table: data.table,
+            labels: data.labels,
+          },
+        });
+        setAPIStatus("success");
+      })
+      .catch((error) => {
+        setAPIStatus("error");
+      });
+  }, [dispatch]);
+
+  return stateAPIStatus;
+}

@@ -1,7 +1,10 @@
 import { createStore } from "redux";
 import moment from "moment";
+import produce from "immer";
+import { tourDate } from "../myComponents/MySelectors";
 
 export const ACTIONS = {
+  STATUS_CHANGE: "STATUS_CHANGE",
   CLOSE_CHECK_ALL: "CLOSE_CHECK_ALL",
   LOAD_MENU: "LOAD_MENU",
   TOGGLE_CHECK_ALL: "CHECK_ALL",
@@ -9,12 +12,13 @@ export const ACTIONS = {
   CHECK_ONE: "CHECK_ONE",
   SAVE_CHANGES: "SAVE_CHANGES",
   ADD_CHANGE: "ADD_CHANGE",
-  DELETE_CHANGES: "DELETE_CHANGES",
+  RESET_CHANGES: "RESET_CHANGES",
   EDIT_TOGGLE: "EDIT_TOGGLE",
   TOGGLE_COLUMN: "TOGGLE_COLUMN",
-  NESTEDFILTER_TOGGLEALL: "NESTEDFILTER_TOGGLEALL",
-  NESTEDFILTER_TOGGLEONE: "NESTEDFILTER_TOGGLEONE",
+  NESTEDFILTER_TOGGLE_ALL: "NESTEDFILTER_TOGGLE_ALL",
+  NESTEDFILTER_TOGGLE_ONE: "NESTEDFILTER_TOGGLE_ONE",
   TOURTABLE_CHANGE_TOURDATE: "TOURTABLE_CHANGE_TOURDATE",
+  NESTEDFILTER_ADD_FILTER: "NESTEDFILTER_ADD_FILTER",
 };
 export const myInitialState = {
   checkedAll: "",
@@ -38,11 +42,13 @@ export const myInitialState = {
   },
 
   tourTable: {
+    status: "IDLE",
     byId: {},
     allId: [],
     shownId: [],
     checkedId: [],
     changesById: {},
+    tableChanges: {},
     editMode: false,
 
     allLabelsId: [],
@@ -63,7 +69,7 @@ function MyReducer(state = myInitialState, action) {
       const newTransactionsTable = table.map((item, index) => ({
         ...item,
         labelId: item.id,
-        id: index,
+        // id: index,
       }));
       const newChecked = table.map((item) => "");
       const newTransactionsFilterChecked = Array(
@@ -112,34 +118,33 @@ function MyReducer(state = myInitialState, action) {
           labelsById: newLabelsById,
           allLabelsId: newAllLabelsId,
           checkedLabelsId: checkedLabelsId,
+          filteredOutValues: { datum: [state.tourTable.tourDate] },
         },
       };
     }
 
+    case ACTIONS.STATUS_CHANGE: {
+      const { status } = action.payload;
+      return {
+        ...state,
+        tourTable: {
+          ...state.tourTable,
+          status: status,
+        },
+      };
+    }
     case ACTIONS.TOGGLE_COLUMN: {
-      const { index, labelId } = action.payload;
-      console.log("Toggle_Column: " + labelId);
-      const newTransactionsFilterChecked = state.transactionsFilter.checked;
-      newTransactionsFilterChecked[index] =
-        !newTransactionsFilterChecked[index];
+      const { id } = action.payload;
+      console.log("Toggle_Column: " + id);
 
-      const test = state.tourTable.checkedLabelsId;
+      const checkedLabelsId = [...state.tourTable.checkedLabelsId];
       const newCheckedLabelsId =
-        state.tourTable.checkedLabelsId.indexOf(labelId) === -1
-          ? [...state.tourTable.checkedLabelsId, labelId]
-          : state.tourTable.checkedLabelsId.filter(
-              (label) => label !== labelId
-            );
-
-      console.log(newCheckedLabelsId);
-      console.log(state.tourTable.checkedLabelsId.indexOf(labelId));
+        checkedLabelsId.indexOf(id) === -1
+          ? [...checkedLabelsId, id]
+          : checkedLabelsId.filter((label) => label !== id);
 
       return {
         ...state,
-        transactionsFilter: {
-          ...state.transactionsFilter,
-          checked: newTransactionsFilterChecked,
-        },
         tourTable: {
           ...state.tourTable,
           checkedLabelsId: newCheckedLabelsId,
@@ -148,15 +153,16 @@ function MyReducer(state = myInitialState, action) {
     }
 
     case ACTIONS.EDIT_TOGGLE: {
-      const newEditMode = !state.tourTable.editMode;
-      console.log("edit mode" + newEditMode);
-      return {
-        ...state,
-        tourTable: {
-          ...state.tourTable,
-          editMode: newEditMode,
-        },
-      };
+      const c = produce(state, (draftState) => {
+        draftState.tourTable.editMode = !draftState.tourTable.editMode;
+        return draftState;
+      });
+      return c;
+
+      // return {
+      //   ...state,
+      //   editMode: true,
+      // };
     }
 
     case ACTIONS.TOGGLE_CHECK_ALL: {
@@ -217,6 +223,8 @@ function MyReducer(state = myInitialState, action) {
         tourTable: {
           ...state.tourTable,
           byId: newById,
+          changesById: {},
+          status: "IDLE",
         },
       };
     }
@@ -233,25 +241,28 @@ function MyReducer(state = myInitialState, action) {
         },
       };
     }
-    case ACTIONS.DELETE_CHANGES: {
-      console.log("clearing changes");
-      return {
-        ...state,
-        tourTable: {
-          ...state.tourTable,
-          changesById: {},
-        },
-      };
+    case ACTIONS.RESET_CHANGES: {
+      if (Object.keys(state.tourTable.changesById).length !== 0) {
+        console.log("clearing changes");
+        return {
+          ...state,
+          tourTable: {
+            ...state.tourTable,
+            changesById: {},
+            status: "IDLE",
+          },
+        };
+      }
+      return state;
     }
-    case ACTIONS.NESTEDFILTER_TOGGLEALL: {
+    case ACTIONS.NESTEDFILTER_TOGGLE_ALL: {
       const { label, data } = action.payload;
+      const filteredOutValues = state.tourTable.filteredOutValues;
+      const newFilteredOutValues =
+        !filteredOutValues[label] || filteredOutValues[label].length === 0
+          ? { ...filteredOutValues, [label]: data }
+          : {};
 
-      const values = data.map((item) => item.value);
-      const checked = data.filter((item) => item.checked === "checked");
-      const checkedAll = values.length === checked.length;
-      const newFilteredOutValues = state.tourTable.filteredOutValues;
-      const newValues = checkedAll ? values : [];
-      newFilteredOutValues[label] = newValues;
       return {
         ...state,
         tourTable: {
@@ -260,47 +271,47 @@ function MyReducer(state = myInitialState, action) {
         },
       };
     }
-    case ACTIONS.NESTEDFILTER_TOGGLEONE: {
+    case ACTIONS.NESTEDFILTER_ADD_FILTER: {
+      const { label, value } = action.payload;
+      console.log(value);
+      const newValues = {
+        ...state.tourTable.filteredOutValues,
+        [label]: value,
+      };
+      return {
+        ...state,
+        tourTable: {
+          ...state.tourTable,
+          filteredOutValues: newValues,
+        },
+      };
+    }
+    case ACTIONS.NESTEDFILTER_TOGGLE_ONE: {
       const { label, value } = action.payload;
       const newFilteredOutValues = { ...state.tourTable.filteredOutValues };
-      const newValues =
-        newFilteredOutValues[label] &&
-        newFilteredOutValues[label].findIndex((item) => item === value) === -1
-          ? [...newFilteredOutValues[label], value]
-          : [...newFilteredOutValues[label]].filter((item) => item !== value);
-
-      newFilteredOutValues[label] = newValues;
+      console.log(label, value);
+      const newLabel = newFilteredOutValues[label]
+        ? newFilteredOutValues[label].find((item) => item === value)
+          ? [...newFilteredOutValues[label]].filter((item) => item !== value)
+          : [...newFilteredOutValues[label], value]
+        : [value];
+      const newValues = { ...newFilteredOutValues, [label]: newLabel };
       return {
         ...state,
         tourTable: {
           ...state.tourTable,
-          filteredOutValues: newFilteredOutValues,
+          filteredOutValues: newValues,
         },
       };
     }
     case ACTIONS.TOURTABLE_CHANGE_TOURDATE: {
-      const oldMonth = moment(state.tourTable.tourDate, "MM/YYYY").format(
-        "MMM"
-      );
-      const oldYear = moment(state.tourTable.tourDate, "MM/YYYY").format(
-        "YYYY"
-      );
-      const { month = oldMonth, yearIncrement = 0 } = action.payload;
-
-      const newMonth = moment(month, "MMM").format("MM");
-      const newYear = moment()
-        .year(parseInt(oldYear) + yearIncrement)
-        .format("YYYY");
-      const newDate = moment()
-        .year(newYear)
-        .month(parseInt(newMonth) - 1)
-        .format("MM/YYYY");
+      const { date } = action.payload;
 
       return {
         ...state,
         tourTable: {
           ...state.tourTable,
-          tourDate: newDate,
+          tourDate: date,
         },
       };
     }

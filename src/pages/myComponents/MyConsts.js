@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import {
-  availableValues,
-  visibleLabelsSelector,
+  // availableValues,
+  // visibleLabelsSelector,
   checkedExistsSelector,
   shownToursSelector,
   shownToursSelector2,
   selectorMenu,
   checkedAllSelector,
   sortedLabelsSelector,
-  tableData,
 } from "./MySelectors";
 
 import moment from "moment";
@@ -17,23 +16,23 @@ import { validateNumber, validateNumberSeparator } from "./util/utilities";
 import { createReduxStore } from "../reducers/redux";
 
 const store = createReduxStore();
-const useTourTable = () => useSelector((state) => state.tourTable);
+// const useTourTable = () => useSelector((state) => state.tourTable);
 const useTourDate = () =>
   useSelector((state) =>
     moment(state.tourTable.tourDate, "MM/YYYY").format("MMMM YYYY")
   );
-const useCheckedExists = () => useSelector(checkedExistsSelector);
+// const useCheckedExists = () => useSelector(checkedExistsSelector);
 
-const useShownTourTable = () => useSelector(shownToursSelector);
-const useShownTourTable2 = () => useSelector(shownToursSelector2, shallowEqual);
-const useCheckedAll = () => useSelector(checkedAllSelector);
-const useChecked = () => useSelector(selectorMenu);
-const useShownLabels = () => useSelector(sortedLabelsSelector);
-const useAllLabels = () => useSelector((state) => state.tourTable.labelsById);
-const useGetVisibleLabels = () =>
-  useSelector(visibleLabelsSelector, shallowEqual);
-const useGetAvailableValuesSelectInput = (key) =>
-  useSelector((state) => availableValues(state, key));
+// const useShownTourTable = () => useSelector(shownToursSelector);
+// const useShownTourTable2 = () => useSelector(shownToursSelector2, shallowEqual);
+// const useCheckedAll = () => useSelector(checkedAllSelector);
+// const useChecked = () => useSelector(selectorMenu);
+// const useShownLabels = () => useSelector(sortedLabelsSelector);
+// const useAllLabels = () => useSelector((state) => state.tourTable.labelsById);
+// const useGetVisibleLabels = () =>
+//   useSelector(visibleLabelsSelector, shallowEqual);
+// const useGetAvailableValuesSelectInput = (key) =>
+//   useSelector((state) => availableValues(state, key));
 const useActiveElement = () => {
   const [listenersReady, setListenersReady] =
     useState(false); /** Useful when working with autoFocus */
@@ -59,29 +58,29 @@ const useActiveElement = () => {
     listenersReady,
   };
 };
-const useToursTableData = () => useSelector(tableData);
+// const useToursTableData = () => useSelector(tableData);
 const red = "250, 82, 82";
 const green = "5, 166, 119";
 const grey = "46,54, 80";
 const lightblue = "209, 215, 224";
 const darkblue = "86, 97, 144";
 const inputLabelsWidths = {
-  wagen: { minWidth: "10px", maxWidth: "450px" },
-  werk: { minWidth: "10px", maxWidth: "450px" },
-  fahrer: { minWidth: "10px", maxWidth: "450px" },
-  entladeTyp: { minWidth: "10px", maxWidth: "450px" },
-  datum: { minWidth: "10px", maxWidth: "450px" },
-  cbm: { minWidth: "10px", maxWidth: "450px" },
-  abfahrt: { minWidth: "10px", maxWidth: "450px" },
-  kmAbfahrt: { minWidth: "10px", maxWidth: "450px" },
-  kmAnkunft: { minWidth: "10px", maxWidth: "450px" },
-  ankunft: { minWidth: "10px", maxWidth: "450px" },
-  lieferscheinNr: { minWidth: "10px", maxWidth: "450px" },
-  baustelle: { minWidth: "10px", maxWidth: "450px" },
-  entladeBeginn: { minWidth: "10px", maxWidth: "450px" },
-  entladeEnde: { minWidth: "10px", maxWidth: "450px" },
-  wartezeit: { minWidth: "10px", maxWidth: "450px" },
-  sonstiges: { minWidth: "10px", maxWidth: "450px" },
+  wagen: { minWidth: "10px", maxWidth: "200px" },
+  werk: { minWidth: "10px", maxWidth: "200px" },
+  fahrer: { minWidth: "10px", maxWidth: "200px" },
+  entladeTyp: { minWidth: "10px", maxWidth: "200px" },
+  datum: { minWidth: "10px", maxWidth: "200px" },
+  cbm: { minWidth: "10px", maxWidth: "200px" },
+  abfahrt: { minWidth: "10px", maxWidth: "200px" },
+  kmAbfahrt: { minWidth: "10px", maxWidth: "200px" },
+  kmAnkunft: { minWidth: "10px", maxWidth: "200px" },
+  ankunft: { minWidth: "10px", maxWidth: "200px" },
+  lieferscheinNr: { minWidth: "10px", maxWidth: "200px" },
+  baustelle: { minWidth: "10px", maxWidth: "200px" },
+  entladeBeginn: { minWidth: "10px", maxWidth: "200px" },
+  entladeEnde: { minWidth: "10px", maxWidth: "200px" },
+  wartezeit: { minWidth: "10px", maxWidth: "200px" },
+  sonstiges: { minWidth: "10px", maxWidth: "200px" },
 };
 const validationType = (type) =>
   type === "time"
@@ -98,22 +97,22 @@ const imgInvalid = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000
 export {
   validationType,
   store,
-  useTourTable,
+  // useTourTable,
   useTourDate,
-  useCheckedExists,
-  useShownTourTable,
-  useCheckedAll,
-  useChecked,
-  useShownLabels,
-  useAllLabels,
-  useGetVisibleLabels,
+  // useCheckedExists,
+  // useShownTourTable,
+  // useCheckedAll,
+  // useChecked,
+  // useShownLabels,
+  // useAllLabels,
+  // useGetVisibleLabels,
   inputLabelsWidths,
-  useGetAvailableValuesSelectInput,
+  // useGetAvailableValuesSelectInput,
   imgValid,
   imgInvalid,
   useActiveElement,
-  useToursTableData,
-  useShownTourTable2,
+  // useToursTableData,
+  // useShownTourTable2,
   red,
   grey,
   lightblue,

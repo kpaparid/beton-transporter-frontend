@@ -1,19 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 
 import moment from "moment";
 import BigNumber from "bignumber.js";
 import { darkblue, green, grey, lightblue, red } from "../MyConsts";
 /* global BigInt */
-
+export function useWindowSize() {
+  const [size, setSize] = useState(0);
+  useLayoutEffect(() => {
+    function updateSize() {
+      setSize(window.innerWidth);
+    }
+    window.addEventListener("resize", updateSize);
+    updateSize();
+    return () => window.removeEventListener("resize", updateSize);
+  });
+  return size;
+}
 export function formatInput(value, type) {
   switch (type) {
     case "number":
     case "distance": {
       return formatNumberInput(value);
     }
-    case "date": {
-      return formatDateInput(value);
-    }
+    // case "date": {
+    //   return formatDateInput(value);
+    // }
     case "time": {
       return formatTimeInput(value);
     }
@@ -244,7 +255,9 @@ export const calcIndexedCalendarDays = (date, labels) => {
   return transpose(filledIndexWithEmptyDays, numRows);
 };
 export const convertArrayToObject = (array = []) =>
-  array !== [] ? array.reduce((prev, curr) => ({ ...prev, ...curr })) : [];
+  array.length !== 0
+    ? array.reduce((prev, curr) => ({ ...prev, ...curr }))
+    : [];
 export function colorizeBorder(
   ref,
   isValid = false,

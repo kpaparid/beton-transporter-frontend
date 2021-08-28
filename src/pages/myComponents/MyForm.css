@@ -8,20 +8,10 @@
   box-shadow: none;
   border: solid 1.5px transparent;
   transition: border 0.2s ease;
-}
-.wrapper:hover {
-  /* background-color: white; */
-}
-.text-span {
-  overflow: hidden;
-  text-overflow: inherit;
-
-  padding-right: 4px;
-  padding-left: 4px;
-}
-.wrapper:hover .text-span {
-  overflow: auto;
-  text-overflow: inherit;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 .wrapper:focus-within {
   background-color: white;
@@ -33,8 +23,6 @@
   border: none;
   width: 100%;
   background-color: transparent;
-  padding-right: 0rem !important;
-  padding-left: 0rem !important;
 }
 .wrapper select:focus {
   border: none;
@@ -45,48 +33,29 @@
   outline: none;
 }
 .wrapper .dummy {
+  width: 100%;
   display: flex;
   justify-content: center;
   text-align: center;
   white-space: nowrap;
-  background-repeat: no-repeat;
-  background-size: calc(0.75em + 1.55rem) calc(0.55em + 0.8rem);
-  background-position: left;
 
   min-height: 25px;
   visibility: visible;
   height: auto;
-  padding-top: 2px;
-  padding-bottom: 2px;
 }
-.wrapper.wrapper-editable.selection .dummy {
-  padding-right: 1.8rem;
-}
-.wrapper.invalid .dummy {
-  padding-left: 2rem;
-  padding-right: 1rem;
-}
-.wrapper.valid .dummy {
-  padding-left: 2rem;
-  padding-right: 1rem;
-}
+
 .wrapper.wrapper-editable {
   border: 1.5px solid rgb(46, 54, 80, 100%);
 }
 .wrapper.wrapper-editable.valid {
-  transition: border 1s;
+  transition: border 0.2s;
   border: 1.5px solid rgb(5, 166, 119, 100%);
 }
 .wrapper.wrapper-editable.invalid {
-  transition: border 1s;
+  transition: border 0.2s;
   border: 1.5px solid rgb(250, 82, 82, 100%);
 }
-.wrapper.wrapper-editable.valid .dummy {
-  padding-left: 2rem;
-}
-.wrapper.wrapper-editable.invalid .dummy {
-  padding-left: 2rem;
-}
+
 .wrapper.wrapper-editable.valid:focus-within {
   border: 1.5px solid rgb(5, 166, 119, 50%);
   box-shadow: 0 0 0 0.2rem rgb(5, 166, 119, 50%);
@@ -100,21 +69,14 @@
   min-height: 0;
   visibility: hidden;
   height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
 }
 
 .wrapper.wrapper-editable .dummy.dummy-visible {
   min-height: 25px;
   visibility: visible;
   height: auto;
-  padding-top: 2px;
-  padding-bottom: 2px;
   background-image: none;
-  padding-left: 0;
-  padding-right: 0;
 }
-input,
 textarea {
   width: 100%;
   background-color: transparent;
@@ -122,15 +84,14 @@ textarea {
   text-align: center;
   resize: none;
   vertical-align: bottom;
-  padding-right: 0.25rem;
-  padding-left: 0.25rem;
+  padding: 0;
   overflow: hidden;
+  padding: 2px 0px 2px 0px;
 }
 textarea:focus-visible {
   outline: 0;
 }
 
-input,
 textarea :focus {
   outline: none;
 }
@@ -138,25 +99,106 @@ textarea :focus {
   /* width: fit-content; */
   align-items: center;
   width: 100%;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 .measurement {
-  visibility: none;
-  transition: all 0.5s ease;
-  visibility: visible;
+  display: flex;
+  align-items: center;
+  padding-left: 0.25rem;
 }
 .wrapper.wrapper-editable .finalwrappi {
   height: inherit;
+  width: 100%;
 }
 .wrapper .finalwrappi {
   height: 0px;
+  width: 100%;
+}
+.img-container {
+  background-position-y: center;
+  background-position-x: left;
+  background-repeat: no-repeat;
+  background-size: calc(0.15em + 1rem) calc(0.55em + 0.8rem);
+}
+.wrapper.wrapper-editable.invalid .img-container {
+  padding: 0;
+}
+.wrapper.wrapper-editable.valid .img-container {
+  padding: 0;
+}
+.wrapper.invalid .img-container {
+  padding-right: 1.3rem;
+}
+.text-span {
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wrapper:hover .text-span {
+  overflow-x: unset;
+  overflow-y: hidden;
+  overflow-x: visible;
+  text-overflow: inherit;
+}
+.wrapper:hover {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.text-flex {
+  display: flex;
+  min-width: 0px;
+  align-items: center;
 }
 .wrapper .finalwrappi textarea {
   visibility: hidden;
 }
+.wrapper .finalwrappi select {
+  visibility: hidden;
+}
 .wrapper.wrapper-editable .finalwrappi textarea {
   visibility: visible;
+}
+.wrapper.wrapper-editable .finalwrappi select {
+  visibility: visible;
+}
+.wrapper.wrapper-editable.selection .dummy {
+  padding-right: 1.5rem;
+}
+.overflowX-hidden {
+  overflow-x: hidden;
+}
+.overflowY-hidden {
+  overflow-y: hidden;
+}
+.table-responsive {
+  overflow-y: hidden;
+}
+.checkbox input {
+  cursor: pointer;
+  margin-top: 0;
+}
+.checkbox {
+  display: flex;
+  justify-content: center;
+}
+.shadow-button-none button {
+  box-shadow: 0 !important;
+}
+.shadow-button-none button {
+  box-shadow: 0 !important;
+}
+.revertio button:hover {
+  background-color: rgba(46, 54, 80, 0.1);
+}
+.truncate-hovered-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.truncate-hovered-overflow:hover {
+  overflow: auto;
+  text-overflow: inherit;
+  white-space: inherit;
 }

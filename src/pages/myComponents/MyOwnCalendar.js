@@ -1,54 +1,35 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Button, Card, Table, Dropdown } from "@themesberg/react-bootstrap";
+import React, {
+  useEffect,
+  useState,
+  memo,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from "react";
+import {
+  Button,
+  Card,
+  Table,
+  Dropdown,
+  Form,
+} from "@themesberg/react-bootstrap";
+
 import moment from "moment";
 import { useSelector, useDispatch } from "react-redux";
 import { ACTIONS } from "../reducers/redux";
-import { HeaderRow } from "./MyTableRow";
-import {
-  rotateArray,
-  calcIndexedCalendarDays,
-  convertArrayToObject,
-} from "./util/utilities";
+import { rotateArray, calcIndexedCalendarDays } from "./util/utilities";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Portal } from "react-portal";
 import { MyDropdown } from "./MyDropdown";
-import MyTextArea from "./TextArea/MyTextArea";
 import TextareaAutosize from "react-textarea-autosize";
+import { isEqual } from "lodash";
+import { Alert } from "bootstrap";
 
-export const MonthSelectorDropdown = (props) => {
-  const { value } = props;
-  const date = useSelector((state) => state.tourTable.tourDate);
-
-  return (
-    <>
-      <Dropdown>
-        <Dropdown.Toggle split variant="light">
-          <h5 className="m-0">{value}</h5>
-        </Dropdown.Toggle>
-
-        <Dropdown.Menu className="p-0">
-          <MonthSelector value={value} date={date}></MonthSelector>
-        </Dropdown.Menu>
-      </Dropdown>
-    </>
-  );
-};
-export const DateSelectorDropdown = React.memo((props) => {
-  const {
-    value,
-    id = "dateSelector",
-    onChange,
-    maxWidth,
-    minWidth,
-    disabled = false,
-  } = props;
-  // console.log(props);
+export const DateSelectorDropdown = (props) => {
+  const { value, onChange, maxWidth, minWidth, disabled = false } = props;
   const [text, setText] = useState(value);
-  const [focused, setFocused] = useState(false);
   function handleChange(value) {
-    console.log("ON CHANGE DROPDOWN setText: " + value);
-    setText(value);
+    moment(value, "D/M/YYYY", true).isValid() && setText(value);
   }
   function handleInputChange(e) {
     setText(e.target.value);
@@ -56,45 +37,24 @@ export const DateSelectorDropdown = React.memo((props) => {
   useEffect(() => {
     onChange && onChange(text);
   }, [text]);
-  const children = {
-    id: id,
-    type: "date",
-    value: text,
-    invalidation: true,
-    onChange: handleChange,
-    focus: focused,
-    minWidth,
-    maxWidth,
-    digitsSeperator: "/",
-    seperatorAt: [2, 4],
-    disabled,
-  };
-  const ref = useRef(null);
+  useEffect(() => {
+    setText(value);
+  }, [value]);
   const data = {
     disabled,
-    // ToggleComponent: <MyTextArea   ref={ref}>{children}</MyTextArea>,
-    // ToggleComponent: <input onChange={handleInputChange} value={text}></input>,
     ToggleComponent: (
-      <TextareaAutosize
-        value={text}
-        onChange={handleInputChange}
-        // onBlur={onBlur}
-      />
+      <TextareaAutosize {...props} value={text} onChange={handleInputChange} />
     ),
     MenuComponent: (
       <DateSelector
-        id={id}
         singleDate
         onChange={handleChange}
-        value={text}
+        date={text}
         maxWidth={maxWidth}
         minWidth={minWidth}
       ></DateSelector>
     ),
-    // ariaLabel,
   };
-  //   return (
-  // const ref = useRef(null);
   return (
     <>
       <div className="d-block w-100">
@@ -102,226 +62,156 @@ export const DateSelectorDropdown = React.memo((props) => {
       </div>
     </>
   );
-});
-
-export const MonthSelector = (props) => {
-  const { value, date } = props;
-  const newDate = moment(date, "MM/YYYY").format("YYYY");
-
-  const dispatch = useDispatch();
-  function handlerMonthChange(month) {
-    dispatch({
-      type: ACTIONS.TOURTABLE_CHANGE_TOURDATE,
-      payload: {
-        month: month,
-      },
-    });
-  }
-  function handlerYearChange(yearIncrement) {
-    dispatch({
-      type: ACTIONS.TOURTABLE_CHANGE_TOURDATE,
-      payload: {
-        yearIncrement: yearIncrement,
-      },
-    });
-  }
-  function colorize(month) {
-    return moment().month(month).format("MM") ===
-      moment(date, "MM/YYYY").format("MM")
-      ? "primary"
-      : "light";
-  }
-  const data = { handlerYearChange, handlerMonthChange, colorize, newDate };
-  return (
-    <>
-      <MonthSelectorComponent data={data}></MonthSelectorComponent>
-    </>
-  );
 };
-export const DateSelector = (props) => {
+
+export const DateSelector = memo((props) => {
   const {
-    monthi = moment().format("MM/YYYY"),
-    id,
+    day = null,
+    month = null,
+    year = null,
+    date = null,
     singleDate = false,
     onChange,
-    value,
     disableMonthSwap = false,
-    maxWidth,
-    minWidth,
+    // maxWidth,
+    // minWidth,
+    ...rest
   } = props;
-  const [clickedId, setClickedId] = useState(
-    moment(value, "DD/MM/YYYY", true).isValid()
-      ? [parseInt(moment(value, "DD/MM/YYYY").format("DD"))]
-      : []
-  );
+  const [clickedId, setClickedId] = useState([]);
   const [hoveredId, setHoveredId] = useState();
   const labels = rotateArray(moment.weekdays(), 1);
   const headers = labels.map((day) => day.substr(0, 2) + ".");
-
-  const [date, setDate] = useState(value);
-
-  const splitDate = date.split("/");
-  const days =
-    date === "" ? "01" : date.indexOf("/") === 2 ? splitDate[0] : date;
-  const month =
-    date.indexOf("/") === 2
-      ? splitDate[1]
-      : moment(monthi, "MM/YYYY").format("MM");
-  const year =
-    date.indexOf("/", 3) === 5
-      ? splitDate[2]
-      : moment(monthi, "MM/YYYY").format("YYYY");
-  const newDate = moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY");
-
-  const [tableDays, setTableDays] = useState(
-    calcIndexedCalendarDays(moment().format("MM/YYYY"), labels)
-  );
-
+  const [monthYear, setMonthYear] = useState([
+    moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY"),
+  ]);
+  const [tableDays, setTableDays] = useState([]);
+  // console.log("DateSelector rerender", { clickedId, monthYear, date });
   useEffect(() => {
-    moment(value, "DD/MM/YYYY", true).isValid()
-      ? setDate(moment(value, "DD/MM/YYYY").format("DD/MM/YYYY"))
-      : moment(value, "DD/MM/Y", true).isValid()
-      ? setDate(moment(value, "DD/MM/Y").format("DD/MM/YYYY"))
-      : moment(value, "DD/M", true).isValid()
-      ? setDate(
-          moment(value, "DD/M").format("DD/MM") +
-            "/" +
-            moment(value, "DD/MM/YYYY").format("YYYY")
-        )
-      : moment(value, "D", true).isValid()
-      ? setDate(
-          moment(value, "D").format("DD") +
-            "/" +
-            moment(value, "DD/MM/YYYY").format("MM/YY")
-        )
-      : console.log("seperator");
-  }, [value]);
-
+    console.log("day: ", day);
+    day && Array.isArray(day) && setClickedId(day);
+    day && !Array.isArray(day) && setClickedId([day]);
+  }, [day]);
   useEffect(() => {
-    console.log("=======DATE: " + date);
-    console.log("days: " + days);
-    console.log("month: " + month);
-    console.log("year: " + year);
-    console.log("===========/");
-    const newD = moment(date, "DD/MM/YYYY").format("MM/YYYY");
-    const newTableDays = calcIndexedCalendarDays(newD, labels);
-    setTableDays(newTableDays);
+    console.log("month year", { month, year });
+    // console.log(moment(month + "/" + year, "M/YYYY").format("MMMM YYYY"));
+    month &&
+      year &&
+      setMonthYear(moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY"));
+  }, [month, year]);
+  useEffect(() => {
+    if (date) {
+      const newD = !Array.isArray(date)
+        ? moment(date, "DD/MM/YYYY", true).isValid()
+          ? moment(date, "DD/MM/YYYY").format("MMMM YYYY")
+          : monthYear
+        : moment(date[0], "DD/MM/YYYY", true).isValid()
+        ? moment(date[0], "DD/MM/YYYY").format("MMMM YYYY")
+        : moment(date[1], "DD/MM/YYYY", true).isValid()
+        ? moment(date[1], "DD/MM/YYYY").format("MMMM YYYY")
+        : monthYear;
+
+      console.log("date", { date, newD });
+      setMonthYear(newD);
+    }
   }, [date]);
   useEffect(() => {
-    moment(days, "DD", true).isValid
-      ? setClickedId([parseInt(days)])
-      : setClickedId([]);
-  }, [days]);
+    console.log("monthYear", monthYear);
+    monthYear.length !== 0 &&
+      setTableDays(
+        calcIndexedCalendarDays(
+          moment(monthYear, "MMMM YYYY").format("MM/YYYY"),
+          labels
+        )
+      );
+  }, [monthYear]);
 
   const data = {
     handleClick,
     handleMouseOver,
     clickedId,
     hoveredId,
-    newDate,
+    newDate: monthYear,
     headers,
     tableDays,
     disableMonthSwap,
     handleIncrementMonth,
     handleDecrementMonth,
-    maxWidth,
-    minWidth,
+    ...rest,
   };
 
-  function sendOutside(date) {
-    if (singleDate) {
-      console.log("sending Outside " + date);
-      onChange && onChange(date);
-    }
+  function sendOutside(days, mY = monthYear) {
+    console.log("sending outside", { days, mY });
+    const change =
+      days && mY
+        ? days.map((day) =>
+            moment(
+              day + "/" + moment(mY, "MMMM YYYY").format("MM/YYYY"),
+              "D/MM/YYYY"
+            ).format("DD/MM/YYYY")
+          )
+        : moment(mY, "MMMM YYYY").format("MM/YYYY");
+
+    console.log("change", change);
+    onChange && onChange(change);
   }
 
   function handleIncrementMonth() {
-    sendOutside(
-      moment(date, "DD/MM/YYYY").add(1, "months").format("DD/MM/YYYY")
-    );
+    const newMonthYear = moment(monthYear, "MMMM YYYY")
+      .add(1, "months")
+      .format("MMMM YYYY");
+    setMonthYear(newMonthYear);
+    sendOutside(clickedId, newMonthYear);
   }
+
   function handleDecrementMonth() {
-    sendOutside(
-      moment(date, "DD/MM/YYYY").subtract(1, "months").format("DD/MM/YYYY")
-    );
+    const newMonthYear = moment(monthYear, "MMMM YYYY")
+      .subtract(1, "months")
+      .format("MMMM YYYY");
+    setMonthYear(newMonthYear);
+    sendOutside(clickedId, newMonthYear);
   }
   function handleClick(event) {
+    console.log("click");
     const id = parseInt(event.target.id.replace("Btn", ""));
     if (singleDate && clickedId.length === 1) {
       setClickedId([id]);
-
-      if (singleDate) {
-        const newDay = moment(id, "D").format("DD");
-        const newDate = moment(
-          newDay + "/" + moment(date, "DD/MM/YYYY").format("MM/YYYY"),
-          "DD/MM/YYYY"
-        ).format("DD/MM/YYYY");
-        sendOutside(newDate);
-      }
     } else if (!singleDate && clickedId.length === 2) {
       setClickedId([]);
       setHoveredId();
     } else if (!singleDate && clickedId.length === 1 && clickedId[0] === id) {
       setClickedId([]);
       setHoveredId();
-    } else setClickedId([...clickedId, id].sort((a, b) => a - b));
+    } else {
+      setClickedId([...clickedId, id].sort((a, b) => a - b));
+    }
   }
+
   function handleMouseOver(event) {
     const id = parseInt(event.target.id.replace("Btn", ""));
     !singleDate && clickedId.length === 1 && setHoveredId(id);
   }
+  useEffect(() => {
+    console.log("clickedID:", clickedId);
+    const size = clickedId.length;
+    switch (size) {
+      case 0:
+        sendOutside();
+        break;
+      case 1:
+        singleDate && sendOutside(clickedId);
+        break;
+      case 2:
+        !singleDate && sendOutside(clickedId);
+        break;
+      default:
+        break;
+    }
+  }, [clickedId]);
 
   return <DateSelectorComponent data={data}></DateSelectorComponent>;
-};
+}, isEqual);
 
-const MonthSelectorComponent = (props) => {
-  const {
-    handlerYearChange,
-    handlerMonthChange,
-    onFocus,
-    onBlur,
-    colorize,
-    newDate,
-  } = props.data;
-  return (
-    <>
-      <Card
-        border="light"
-        className="shadow-sm flex-fill"
-        style={{ width: "250px", minWidth: "250px" }}
-      >
-        <Card.Body>
-          <div className="container-fluid d-flex p-1 pb-3 justify-content-between align-items-center">
-            <Button
-              variant="light"
-              onClick={() => handlerYearChange(-1)}
-            >{`<`}</Button>
-            <h5 className="text-center m-0">{newDate}</h5>
-            <Button
-              variant="light"
-              onClick={() => handlerYearChange(1)}
-            >{`>`}</Button>
-          </div>
-          <div className="d-flex flex-wrap">
-            {moment.monthsShort().map((month, index) => {
-              return (
-                <div className="col-4 text-center text-nowrap" key={index}>
-                  <MonthButton
-                    value={month}
-                    onClick={() => handlerMonthChange(month)}
-                    variant={colorize(month)}
-                  ></MonthButton>
-                </div>
-              );
-            })}
-          </div>
-        </Card.Body>
-      </Card>
-    </>
-  );
-};
-
-const DateSelectorComponent = (props) => {
+const DateSelectorComponent = memo((props) => {
   const {
     handleClick,
     handleMouseOver,
@@ -342,7 +232,7 @@ const DateSelectorComponent = (props) => {
       <Card
         border="light"
         className="shadow-sm flex-fill"
-        style={{ width: "300px", minWidth: "300px" }}
+        style={{ width: "300px", minWidth: "300px", cursor: "default" }}
       >
         <Card.Body className="px-3">
           <div className="container-fluid d-flex py-3 px-1 justify-content-around align-items-center">
@@ -391,18 +281,17 @@ const DateSelectorComponent = (props) => {
       </Card>
     </>
   );
-};
+}, isEqual);
 
 const TableRow = (props) => {
   const { data, onClick, onMouseOver, clickedId, hoveredId, index } = props;
   return data.map((day, i) => {
-    const c = index * 7 + i;
     if (day === " ")
       return <td className="border-0 p-1" key={"empty" + index * 7 + i}></td>;
     else {
       const id = "Btn" + day;
-      const from = clickedId[0];
-      const toClick = clickedId[1];
+      const from = parseInt(clickedId[0]);
+      const toClick = parseInt(clickedId[1]);
       const toHover = hoveredId;
       const variant =
         day === from
@@ -481,3 +370,155 @@ export const CalendarButton = (props) => {
     </Button>
   );
 };
+const HeaderRow = (props) => {
+  const { headers, checked, handleAllClick, checkbox = false } = props;
+  return (
+    <tr className="align-middle">
+      {checkbox && (
+        <th className="border-bottom px-2 text-left" style={{ width: "30px" }}>
+          <Form.Check
+            id="checkboxAll"
+            htmlFor="checkboxAll"
+            checked={checked}
+            onChange={handleAllClick}
+          />
+        </th>
+      )}
+
+      {headers.map((header) => (
+        <th
+          key={`$s-${header}`}
+          className="border-bottom  px-2 text-nowrap text-center "
+        >
+          {header}
+        </th>
+      ))}
+    </tr>
+  );
+};
+export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
+  return (
+    <>
+      <Dropdown>
+        <Dropdown.Toggle
+          split
+          variant="light"
+          className="rounded-0 rounded-end"
+        >
+          <h5 className="m-0 py-0 px-2">
+            {title} {moment(date, "MM/YYYY").format("MMMM YYYY")}
+          </h5>
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu className="p-0">
+          <MonthSelector {...rest} date={date}></MonthSelector>
+        </Dropdown.Menu>
+      </Dropdown>
+    </>
+  );
+};
+export const MonthSelector = (props) => {
+  const { date, onChange } = props;
+
+  // const newDate = moment(date, "MM/YYYY").format("YYYY");
+  const [year, setYear] = useState(moment(date, "MM/YYYY").format("YYYY"));
+  const [month, setMonth] = useState(moment(date, "MM/YYYY").format("MMM"));
+
+  useEffect(() => {
+    setYear(moment(date, "MM/YYYY").format("YYYY"));
+    setMonth(moment(date, "MM/YYYY").format("MMM"));
+  }, [date]);
+
+  function handlerMonthChange(m) {
+    console.log("new month", m);
+    const change = moment(m + "/" + year, "MMM/YYYY").format("MM/YYYY");
+    console.log(change);
+    onChange && onChange(change);
+  }
+  function handlerYearChange(y) {
+    onChange && y === 1
+      ? onChange(
+          moment(month + "/" + year, "MMM/YYYY")
+            .add(1, "years")
+            .format("MM/YYYY")
+        )
+      : onChange(
+          moment(month + "/" + year, "MMM/YYYY")
+            .subtract(1, "years")
+            .format("MM/YYYY")
+        );
+  }
+
+  const data = { handlerYearChange, handlerMonthChange, month, year };
+  return (
+    <>
+      <MonthSelectorComponent data={data}></MonthSelectorComponent>
+    </>
+  );
+};
+const MonthSelectorComponent = memo((props) => {
+  const {
+    handlerYearChange,
+    handlerMonthChange,
+    onFocus,
+    onBlur,
+    year,
+    month,
+  } = props.data;
+
+  const [activeMonth, setActiveMonth] = useState(month);
+  function handleClick(value) {
+    console.log("active before month", activeMonth);
+    console.log("active month", value);
+    setActiveMonth(value);
+  }
+
+  const colorize = useCallback(
+    (m) => {
+      return m === activeMonth ? "primary" : "light";
+    },
+    [activeMonth]
+  );
+  useEffect(() => {
+    handlerMonthChange(activeMonth);
+  }, [activeMonth]);
+  return (
+    <>
+      <Card
+        border="light"
+        className="shadow-sm flex-fill"
+        style={{ width: "250px", minWidth: "250px" }}
+      >
+        <Card.Body>
+          <div className="container-fluid d-flex p-1 pb-3 justify-content-between align-items-center">
+            <Button
+              variant="light"
+              onClick={() => handlerYearChange(-1)}
+            >{`<`}</Button>
+            <h5 className="text-center m-0">{year}</h5>
+            <Button
+              variant="light"
+              onClick={() => handlerYearChange(1)}
+            >{`>`}</Button>
+          </div>
+          <div className="d-flex flex-wrap">
+            {moment.monthsShort().map((month, index) => {
+              return (
+                <div
+                  className="col-4 text-center text-nowrap"
+                  key={"month-Short" + index}
+                >
+                  <MonthButton
+                    value={month}
+                    onClick={() => handleClick(month)}
+                    variant={colorize(month)}
+                  ></MonthButton>
+                </div>
+              );
+            })}
+          </div>
+        </Card.Body>
+      </Card>
+    </>
+  );
+}, isEqual);
