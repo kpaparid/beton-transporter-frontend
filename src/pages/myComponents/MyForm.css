@@ -1,28 +1,33 @@
 .wrapper {
   height: 100%;
   font-size: 0.875rem;
-  color: black !important;
+  color: #2e3650 !important;
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
   box-shadow: none;
   border: solid 1.5px transparent;
-  transition: border 0.2s ease;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .wrapper:focus-within {
   background-color: white;
   box-shadow: 0 0 0 0.2rem rgb(46, 54, 80, 50%);
 }
 .wrapper select {
-  height: 25px;
-  color: black;
+  /* height: 25px; */
+  color: #2e3650;
   border: none;
   width: 100%;
   background-color: transparent;
+  text-align-last: center;
+  font-size: 0.875rem;
+  background-position: right 0.05rem center;
+  padding: 0;
+  /* padding-right: 1rem; */
+
+  /* padding-left: 0.5rem;
+  padding-right: 1rem; */
 }
 .wrapper select:focus {
   border: none;
@@ -42,17 +47,17 @@
   min-height: 25px;
   visibility: visible;
   height: auto;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .wrapper.wrapper-editable {
   border: 1.5px solid rgb(46, 54, 80, 100%);
 }
 .wrapper.wrapper-editable.valid {
-  transition: border 0.2s;
   border: 1.5px solid rgb(5, 166, 119, 100%);
 }
 .wrapper.wrapper-editable.invalid {
-  transition: border 0.2s;
   border: 1.5px solid rgb(250, 82, 82, 100%);
 }
 
@@ -69,6 +74,7 @@
   min-height: 0;
   visibility: hidden;
   height: 0;
+  white-space: normal !important;
 }
 
 .wrapper.wrapper-editable .dummy.dummy-visible {
@@ -78,7 +84,8 @@
   background-image: none;
 }
 textarea {
-  width: 100%;
+  min-width: 20px;
+  width: fit-content;
   background-color: transparent;
   border: none;
   text-align: center;
@@ -86,7 +93,7 @@ textarea {
   vertical-align: bottom;
   padding: 0;
   overflow: hidden;
-  padding: 2px 0px 2px 0px;
+  color: #2e3650;
 }
 textarea:focus-visible {
   outline: 0;
@@ -97,24 +104,32 @@ textarea :focus {
 }
 .text-container {
   /* width: fit-content; */
+  min-height: 25px;
   align-items: center;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* background-color: red; */
+  /* padding-left: 0.5rem;
+  padding-right: 0.5rem; */
 }
 .measurement {
   display: flex;
   align-items: center;
   padding-left: 0.25rem;
 }
-.wrapper.wrapper-editable .finalwrappi {
+.wrapper.wrapper-editable .editable-container {
   height: inherit;
   width: 100%;
+  visibility: visible;
 }
-.wrapper .finalwrappi {
+.wrapper .editable-container {
   height: 0px;
-  width: 100%;
+  width: 0px;
+  visibility: hidden;
+  display: flex;
+  justify-content: center;
 }
 .img-container {
   background-position-y: center;
@@ -132,6 +147,7 @@ textarea :focus {
   padding-right: 1.3rem;
 }
 .text-span {
+  line-height: 21px;
   width: auto;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -141,30 +157,35 @@ textarea :focus {
   overflow-y: hidden;
   overflow-x: visible;
   text-overflow: inherit;
-}
-.wrapper:hover {
+
   margin-top: 0;
   margin-bottom: 0;
 }
+
 .text-flex {
   display: flex;
   min-width: 0px;
   align-items: center;
+  height: 25px;
 }
-.wrapper .finalwrappi textarea {
+.wrapper.wrapper-editable .text-flex {
+  height: auto;
+}
+.wrapper .editable-container textarea {
   visibility: hidden;
 }
-.wrapper .finalwrappi select {
+.wrapper .editable-container select {
   visibility: hidden;
 }
-.wrapper.wrapper-editable .finalwrappi textarea {
+.wrapper.wrapper-editable .editable-container textarea {
   visibility: visible;
 }
-.wrapper.wrapper-editable .finalwrappi select {
+.wrapper.wrapper-editable .editable-container select {
   visibility: visible;
 }
 .wrapper.wrapper-editable.selection .dummy {
-  padding-right: 1.5rem;
+  /* padding-right: 35px;
+  padding-left: 35px; */
 }
 .overflowX-hidden {
   overflow-x: hidden;
@@ -201,4 +222,88 @@ textarea :focus {
   overflow: auto;
   text-overflow: inherit;
   white-space: inherit;
+}
+.measurement {
+  font-size: 0.875rem;
+  color: "#2E3650" !important;
+}
+.text-input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  border: 0.1em solid rgb(46, 54, 80, 100%);
+  border-radius: 0.5em;
+  align-items: center;
+  flex: 1 1 auto !important;
+}
+.text-input-group .wrapper {
+  border: none !important;
+}
+.text-input-group.measured .wrapper {
+  border-right: 1.5px solid rgb(46, 54, 80, 100%) !important;
+}
+.text-input-group:focus-within {
+  border-radius: 0.5em;
+  box-shadow: 0 0 0 2.5px rgb(46, 54, 80, 70%);
+}
+.text-input-group .wrapper:focus-within {
+  background-color: transparent;
+  box-shadow: none;
+}
+.text-input-group .wrapper:focus-within {
+  background-color: transparent;
+  box-shadow: none;
+}
+.text-input-group .wrapper.valid:focus-within {
+  background-color: transparent;
+  box-shadow: none;
+}
+.text-input-group .wrapper.invalid:focus-within {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.myprimary-bg {
+  background-color: #253b43 !important;
+  border-color: #17252a !important;
+}
+.my-secondary-bg .h4 {
+  color: white;
+}
+.my-secondary-bg {
+  background-color: #2b7a78 !important;
+  border-color: #2b7a78 !important;
+}
+
+.my-nav-link {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.my-nav-link:hover {
+  background-color: #2b7a78 !important;
+  border-color: #2b7a78 !important;
+}
+
+.primary-btn {
+  background-color: #2b7a78 !important;
+  border-color: #2b7a78 !important;
+}
+.primary-btn:hover {
+  background-color: #215d5b !important;
+  border-color: #215d5b !important;
+}
+
+.light {
+  background-color: #f5f8fb;
+}
+
+.danger-btn {
+  background-color: #2b7a78 !important;
+  border-color: #2b7a78 !important;
+}
+.danger-btn:hover {
+  background-color: #ff0000 !important;
+  border-color: #ff0000 !important;
+}
+.text-input-group.measured .text-container {
+  padding-left: 50px;
 }

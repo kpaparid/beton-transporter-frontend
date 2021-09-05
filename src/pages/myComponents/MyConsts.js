@@ -14,6 +14,13 @@ import {
 import moment from "moment";
 import { validateNumber, validateNumberSeparator } from "./util/utilities";
 import { createReduxStore } from "../reducers/redux";
+// dark 0
+// #485354  1
+// #037070  3
+// #4B5757  2
+// #5DA3A3  4
+// #DDFFFF  5
+const primaryVariant = "#037070";
 
 const store = createReduxStore();
 // const useTourTable = () => useSelector((state) => state.tourTable);
@@ -118,4 +125,5 @@ export {
   lightblue,
   darkblue,
   green,
+  primaryVariant,
 };

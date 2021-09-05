@@ -114,7 +114,7 @@ const RouteWithSidebar = ({ component: Component, ...rest }) => {
   );
 };
 
-export default () => (
+const HomePage = () => (
   <Switch>
     <RouteWithLoader
       exact
@@ -240,3 +240,4 @@ export default () => (
     <Redirect to={Routes.NotFound.path} />
   </Switch>
 );
+export default HomePage;

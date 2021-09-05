@@ -23,7 +23,6 @@ import "./scss/volt.scss";
 
 // vendor styles
 import "@fortawesome/fontawesome-free/css/all.css";
-import "react-datetime/css/react-datetime.css";
 
 // import "./scss/kpaparid/components/mycalendarstyles.css";
 
@@ -31,15 +30,17 @@ import HomePage from "./pages/HomePage";
 import ScrollToTop from "./components/ScrollToTop";
 import { store } from "./pages/myComponents/MyConsts";
 
-// import "react-dates/initialize";
-// import "react-dates/lib/css/_datepicker.css";
+// import AdapterDateFns from "@mui/lab/AdapterDateFns";
+// import LocalizationProvider from "@mui/lab/LocalizationProvider";
 
 ReactDOM.render(
+  // <LocalizationProvider dateAdapter={AdapterDateFns}>
   <Provider store={store}>
     <HashRouter>
       <ScrollToTop />
       <HomePage />
     </HashRouter>
   </Provider>,
+  // </LocalizationProvider>
   document.getElementById("root")
 );

@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, React } from "react";
 
 export const DummyWrapperRef = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {

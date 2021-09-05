@@ -1,12 +1,8 @@
 import React from "react";
-import { Form, Dropdown, ToggleButton } from "@themesberg/react-bootstrap";
+import { Form, Dropdown } from "@themesberg/react-bootstrap";
 // import './nstyle.scss'
 import { Button } from "@themesberg/react-bootstrap";
-import { useEffect, useState } from "react";
 
-import InputRange from "react-input-range";
-import { useSelector, useDispatch } from "react-redux";
-import { ACTIONS } from "../reducers/redux";
 import "./MyForm.css";
 import { isEqual } from "lodash";
 function MyCheckboxContainer(props) {
@@ -42,7 +38,6 @@ function MyCheckboxContainer(props) {
 }
 export const MyCheckboxFilter = React.memo(
   ({ onToggleAll, onToggleOne, checkedAll = true, data }) => {
-    console.log(data);
     return (
       <>
         <MyCheckboxContainer
@@ -65,58 +60,3 @@ export const MyCheckboxFilter = React.memo(
   },
   isEqual
 );
-const MyCheckbox = (props) => {
-  const { labels, data } = props;
-  const dispatch = useDispatch();
-
-  const checkedAll =
-    data[labels.id].filter((item) => item.checked === "checked").length ===
-    data[labels.id].length
-      ? "checked"
-      : "";
-  console.log(checkedAll);
-
-  function toggleAll(label, data, event) {
-    console.log("click nestedFilter All");
-    dispatch({
-      type: ACTIONS.NESTEDFILTER_TOGGLE_ALL,
-      payload: {
-        label: label,
-        data: data[label],
-      },
-    });
-  }
-  function toggleOne(label, value) {
-    console.log("click nestedFilter Single");
-    dispatch({
-      type: ACTIONS.NESTEDFILTER_TOGGLE_ONE,
-      payload: {
-        label: label,
-        value: value,
-      },
-    });
-  }
-
-  return (
-    <>
-      <MyCheckboxContainer
-        labels={labels}
-        text="Select All"
-        handler={(e) => toggleAll(labels.id, data, e)}
-        checked={checkedAll}
-      />
-      <Dropdown.Divider></Dropdown.Divider>
-      {data[labels.id].map((item, index) => (
-        <MyCheckboxContainer
-          key={index}
-          index={index}
-          labels={labels}
-          text={item.value}
-          checked={item.checked}
-          handler={(e) => toggleOne(labels.id, item.value)}
-        />
-      ))}
-    </>
-  );
-};
-export default MyCheckbox;

@@ -65,25 +65,7 @@ function MyReducer(state = myInitialState, action) {
     case ACTIONS.LOAD_TOUR_TABLE: {
       const { table, labels } = action.payload;
 
-      console.log("LOADING TOUR TABLE");
-      const newTransactionsTable = table.map((item, index) => ({
-        ...item,
-        labelId: item.id,
-        // id: index,
-      }));
-      const newChecked = table.map((item) => "");
-      const newTransactionsFilterChecked = Array(
-        Object.keys(table[0]).length - 1
-      ).fill(true);
-      const newTransactionsFilterFilters = Object.keys(table[0]).map(
-        (item) => ({
-          label: item,
-          filter: [...new Set(table.map((row) => row[item]))].map((item) => ({
-            checked: true,
-            value: item,
-          })),
-        })
-      );
+      console.log("LOADING TOUR TABLE", labels);
 
       const newTourTableById = table
         .map((item, index) => ({ ["Tour" + index]: { ...item } }))
@@ -104,12 +86,6 @@ function MyReducer(state = myInitialState, action) {
 
       return {
         ...state,
-        checked: newChecked,
-        transactionsTable: newTransactionsTable,
-        transactionsFilter: {
-          checked: newTransactionsFilterChecked,
-          nestedFilter: newTransactionsFilterFilters,
-        },
         tourTable: {
           ...state.tourTable,
           byId: newTourTableById,
@@ -188,19 +164,12 @@ function MyReducer(state = myInitialState, action) {
     }
 
     case ACTIONS.CHECK_ONE: {
-      const { id } = action.payload;
-      console.log(state.tourTable);
-      const index = state.tourTable.checkedId.findIndex((item) => item === id);
-      var newCheckedId2 = [...state.tourTable.checkedId];
-      index === -1
-        ? newCheckedId2.push(id)
-        : (newCheckedId2 = newCheckedId2.filter((item) => item !== id));
-
+      const { ids } = action.payload;
       return {
         ...state,
         tourTable: {
           ...state.tourTable,
-          checkedId: newCheckedId2,
+          checkedId: ids,
         },
       };
     }
@@ -255,22 +224,6 @@ function MyReducer(state = myInitialState, action) {
       }
       return state;
     }
-    case ACTIONS.NESTEDFILTER_TOGGLE_ALL: {
-      const { label, data } = action.payload;
-      const filteredOutValues = state.tourTable.filteredOutValues;
-      const newFilteredOutValues =
-        !filteredOutValues[label] || filteredOutValues[label].length === 0
-          ? { ...filteredOutValues, [label]: data }
-          : {};
-
-      return {
-        ...state,
-        tourTable: {
-          ...state.tourTable,
-          filteredOutValues: newFilteredOutValues,
-        },
-      };
-    }
     case ACTIONS.NESTEDFILTER_ADD_FILTER: {
       const { label, value } = action.payload;
       console.log(value);
@@ -301,6 +254,21 @@ function MyReducer(state = myInitialState, action) {
         tourTable: {
           ...state.tourTable,
           filteredOutValues: newValues,
+        },
+      };
+    }
+    case ACTIONS.NESTEDFILTER_TOGGLE_ALL: {
+      const { label, data } = action.payload;
+      const filteredOutValues = state.tourTable.filteredOutValues;
+      const newFilteredOutValues =
+        !filteredOutValues[label] || filteredOutValues[label].length === 0
+          ? { ...filteredOutValues, [label]: data }
+          : { ...filteredOutValues, [label]: [] };
+      return {
+        ...state,
+        tourTable: {
+          ...state.tourTable,
+          filteredOutValues: newFilteredOutValues,
         },
       };
     }

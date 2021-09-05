@@ -1,14 +1,17 @@
 import React, {
-  forwardRef,
   memo,
+  useRef,
+  forwardRef,
   useCallback,
   useEffect,
   useState,
+  useMemo,
 } from "react";
+import { TableLabel } from "./Table/TableLabel";
 import { useTable, usePagination, useSortBy, useRowSelect } from "react-table";
 
 import { useDispatch, useSelector } from "react-redux";
-import { editMode, hiddenColumnsReselect } from "./MySelectors";
+import { hiddenColumnsReselect } from "./MySelectors";
 import {
   Card,
   Form,
@@ -18,20 +21,187 @@ import {
 } from "@themesberg/react-bootstrap";
 import Input from "./TextArea/MyNewInput";
 import { isEqual } from "lodash";
-import { ACTIONS } from "../reducers/redux";
 import "./MyForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
+import TextareaAutosize from "react-textarea-autosize";
 
-function useCellComponent({ cellType, ...rest }) {
-  switch (cellType) {
-    case "input":
-      return <Input {...rest} />;
+export const ReactTable = memo(
+  forwardRef(({ children }, skipResetRef) => {
+    const { dataSelector, headersSelector, onCellChange, ...rest } = children;
+    const tours = useSelector(dataSelector);
+    const columns = useSelector(headersSelector);
+    const [data, setData] = useState(tours);
+    const updateMyData = useCallback((rowIndex, columnId, value, label, id) => {
+      skipResetRef.current = true;
+      onCellChange(id, label, value);
+      setData((old) =>
+        old.map((row, index) => {
+          if (index === rowIndex) {
+            return {
+              ...row,
+              [columnId]: { ...row[columnId], value: value },
+            };
+          }
+          return row;
+        })
+      );
+    }, []);
 
-    default:
-      return <Input {...rest} />;
-  }
-}
+    useEffect(() => {
+      if (!isEqual(data, tours)) {
+        skipResetRef.current = true;
+        setData(tours);
+      }
+    }, [tours]);
+    useEffect(() => {
+      if (!isEqual(data, tours)) {
+      }
+    }, [columns]);
+
+    useEffect(() => {
+      skipResetRef.current = false;
+    }, [data]);
+    return (
+      <>
+        <RTables
+          ref={skipResetRef}
+          {...rest}
+          columns={columns}
+          data={data}
+          updateMyData={updateMyData}
+        />
+      </>
+    );
+  }),
+  isEqual
+);
+const RTables = memo(
+  forwardRef(
+    (
+      {
+        columns,
+        data,
+        updateMyData,
+        hiddenColumnsSelector,
+        editSelector,
+        maxPageSize = 20,
+        onSelectedRowsChange,
+      },
+      ref
+    ) => {
+      const defaultColumn = React.useMemo(
+        () => ({
+          Cell: ({
+            value,
+            row: { index, isSelected },
+            column: { id },
+            updateMyData,
+          }) => (
+            <EditableCell
+              {...{ value, index, id, updateMyData, editSelector, isSelected }}
+            />
+          ),
+        }),
+        []
+      );
+      const {
+        headerGroups,
+        prepareRow,
+        page,
+        canPreviousPage,
+        canNextPage,
+        pageCount,
+        gotoPage,
+        nextPage,
+        previousPage,
+        getTableBodyProps,
+        selectedFlatRows,
+        state: { pageIndex },
+      } = useTable(
+        {
+          columns,
+          data,
+          defaultColumn,
+          updateMyData,
+          initialState: { pageSize: 20 },
+          autoResetPage: !ref.current,
+          autoResetSelectedRows: !ref.current,
+          autoResetSortBy: !ref.current,
+          autoResetExpanded: !ref.current,
+          autoResetGroupBy: !ref.current,
+          autoResetFilters: !ref.current,
+          autoResetRowState: !ref.current,
+          disableMultiSort: true,
+        },
+        useSortBy,
+        usePagination,
+        useRowSelect,
+        (hooks) => {
+          hooks.visibleColumns.push((columns) => {
+            return [
+              {
+                id: "selection",
+                Header: ({ getToggleAllPageRowsSelectedProps }) => (
+                  <div>
+                    <IndeterminateCheckbox
+                      {...getToggleAllPageRowsSelectedProps()}
+                    />
+                  </div>
+                ),
+                Cell: ({ row }) => (
+                  <div>
+                    <IndeterminateCheckbox
+                      {...row.getToggleRowSelectedProps()}
+                    />
+                  </div>
+                ),
+              },
+              ...columns,
+            ];
+          });
+        }
+      );
+      useEffect(() => {
+        onSelectedRowsChange(selectedFlatRows.map((_) => _.original.id));
+      }, [selectedFlatRows]);
+      return (
+        <>
+          <Table
+            hover
+            responsive
+            className="align-items-center table-flush align-items-center table"
+            {...getTableBodyProps()}
+          >
+            <TableHead headerGroups={headerGroups}></TableHead>
+            <TableBody
+              page={page}
+              prepareRow={prepareRow}
+              hiddenColumnsSelector={hiddenColumnsSelector}
+            ></TableBody>
+          </Table>
+          {maxPageSize < data.length && (
+            <TableFooter
+              maxRows={data.length}
+              {...{
+                pageCount,
+                nextPage,
+                previousPage,
+                canPreviousPage,
+                canNextPage,
+                gotoPage,
+                pageIndex,
+                currentPageSize: page.length,
+              }}
+            ></TableFooter>
+          )}
+        </>
+      );
+    }
+  ),
+  isEqual
+);
+
 const EditableCell = React.memo(
   ({
     value: { value: initialValue, label, id: tourId, ...rest },
@@ -51,137 +221,31 @@ const EditableCell = React.memo(
     }, [value, initialValue]);
     const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
 
+    const editMode = useSelector(editSelector);
     useEffect(() => {
       setValue(initialValue);
     }, [initialValue]);
-    const component = useCellComponent({
-      ...rest,
-      label,
-      value,
-      onChange,
-      onBlur,
-      editSelector,
-      isSelected,
-    });
-    return component;
-  },
-  isEqual
-);
-const RTable = memo(
-  ({
-    columns,
-    data,
-    updateMyData,
-    hiddenColumnsSelector,
-    editSelector,
-    skipReset,
-    maxPageSize = 20,
-  }) => {
-    const defaultColumn = React.useMemo(
-      () => ({
-        Cell: ({
-          value,
-          row: { index, isSelected },
-          column: { id },
-          updateMyData,
-        }) => (
-          <EditableCell
-            {...{ value, index, id, updateMyData, editSelector, isSelected }}
-          />
-        ),
-      }),
-      []
+    const editable = useMemo(
+      () => isSelected && editMode,
+      [editMode, isSelected]
     );
-    const {
-      headerGroups,
-      prepareRow,
-      page,
-      canPreviousPage,
-      canNextPage,
-      pageOptions,
-      pageCount,
-      gotoPage,
-      nextPage,
-      previousPage,
-      setPageSize,
-      getTableBodyProps,
-      state: { pageIndex, pageSize },
-    } = useTable(
-      {
-        columns,
-        data,
-        defaultColumn,
-        updateMyData,
-        initialState: { pageSize: maxPageSize },
-        autoResetPage: !skipReset,
-        autoResetSelectedRows: !skipReset,
-        autoResetSortBy: !skipReset,
-        autoResetExpanded: !skipReset,
-        autoResetGroupBy: !skipReset,
-        autoResetFilters: !skipReset,
-        autoResetRowState: !skipReset,
-        disableMultiSort: true,
-      },
-      useSortBy,
-      usePagination,
-      useRowSelect,
-      (hooks) => {
-        hooks.visibleColumns.push((columns) => {
-          return [
-            {
-              id: "selection",
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <div>
-                  <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-                </div>
-              ),
-              Cell: ({ row }) => (
-                <div>
-                  <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-                </div>
-              ),
-            },
-            ...columns,
-          ];
-        });
-      }
-    );
-
     return (
-      <>
-        <Table
-          hover
-          responsive
-          className="align-items-center table-flush align-items-center table"
-          {...getTableBodyProps()}
-        >
-          <TableHead headerGroups={headerGroups}></TableHead>
-          <TableBody
-            page={page}
-            prepareRow={prepareRow}
-            hiddenColumnsSelector={hiddenColumnsSelector}
-          ></TableBody>
-        </Table>
-        {maxPageSize < data.length && (
-          <TableFooter
-            maxRows={data.length}
-            {...{
-              pageCount,
-              nextPage,
-              previousPage,
-              canPreviousPage,
-              canNextPage,
-              gotoPage,
-              pageIndex,
-              currentPageSize: page.length,
-            }}
-          ></TableFooter>
-        )}
-      </>
+      <Input
+        extendable
+        {...{
+          label,
+          value,
+          onChange,
+          onBlur,
+          editable,
+          ...rest,
+        }}
+      />
     );
   },
   isEqual
 );
+
 const TableBody = ({ page, prepareRow, hiddenColumnsSelector }) => {
   const hiddenColumns = useSelector(hiddenColumnsSelector);
   return (
@@ -214,7 +278,7 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
       style={{
         display: display,
       }}
-      className="px-2 py-0"
+      className="px-2 py-1"
     >
       {cell.render("Cell")}
     </td>
@@ -304,7 +368,6 @@ const TableFooter = React.memo((props) => {
     pageIndex,
     currentPageSize = 0,
   } = props;
-  console.log(pageCount);
   return (
     <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
       <Nav>
@@ -350,68 +413,6 @@ const IndeterminateCheckbox = React.forwardRef(
     return <Form.Check ref={resolvedRef} {...rest} className="checkbox" />;
   }
 );
+ReactTable.displayName = "ReactTable";
 
-const ReactTable = forwardRef(
-  ({ children: { dataSelector, headersSelector, ...rest } }, skipResetRef) => {
-    const tours = useSelector(dataSelector);
-    const columns = useSelector(headersSelector);
-    const [data, setData] = useState(tours);
-    const dispatch = useDispatch();
-    const addChanges = useCallback((id, label, value) => {
-      dispatch({
-        type: ACTIONS.ADD_CHANGE,
-        payload: {
-          id: id,
-          key: label,
-          change: value,
-        },
-      });
-    }, []);
-
-    const updateMyData = useCallback((rowIndex, columnId, value, label, id) => {
-      skipResetRef.current = true;
-      addChanges(id, label, value);
-      setData((old) =>
-        old.map((row, index) => {
-          if (index === rowIndex) {
-            return {
-              ...row,
-              [columnId]: { ...row[columnId], value: value },
-            };
-          }
-          return row;
-        })
-      );
-    }, []);
-
-    useEffect(() => {
-      if (!isEqual(data, tours)) {
-        console.log("new Tours", tours);
-        skipResetRef.current = true;
-        setData(tours);
-      }
-    }, [tours]);
-    useEffect(() => {
-      if (!isEqual(data, tours)) {
-        console.log("new columns", columns);
-      }
-    }, [columns]);
-
-    useEffect(() => {
-      skipResetRef.current = false;
-    }, [data]);
-    return (
-      <>
-        <RTable
-          columns={columns}
-          data={data}
-          updateMyData={updateMyData}
-          skipReset={skipResetRef.current}
-          {...rest}
-        />
-      </>
-    );
-  }
-);
-
-export default React.memo(ReactTable);
+RTables.displayName = "RTables";

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Form } from "@themesberg/react-bootstrap";
 import MyTextArea from "./TextArea/MyTextArea";
+import Select from "react-select";
+import { red } from "./MyConsts";
 
 export const MyFormSelect = (props) => {
   const {
@@ -8,34 +10,100 @@ export const MyFormSelect = (props) => {
     availableValues,
     id,
     value,
+    defaultValue,
     onChange,
     onBlur,
-    labelIsDisabled = false,
+    labelIsDisabled = true,
+    hidden = false,
   } = props;
-  const [defaultValue, setDefaultValue] = useState(value);
+  const [selectedValue, setSelectedValue] = useState(value);
 
   useEffect(() => {
-    setDefaultValue(value);
+    // console.log("sel:", value);
+    setSelectedValue(value);
   }, [value]);
-  function handleChange(e) {
-    console.log("change");
-    setDefaultValue(e.target.value);
-    onChange(e);
+  function handleChange(selectedOption) {
+    setSelectedValue(selectedOption.value);
+    onChange && onChange(selectedOption.value);
+    // );
   }
+
+  const options = availableValues.map((v, index) => ({
+    value: v,
+    label: v,
+  }));
+  // console.log((selectedValue + "").length);
   return (
     <>
-      {!labelIsDisabled && label && <Form.Label>{label}</Form.Label>}
-      <select
-        key={id}
-        value={defaultValue}
-        onChange={handleChange}
-        onBlur={onBlur}
-        selected
-      >
-        {availableValues.map((value, index) => (
-          <option key={`${id}-${index}`}>{value}</option>
-        ))}
-      </select>
+      {!hidden && (
+        <Select
+          placeholder={selectedValue}
+          options={options}
+          className="w-100"
+          // style={{ width: `${8 * selectedValue.length + 100}px` }}
+          onChange={handleChange}
+          components={{
+            IndicatorSeparator: () => null,
+          }}
+          styles={{
+            control: (base) => ({
+              ...base,
+              border: 0,
+              boxShadow: 0,
+              minHeight: 21,
+              transition: "none",
+              width: "100%",
+              backgroundColor: "inherit",
+            }),
+            valueContainer: (base) => ({
+              ...base,
+              padding: 0,
+              paddingLeft: 27,
+              // paddingRight: 15,
+              justifyContent: "center",
+              width: 8 * (selectedValue + "").length + 100,
+              // width: 100,
+            }),
+            singleValue: (base) => ({
+              ...base,
+              padding: 0,
+              paddingLeft: 15,
+              paddingRight: 15,
+              color: "#2E3650",
+            }),
+            placeholder: (base) => ({
+              ...base,
+              padding: 0,
+              paddingLeft: 15,
+              paddingRight: 15,
+              color: "#2E3650",
+            }),
+            dropdownIndicator: (base) => ({
+              ...base,
+              padding: 0,
+              transition: "none",
+              color: "#2E3650",
+            }),
+
+            indicatorSeparator: (base) => ({ ...base, margin: 3 }),
+            indicatorsContainer: (base) => ({ ...base, paddingRight: 7 }),
+            // indicatorContainer: (base) => ({ ...base, transition: "none" }),
+            input: (base) => ({
+              ...base,
+              padding: 0,
+              margin: 0,
+              color: "#2E3650",
+            }),
+          }}
+          theme={(theme) => ({
+            ...theme,
+            colors: {
+              ...theme.colors,
+              primary: "black",
+            },
+          })}
+        ></Select>
+      )}
     </>
   );
 };

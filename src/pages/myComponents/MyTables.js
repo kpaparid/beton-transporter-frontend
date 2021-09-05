@@ -10,7 +10,6 @@ import { workHours } from "../../data/tables";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { ButtonGroup, Dropdown } from "@themesberg/react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DropdownFilter } from "../myComponents/Filter";
 
 export const MonthlyWorkHours = (props) => {
   const totalWorkHours = workHours.length;
@@ -65,9 +64,7 @@ export const MonthlyWorkHours = (props) => {
               <Dropdown.Menu
                 className="dropdown-menu-xs"
                 style={{ display: "inline-table", animation: "disable" }}
-              >
-                <DropdownFilter></DropdownFilter>
-              </Dropdown.Menu>
+              ></Dropdown.Menu>
             </Dropdown>
             <h5 className="m-0 py-0 px-2">Arbeitszeiten März 2021</h5>
           </div>

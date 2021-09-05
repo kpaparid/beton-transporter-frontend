@@ -8,89 +8,122 @@ import {
   faTrash,
   faWindowClose,
 } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonGroup } from "@themesberg/react-bootstrap";
-import { forwardRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { forwardRef, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ACTIONS } from "../reducers/redux";
+import AddRowModal from "./AddRowModal";
 import { BreakBtn, DownloadBtn, EditBtn, MyBtn, SaveBtn } from "./MyButtons";
 
-const TableButtons = forwardRef((_, ref) => {
-  const dispatch = useDispatch();
+const TableButtons = forwardRef(
+  (
+    {
+      onToggleEdit,
+      onAdd,
+      onSave,
+      onDownload,
+      onClose,
+      onDelete,
+      forceClose,
+      editMode = false,
+      checkedRowsExist = "hi",
+      changesExist = false,
+      labelsSelector,
+      titleModal = "Add Row",
+    },
+    ref
+  ) => {
+    const modalLabels = useSelector(labelsSelector);
+    const [showModalDefault, setShowModalDefault] = useState(false);
+    const handleAddRow = () => setShowModalDefault(true);
+    const handleCloseAddRow = () => setShowModalDefault(false);
 
-  // const tourTable = useTourTable();
-  //   const tourDate = useTourDate();
-  // const checkedExists = useCheckedExists();
-  // const allLabels = useAllLabels();
+    const handleEditEnable = () => {
+      onToggleEdit();
+    };
+    const handleEditDisable = () => {
+      ref.current = true;
+      console.log("handleEditDisable", ref.current);
+      onToggleEdit();
+      clearChanges();
+    };
+    const handleSave = () => {
+      ref.current = true;
+      console.log("handleSave", ref.current);
+      onSave();
+      onToggleEdit();
+    };
+    const handleDownload = () => {
+      onDownload();
+    };
+    const handleDelete = () => {
+      onDelete();
+    };
+    function clearChanges() {
+      onClose();
+    }
+    useEffect(() => {
+      if (editMode && !checkedRowsExist) {
+        ref.current = true;
+        console.log("handleEditDisable", ref.current);
+        onToggleEdit();
+        clearChanges();
+      }
+    }, [checkedRowsExist]);
+    return (
+      <ButtonGroup
+        className="btn-toolbar flex-wrap justify-content-end"
+        variant="danger"
+      >
+        {(checkedRowsExist || (editMode && !checkedRowsExist)) && (
+          <MyBtn
+            disabled={editMode}
+            onClick={handleEditEnable}
+            value={<FontAwesomeIcon icon={faEdit} />}
+          />
+        )}
+        {checkedRowsExist && (
+          <MyBtn
+            disabled={editMode}
+            onClick={handleDelete}
+            value={<FontAwesomeIcon icon={faTrash} />}
+          ></MyBtn>
+        )}
+        <AddRowModal
+          labels={modalLabels}
+          title={titleModal}
+          onClose={handleCloseAddRow}
+          show={showModalDefault}
+        />
 
-  const [showModalDefault, setShowModalDefault] = useState(false);
-  const handleAddRow = () => setShowModalDefault(true);
-  // const handleClose = () => setShowModalDefault(false);
-  const toggleEditMode = () => {
-    dispatch({
-      type: ACTIONS.EDIT_TOGGLE,
-    });
-  };
-  const handleEditEnable = () => {
-    // if (checkedExists) {
-    toggleEditMode();
-    // }
-  };
-  const handleEditDisable = () => {
-    ref.current = true;
-    console.log("handleEditDisable", ref.current);
-    toggleEditMode();
-    closeAllCheckBoxes();
-    clearChanges();
-  };
-  const handleSave = () => {
-    ref.current = true;
-    console.log("handleSave", ref.current);
-    dispatch({
-      type: ACTIONS.SAVE_CHANGES,
-    });
-    closeAllCheckBoxes();
-    toggleEditMode();
-  };
-  const handleDownload = () => {
-    console.log("DOWNLOAD");
-  };
-  function closeAllCheckBoxes() {
-    dispatch({
-      type: ACTIONS.CLOSE_CHECK_ALL,
-    });
+        <MyBtn
+          disabled={editMode}
+          onClick={handleDownload}
+          value={<FontAwesomeIcon icon={faDownload} />}
+        />
+        {editMode && (
+          <MyBtn
+            disabled={!changesExist}
+            onClick={handleSave}
+            value={<FontAwesomeIcon icon={faSave} />}
+          />
+        )}
+        <MyBtn
+          value={<FontAwesomeIcon icon={faPlus} />}
+          onClick={handleAddRow}
+        ></MyBtn>
+        {editMode && (
+          <MyBtn
+            className="danger-btn"
+            onClick={handleEditDisable}
+            value={<FontAwesomeIcon icon={faWindowClose} />}
+          />
+        )}
+      </ButtonGroup>
+    );
   }
-  function clearChanges() {
-    dispatch({
-      type: ACTIONS.RESET_CHANGES,
-    });
-  }
-  return (
-    <ButtonGroup
-      className="btn-toolbar flex-wrap justify-content-end"
-      variant="danger"
-    >
-      <EditBtn
-        onClick={handleEditEnable}
-        value={<FontAwesomeIcon icon={faEdit} />}
-      />
-      <BreakBtn
-        onClick={handleEditDisable}
-        value={<FontAwesomeIcon icon={faWindowClose} />}
-      />
-      <MyBtn
-        value={<FontAwesomeIcon icon={faPlus} />}
-        onClick={handleAddRow}
-      ></MyBtn>
-      <SaveBtn onClick={handleSave} value={<FontAwesomeIcon icon={faSave} />} />
-
-      <MyBtn value={<FontAwesomeIcon icon={faTrash} />}></MyBtn>
-      <DownloadBtn
-        onClick={handleDownload}
-        value={<FontAwesomeIcon icon={faDownload} />}
-      />
-    </ButtonGroup>
-  );
-});
+);
 
 export default TableButtons;

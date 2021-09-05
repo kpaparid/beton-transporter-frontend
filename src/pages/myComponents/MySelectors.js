@@ -15,11 +15,40 @@ const filteredOutValues = (state) => state.tourTable.filteredOutValues;
 const byId = (state) => state.tourTable.byId;
 const checkedLabelsId = (state) => state.tourTable.checkedLabelsId;
 const labelsById = (state) => state.tourTable.labelsById;
+
+const labelsReselect = createSelector(
+  [allLabelsId, labelsById],
+  (allLabelsId, labelsById) => {
+    const labels = [...allLabelsId].sort(
+      (a, b) => labelsById[a].priority - labelsById[b].priority
+    );
+    return labels.map((l) => labelsById[l]);
+  }
+);
+
+const availableValuesReselect = createSelector(
+  [allId, byId, allLabelsId],
+  (allId, byId, allLabelsId) => {
+    return convertArrayToObject(
+      allLabelsId.map((label) => {
+        return {
+          [label]: [...new Set(allId.map((tour) => byId[tour][label]))],
+        };
+      })
+    );
+  }
+);
+
+const visibleHeaders = createSelector([labelsReselect], (labels) => {
+  return labels.map(({ text, id }) => ({
+    Header: text,
+    accessor: "col-" + id,
+    label: id,
+    sortType: (a, b) =>
+      a.values["col-" + id].value > b.values["col-" + id].value ? 1 : -1,
+  }));
+});
 function customFilterFunction({ type, values, value, defaultDate }) {
-  // if (type === "date") {
-  //   console.log(value);
-  //   console.log(defaultDate);
-  // }
   switch (type) {
     case "date":
       return values.length !== 0 &&
@@ -60,44 +89,11 @@ const shownToursReselect = createSelector(
     return table;
   }
 );
-
-const labelsReselect = createSelector(
-  [allLabelsId, labelsById],
-  (allLabelsId, labelsById) => {
-    const labels = [...allLabelsId].sort(
-      (a, b) => labelsById[a].priority - labelsById[b].priority
-    );
-    return labels.map((l) => labelsById[l]);
-  }
-);
-
-const availableValuesReselect = createSelector(
-  [allId, byId, allLabelsId],
-  (allId, byId, allLabelsId) => {
-    return convertArrayToObject(
-      allLabelsId.map((label) => {
-        return {
-          [label]: [...new Set(allId.map((tour) => byId[tour][label]))],
-        };
-      })
-    );
-  }
-);
-
-const visibleHeaders = createSelector([labelsReselect], (labels) => {
-  return labels.map(({ text, id }) => ({
-    Header: text,
-    accessor: "col-" + id,
-    label: id,
-    sortType: (a, b) =>
-      a.values["col-" + id].value > b.values["col-" + id].value ? 1 : -1,
-  }));
-});
-
 const reactTableData = createSelector(
   [allLabelsId, shownToursReselect, labelsById, availableValuesReselect],
   (allLabelsId, shownToursReselect, labelsById, availableValues) => {
     return shownToursReselect.map(({ id, value }) => ({
+      id: id,
       ...convertArrayToObject(
         allLabelsId.map((label) => {
           const props = {
@@ -107,7 +103,7 @@ const reactTableData = createSelector(
             type: labelsById[label].type,
             measurement: labelsById[label].measurement,
             minWidth: "10px",
-            maxWidth: "200px",
+            maxWidth: "250px",
           };
           if (props.type !== "constant") return { ["col-" + label]: props };
           else
@@ -185,8 +181,25 @@ const nestedFilterTourData = createSelector(
     });
   }
 );
+const modalLabelsReselect = createSelector(
+  [allLabelsId, labelsById, availableValuesReselect],
+  (allLabelsId, labelsById, availableValues) => {
+    return allLabelsId.map((labelId) => {
+      const { id, text, type, measurement, grid } = labelsById[labelId];
+      const props = { id, text, type, measurement, grid };
+      return type === "constant"
+        ? { ...props, availableValues: availableValues[id] }
+        : type === "date"
+        ? { ...props, portal: false, withButton: true }
+        : props;
+    });
+  }
+);
 
 export {
+  modalLabelsReselect,
+  changesById,
+  checkedId,
   nestedFilterTourData,
   hiddenColumnsReselect,
   tourDate,

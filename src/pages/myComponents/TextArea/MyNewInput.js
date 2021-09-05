@@ -1,4 +1,12 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  forwardRef,
+  memo,
+  useRef,
+} from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import "../MyForm.css";
 import { imgInvalid, imgValid, validationType } from "../MyConsts";
@@ -9,15 +17,20 @@ import {
   calcValidation,
   formatInput,
 } from "../util/utilities";
-import { useSelector } from "react-redux";
 import { isEqual } from "lodash";
+import LazyLoad from "react-lazyload";
+// import DatePicker from "@mui/lab/DatePicker";
 
-export const Input = React.memo((props) => {
+export const Input = memo((props) => {
   const {
-    value,
+    value = "",
     type = "text",
-    editSelector,
-    isSelected = false,
+    extendable = false,
+    editable = false,
+    maxWidth = "150px",
+    minWidth = "10px",
+    style: inputStyle = {},
+    lazyLoad = false,
     ...rest
   } = props;
   const isValid = useMemo(
@@ -28,12 +41,7 @@ export const Input = React.memo((props) => {
     () => calcInvalidation(value + "", validationType(type), true),
     [value, type]
   );
-  const editMode = useSelector(editSelector);
 
-  const editable = useMemo(
-    () => isSelected && editMode,
-    [editMode, isSelected]
-  );
   const img = useMemo(
     () => (isInvalid ? imgInvalid : isValid ? imgValid : "none"),
     [isInvalid, isValid]
@@ -46,60 +54,56 @@ export const Input = React.memo((props) => {
       (type === "constant" ? " selection" : ""),
     [editable, isValid, isInvalid, type]
   );
-
+  const style = extendable
+    ? { maxWidth, minWidth, ...inputStyle }
+    : { width: "100%", ...inputStyle };
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       <Container
         {...{
           ...rest,
           type,
           value,
           img,
-          className,
         }}
+        lazyLoad={lazyLoad}
+        extendable={extendable}
       />
     </div>
   );
-});
+}, isEqual);
 
-export const Container = React.memo(
-  ({
-    img,
-    className,
-    value,
-    type,
-    measurement,
-    maxWidth = "150px",
-    minWidth = "10px",
-    ...rest
-  }) => {
+export const Container = memo(
+  ({ img, value, type, extendable, lazyLoad = true, measurement, ...rest }) => {
     return (
       <>
-        <div
-          className="text-container"
-          style={{
-            maxWidth,
-            minWidth,
-          }}
-        >
-          <div className="dummy">
-            <div
-              className="img-container"
-              style={{ backgroundImage: img }}
-            ></div>
-            <div className="text-flex">
-              <span
-                className="text-span"
-                onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
-              >
-                {formatInput(value, type)}
-              </span>
+        <div className="text-container">
+          {extendable && (
+            <div className="dummy">
+              <div
+                className="img-container"
+                style={{ backgroundImage: img }}
+              ></div>
+              <div className="text-flex">
+                <span
+                  className="text-span"
+                  onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
+                >
+                  {formatInput(value, type)}
+                </span>
+              </div>
+              {measurement !== "" && (
+                <span className="measurement">{measurement}</span>
+              )}
             </div>
-            {measurement !== "" && (
-              <span className="measurement">{measurement}</span>
+          )}
+          <div className="editable-container">
+            {lazyLoad ? (
+              <LazyContainer {...{ value, type, ...rest }} />
+            ) : (
+              <TextInput {...{ value, type, ...rest }} />
             )}
           </div>
-          <LazyContainer {...{ value, type, ...rest }} />
         </div>
       </>
     );
@@ -107,34 +111,82 @@ export const Container = React.memo(
   isEqual
 );
 
-const LazyContainer = React.memo((props) => {
-  const [vis, setVis] = useState(false);
-  useEffect(() => {
-    setVis(true);
-  }, []);
-  return <div className="finalwrappi">{vis && <TextInput {...props} />}</div>;
-});
+const LazyContainer = memo((props) => {
+  return (
+    <LazyLoad>
+      <TextInput {...props} />
+    </LazyLoad>
+  );
+}, isEqual);
 
-const TextInput = ({ onChange, type, availableValues, ...rest }) => {
-  function handleTextAreaChange(e) {
-    onChange(e.target.value);
-  }
+export const TextInput = memo(
+  forwardRef(
+    (
+      {
+        onChange,
+        type,
+        availableValues,
+        inputClassName = "",
+        className = "",
+        ...rest
+      },
+      ref
+    ) => {
+      const backupRef = useRef(null);
+      const domRef = ref ? ref : backupRef;
 
-  switch (type) {
-    case "date":
-      return <DateSelectorDropdown onChange={onChange} {...rest} />;
-    case "constant":
-      return (
-        <MyFormSelect
-          onChange={handleTextAreaChange}
-          availableValues={availableValues}
-          {...rest}
-          labelIsDisabled
-        />
+      function handleTextAreaChange(e) {
+        onChange(e.target.value);
+      }
+      const [selectedDate, handleDateChange] = useState(
+        "2018-01-01T00:00:00.000Z"
       );
-    default:
-      return <TextareaAutosize {...rest} onChange={handleTextAreaChange} />;
-  }
-};
+      switch (type) {
+        case "date":
+          return (
+            <DateSelectorDropdown
+              className={className}
+              onChange={onChange}
+              {...rest}
+            />
+          );
+        case "constant":
+          return (
+            <MyFormSelect
+              className={className}
+              onChange={onChange}
+              availableValues={availableValues}
+              {...rest}
+              labelIsDisabled
+            />
+          );
+        // case "time":
+        //   return (
+        //     <DatePicker
+        //       renderInput={(props) => <div {...props} />}
+        //       label="DateTimePicker"
+        //       {...rest}
+        //       onChange={onChange}
+        //     />
+        //   );
+        default:
+          return (
+            <div className={"d-block " + className}>
+              <TextareaAutosize
+                className={inputClassName}
+                {...rest}
+                onChange={handleTextAreaChange}
+                ref={domRef}
+              />
+            </div>
+          );
+      }
+    }
+  ),
+  isEqual
+);
 
+Input.displayName = "Input";
+TextInput.displayName = "TextInput";
+Container.displayName = "Container";
 export default Input;

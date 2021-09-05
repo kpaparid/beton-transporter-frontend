@@ -1,84 +1,97 @@
-import React from "react";
-import { Button, Container, Modal } from "@themesberg/react-bootstrap";
-import MyTextArea from "./TextArea/MyTextArea";
-import MyFormSelect from "./MyFormSelect";
-import MyInput from "./MyInput";
+import React, { memo, useEffect, useState } from "react";
+import { Form, Modal } from "@themesberg/react-bootstrap";
+import { TextInput } from "./TextArea/MyNewInput";
+import { isEqual } from "lodash";
+import "./MyForm.css";
+import { MyBtn } from "./MyButtons";
 export const MyModal = (props) => {
   const {
     Header = () => <></>,
     Body = () => <></>,
     Footer = () => <></>,
+    show,
+    onClose,
+    title,
   } = props;
-  const { show, onClose, title } = props;
-  // console.log(!isNaN("1a"));
 
   return (
     <>
-      <Modal as={Modal.Body} fullscreen={false} show={show} onHide={onClose}>
-        <Modal.Header className="justify-content-center">
-          <Modal.Title className="h6">{title}</Modal.Title>
-          <Header></Header>
-        </Modal.Header>
-        <Modal.Body>
-          <Body></Body>
-        </Modal.Body>
-        <Modal.Footer className="justify-content-center">
-          <Footer></Footer>
-        </Modal.Footer>
+      <Modal
+        as={Modal.Body}
+        fullscreen={false}
+        show={show}
+        onHide={onClose}
+        size="xl"
+      >
+        <div className="px-0">
+          <Modal.Header className="justify-content-center my-secondary-bg">
+            {Header}
+          </Modal.Header>
+          <Modal.Body>{Body}</Modal.Body>
+          <Modal.Footer className="justify-content-center">
+            <Footer></Footer>
+          </Modal.Footer>
+        </div>
       </Modal>
-
-      {/* <Modal
-                as={Modal.Dialog} centered show={show} onHide={onClose}>
-                <Modal.Header className="justify-content-center">
-                    <Modal.Title className="h6">{title}</Modal.Title>
-                    <Header></Header>
-                </Modal.Header>
-                <Modal.Body>
-                    <Body></Body>
-                </Modal.Body>
-                <Modal.Footer className="justify-content-center">
-                    <Footer></Footer>
-                </Modal.Footer>
-            </Modal> */}
     </>
   );
 };
-export default (props) => {
-  const { labels, title } = props;
-  const { show, onClose } = props;
+const ModalRow = memo(({ onChange, text, grid, measurement, id, ...rest }) => {
+  // console.log(grid);
+  const [value, setValue] = useState("");
+  function handleChange(newValue) {
+    if (newValue !== value) {
+      setValue(newValue);
+      onChange && onChange(id, newValue);
+      // console.log("mR handlechange", { id, newValue });
+    }
+  }
+  const [selectedDate, handleDateChange] = useState("2018-01-01T00:00:00.000Z");
+  const measured = measurement ? "measured" : "";
+  return (
+    <div className="col-5 p-2">
+      <Form.Label className="mb-1">{text}</Form.Label>
+      <div className="d-flex flex-nowrap">
+        <div className={"text-input-group " + measured}>
+          {/* <Input editable value={value} onChange={handleChange} {...rest} /> */}
+          <div className="wrapper wrapper-editable w-100 p-0">
+            <div className="text-container">
+              <TextInput
+                className="w-100"
+                inputClassName="w-100"
+                value={value}
+                onChange={handleChange}
+                {...rest}
+              ></TextInput>
+            </div>
+          </div>
 
-  const Body = () => {
-    return (
-      <>
-        <Container className="">
-          {Object.keys(labels).map((l, index) => {
-            const label = labels[l];
-            return <MyInput label={label} />;
-          })}
-        </Container>
-      </>
-    );
-  };
-  const Header = () => {
-    return (
-      <>
-        <h5>Add Row</h5>
-      </>
-    );
-  };
-  const Footer = () => {
-    return (
-      <>
-        <Button variant="tertiary">Submit</Button>
-      </>
-    );
-  };
-
+          {measurement && (
+            <div
+              className="px-2 measurement d-flex justify-content-center"
+              style={{ width: "50px" }}
+            >
+              {measurement}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}, isEqual);
+const AddRowModal = memo(({ labels, title, show, onClose }) => {
+  const [row, setRow] = useState({});
+  useEffect(() => {
+    // console.log("effect", row);
+  }, [row]);
+  function handleChange(id, value) {
+    setRow((old) => ({ ...old, [id]: value }));
+  }
   return (
     <>
       <MyModal
-        Header={Header}
-        Body={Body}
+        Header={Header({ title })}
+        Body={Body({ labels, onChange: handleChange })}
         Footer={Footer}
         title={title}
         show={show}
@@ -86,8 +99,40 @@ export default (props) => {
       />
     </>
   );
-};
+}, isEqual);
 
 export const AddRow = (props) => {
   return <></>;
 };
+const Body = (props) => {
+  const { labels, onChange } = props;
+  return (
+    <>
+      <Form>
+        <Form.Group
+          className="d-flex flex-wrap justify-content-around"
+          controlId="formBasicEmail"
+        >
+          {labels.map((label, index) => {
+            return <ModalRow key={index} {...label} onChange={onChange} />;
+          })}
+        </Form.Group>
+      </Form>
+    </>
+  );
+};
+const Header = ({ title = "Add Row" }) => {
+  return (
+    <>
+      <Modal.Title className="h4">{title}</Modal.Title>
+    </>
+  );
+};
+const Footer = (onSubmit) => {
+  return (
+    <>
+      <MyBtn onSubmit={onSubmit} value="Submit" className="primary-btn"></MyBtn>
+    </>
+  );
+};
+export default AddRowModal;

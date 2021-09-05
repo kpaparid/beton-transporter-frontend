@@ -25,7 +25,7 @@ import {
   keyPreventDefault,
   formatInput,
 } from "../util/utilities";
-import { DummyWrapperRef } from "../DummyWrappers";
+import { DummyWrapperRef } from "./DummyWrappers";
 
 export const MyTextArea1 = forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {

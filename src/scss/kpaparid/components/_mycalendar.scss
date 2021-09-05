@@ -1,58 +1,55 @@
 .mybutton {
-    background-color: $white;
-    color: $default;
-    border: 0;
+  background-color: $white;
+  color: $default;
+  border: 0;
   :hover,
   :focus {
     background-color: $tertiary;
     color: $white;
   }
 }
+.mybutton2 {
+  border: 0;
+}
 .mybutton2:hover,
 .mybutton2:focus {
   background-color: $tertiary;
-  border: 0;
 }
-.mydropdowntoggle{
-  box-shadow: inset 0 0px 0px rgb(46 54 80 / 13%), 0 0 0 0rem rgb(222 223 226 / 50%);
+.mydropdowntoggle {
+  box-shadow: inset 0 0px 0px rgb(46 54 80 / 13%),
+    0 0 0 0rem rgb(222 223 226 / 50%);
 }
-.mydropdownlist{
+.mydropdownlist {
   background-color: $white;
   color: $default;
   :disabled {
     opacity: 1;
   }
-  
+
   .dropdown-toggle {
     box-shadow: 0;
-    :focus{
-      box-shadow: inset 0 3px 6px rgb(46 54 80 / 13%), 0 0 0 0.2rem rgb(222 223 226 / 50%);
+    :focus {
+      box-shadow: inset 0 3px 6px rgb(46 54 80 / 13%),
+        0 0 0 0.2rem rgb(222 223 226 / 50%);
     }
   }
-  button{
-    
-    button{
+  button {
+    button {
     }
     :hover,
     :focus {
       background-color: aliceblue;
       color: $default;
-      
     }
-    
   }
-  
 }
 
 .mycheckbox:hover,
 .mycheckbox:focus {
-    transform: scale(1.1);  
+  transform: scale(1.1);
 }
 
-
-
 .mycontainer {
-
   width: 230px;
   line-height: 26px;
   padding-left: 1.5rem;
@@ -62,45 +59,43 @@
   font-family: $font-family-sans-serif;
   font-weight: $font-weight-normal;
 
-  div{
-    div{
-    padding-left: 3rem;
-    align-items: left;
-    .form-check-input:disabled{
-      opacity: 1;
+  div {
+    div {
+      padding-left: 3rem;
+      align-items: left;
+      .form-check-input:disabled {
+        opacity: 1;
+      }
     }
-    
-      
-  }}
-
+  }
 }
 .DateRangePickerInput_arrow {
   padding: 0;
   display: none;
   text-align: left;
 }
-.DateInput{
+.DateInput {
   // width: 100%;
 }
-.DateInput_input{
-width: 100%;
-text-align: left;
-font-size: $font-size-md;
-font-family: $font-family-sans-serif;
-font-weight: $font-weight-normal;
-color: $default;
-padding: 0.5625rem;
-margin-left: 2rem;
+.DateInput_input {
+  width: 100%;
+  text-align: left;
+  font-size: $font-size-md;
+  font-family: $font-family-sans-serif;
+  font-weight: $font-weight-normal;
+  color: $default;
+  padding: 0.5625rem;
+  margin-left: 2rem;
 }
-.DateInput_input::-webkit-input-placeholder{
-color: $default;
+.DateInput_input::-webkit-input-placeholder {
+  color: $default;
 }
 .DateRangePickerInput__showClearDates {
-padding-right: 0;
+  padding-right: 0;
 }
-.DateRangePicker_picker{
-margin-top: 35px 
+.DateRangePicker_picker {
+  margin-top: 35px;
 }
-.DateInput_fang{
-display: none;
+.DateInput_fang {
+  display: none;
 }

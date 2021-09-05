@@ -30,7 +30,7 @@ import ThemesbergLogo from "../assets/img/themesberg.svg";
 import ReactHero from "../assets/img/technologies/react-hero-logo.svg";
 import ProfilePicture from "../assets/img/team/profile-picture-3.jpg";
 
-export default (props = {}) => {
+const Sidebar = (props = {}) => {
   const location = useLocation();
   const { pathname } = location;
   const [show, setShow] = useState(false);
@@ -77,8 +77,8 @@ export default (props = {}) => {
       badgeColor = "primary",
     } = props;
     const classNames = badgeText
-      ? "d-flex justify-content-start align-items-center justify-content-between"
-      : "";
+      ? "d-flex justify-content-start align-items-center justify-content-between my-nav-link"
+      : "my-nav-link";
     const navItemClassName = link === pathname ? "active" : "";
     const linkProps = external ? { href: link } : { as: Link, to: link };
 
@@ -142,7 +142,8 @@ export default (props = {}) => {
       </Navbar>
       <CSSTransition timeout={300} in={show} classNames="sidebar-transition">
         <SimpleBar
-          className={`collapse ${showClass} sidebar d-md-block bg-primary text-white`}
+          // className={`collapse ${showClass} sidebar d-md-block text-white bg-primary`}
+          className={`collapse ${showClass} sidebar d-md-block text-white myprimary-bg`}
         >
           <div className="sidebar-inner px-4 pt-3">
             <div className="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
@@ -308,3 +309,4 @@ export default (props = {}) => {
     </>
   );
 };
+export default Sidebar;

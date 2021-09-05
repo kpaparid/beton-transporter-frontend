@@ -1,64 +1,95 @@
-import React, {
-  useEffect,
-  useState,
-  memo,
-  useCallback,
-  useMemo,
-  useLayoutEffect,
-} from "react";
+import React, { useEffect, useState, memo, useCallback, useRef } from "react";
 import {
   Button,
   Card,
   Table,
-  Dropdown,
   Form,
+  ButtonGroup,
 } from "@themesberg/react-bootstrap";
-
+import Dropdown from "react-bootstrap/Dropdown";
 import moment from "moment";
-import { useSelector, useDispatch } from "react-redux";
-import { ACTIONS } from "../reducers/redux";
 import { rotateArray, calcIndexedCalendarDays } from "./util/utilities";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faCalendar,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MyDropdown } from "./MyDropdown";
 import TextareaAutosize from "react-textarea-autosize";
 import { isEqual } from "lodash";
-import { Alert } from "bootstrap";
+import { CustomDropdown } from "./CustomDropdown";
 
-export const DateSelectorDropdown = (props) => {
-  const { value, onChange, maxWidth, minWidth, disabled = false } = props;
+export const DateSelectorDropdown = ({
+  value,
+  onChange,
+  maxWidth,
+  minWidth,
+  disabled = false,
+  portal = true,
+  withButton = false,
+}) => {
+  const ref = useRef(null);
+
   const [text, setText] = useState(value);
-  function handleChange(value) {
+  const handleChange = useCallback((value) => {
     moment(value, "D/M/YYYY", true).isValid() && setText(value);
-  }
-  function handleInputChange(e) {
+  }, []);
+  const handleInputChange = useCallback((e) => {
     setText(e.target.value);
-  }
+  }, []);
   useEffect(() => {
     onChange && onChange(text);
   }, [text]);
   useEffect(() => {
     setText(value);
   }, [value]);
-  const data = {
-    disabled,
-    ToggleComponent: (
-      <TextareaAutosize {...props} value={text} onChange={handleInputChange} />
-    ),
-    MenuComponent: (
-      <DateSelector
-        singleDate
-        onChange={handleChange}
-        date={text}
-        maxWidth={maxWidth}
-        minWidth={minWidth}
-      ></DateSelector>
-    ),
-  };
+
+  const toggleComponent = withButton ? (
+    <div
+      size="sm"
+      variant="primary"
+      className="p-0 px-2 d-flex justify-content-center align-items-center h-100"
+      style={{ width: "40px" }}
+    >
+      <FontAwesomeIcon icon={faCalendar} />
+    </div>
+  ) : (
+    <div className="d-block w-100">
+      <TextareaAutosize value={text} onChange={handleInputChange} />
+    </div>
+  );
+
   return (
     <>
       <div className="d-block w-100">
-        <MyDropdown {...data}></MyDropdown>
+        <div className="d-flex flex-nowrap w-100">
+          {withButton && (
+            <TextareaAutosize
+              style={{ paddingLeft: "40px" }}
+              className="w-100"
+              value={text}
+              onChange={handleInputChange}
+            />
+          )}
+          <CustomDropdown
+            id={"TourFilter"}
+            as={ButtonGroup}
+            disabled={disabled}
+            ref={{ ref: ref }}
+            toggleAs="custom"
+            // className="w-100"
+            portal={portal}
+            value={toggleComponent}
+          >
+            <DateSelector
+              singleDate
+              onChange={handleChange}
+              date={text}
+              maxWidth={maxWidth}
+              minWidth={minWidth}
+            />
+          </CustomDropdown>
+        </div>
       </div>
     </>
   );
@@ -77,30 +108,36 @@ export const DateSelector = memo((props) => {
     // minWidth,
     ...rest
   } = props;
-  const [clickedId, setClickedId] = useState([]);
+  const [clickedId, setClickedId] = useState(
+    date && moment(date, "DD/MM/YYYY", true).isValid()
+      ? [moment(date, "DD/MM/YYYY").format("DD")]
+      : []
+  );
   const [hoveredId, setHoveredId] = useState();
   const labels = rotateArray(moment.weekdays(), 1);
   const headers = labels.map((day) => day.substr(0, 2) + ".");
-  const [monthYear, setMonthYear] = useState([
-    moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY"),
-  ]);
   const [tableDays, setTableDays] = useState([]);
-  // console.log("DateSelector rerender", { clickedId, monthYear, date });
+  const [monthYear, setMonthYear] = useState(
+    date && moment(date, "DD/MM/YYYY", true).isValid()
+      ? [moment(date, "DD/MM/YYYY").format("MMMM YYYY")]
+      : date && moment(date, "MM/YYYY", true).isValid()
+      ? [moment(date, "MM/YYYY").format("MMMM YYYY")]
+      : month && year && moment(month + "/" + year, "MM/YYYY", true).isValid()
+      ? [moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY")]
+      : [moment().format("MMMM YYYY")]
+  );
   useEffect(() => {
-    console.log("day: ", day);
     day && Array.isArray(day) && setClickedId(day);
     day && !Array.isArray(day) && setClickedId([day]);
   }, [day]);
   useEffect(() => {
-    console.log("month year", { month, year });
-    // console.log(moment(month + "/" + year, "M/YYYY").format("MMMM YYYY"));
     month &&
       year &&
       setMonthYear(moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY"));
   }, [month, year]);
   useEffect(() => {
-    if (date) {
-      const newD = !Array.isArray(date)
+    if (date !== null) {
+      const newDate = !Array.isArray(date)
         ? moment(date, "DD/MM/YYYY", true).isValid()
           ? moment(date, "DD/MM/YYYY").format("MMMM YYYY")
           : monthYear
@@ -109,14 +146,22 @@ export const DateSelector = memo((props) => {
         : moment(date[1], "DD/MM/YYYY", true).isValid()
         ? moment(date[1], "DD/MM/YYYY").format("MMMM YYYY")
         : monthYear;
-
-      console.log("date", { date, newD });
-      setMonthYear(newD);
+      setMonthYear(newDate);
+      const newClickedId = !Array.isArray(date)
+        ? moment(date, "DD/MM/YYYY", true).isValid()
+          ? [moment(date, "DD/MM/YYYY").format("DD")]
+          : []
+        : moment(date[0], "DD/MM/YYYY", true).isValid()
+        ? [moment(date[0], "DD/MM/YYYY").format("DD")]
+        : moment(date[1], "DD/MM/YYYY", true).isValid()
+        ? [moment(date[1], "DD/MM/YYYY").format("DD")]
+        : [];
+      setClickedId(newClickedId);
     }
   }, [date]);
   useEffect(() => {
-    console.log("monthYear", monthYear);
-    monthYear.length !== 0 &&
+    monthYear &&
+      monthYear.length !== 0 &&
       setTableDays(
         calcIndexedCalendarDays(
           moment(monthYear, "MMMM YYYY").format("MM/YYYY"),
@@ -140,7 +185,6 @@ export const DateSelector = memo((props) => {
   };
 
   function sendOutside(days, mY = monthYear) {
-    console.log("sending outside", { days, mY });
     const change =
       days && mY
         ? days.map((day) =>
@@ -150,9 +194,7 @@ export const DateSelector = memo((props) => {
             ).format("DD/MM/YYYY")
           )
         : moment(mY, "MMMM YYYY").format("MM/YYYY");
-
-    console.log("change", change);
-    onChange && onChange(change);
+    onChange && change.length === 1 ? onChange(change[0]) : onChange(change);
   }
 
   function handleIncrementMonth() {
@@ -171,7 +213,6 @@ export const DateSelector = memo((props) => {
     sendOutside(clickedId, newMonthYear);
   }
   function handleClick(event) {
-    console.log("click");
     const id = parseInt(event.target.id.replace("Btn", ""));
     if (singleDate && clickedId.length === 1) {
       setClickedId([id]);
@@ -191,7 +232,6 @@ export const DateSelector = memo((props) => {
     !singleDate && clickedId.length === 1 && setHoveredId(id);
   }
   useEffect(() => {
-    console.log("clickedID:", clickedId);
     const size = clickedId.length;
     switch (size) {
       case 0:
@@ -403,14 +443,15 @@ export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
         <Dropdown.Toggle
           split
           variant="light"
-          className="rounded-0 rounded-end"
+          className="rounded-0 rounded-end light"
+          // style={{ backgroundColor: "#f5f8fb" }}
         >
           <h5 className="m-0 py-0 px-2">
             {title} {moment(date, "MM/YYYY").format("MMMM YYYY")}
           </h5>
         </Dropdown.Toggle>
 
-        <Dropdown.Menu className="p-0">
+        <Dropdown.Menu className="m-0 p-0">
           <MonthSelector {...rest} date={date}></MonthSelector>
         </Dropdown.Menu>
       </Dropdown>

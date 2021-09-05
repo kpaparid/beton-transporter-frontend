@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { Button } from "@themesberg/react-bootstrap";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import { primaryVariant } from "./MyConsts";
+
+import "./MyForm.css";
 
 const defaultVariant = "primary";
 
@@ -59,16 +62,17 @@ export const MyBtn = (props) => {
   const {
     onClick = "",
     value = "",
-    className = "",
+    className = "primary-btn",
     size = "",
     variant = defaultVariant,
+    disabled,
   } = props;
   return (
     <Button
-      className={`${className} mybutton2`}
+      className={className}
       onClick={onClick}
-      variant={variant}
       size={size}
+      disabled={disabled}
     >
       {value}
     </Button>
