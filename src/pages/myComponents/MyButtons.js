@@ -66,9 +66,11 @@ export const MyBtn = (props) => {
     size = "",
     variant = defaultVariant,
     disabled,
+    type,
   } = props;
   return (
     <Button
+      type={type}
       className={className}
       onClick={onClick}
       size={size}

@@ -213,6 +213,7 @@ const EditableCell = React.memo(
   }) => {
     const [value, setValue] = useState(initialValue);
     const onChange = useCallback((e) => {
+      console.log("editable", e);
       setValue(e);
     }, []);
     const handleUpdateData = useCallback(() => {

@@ -5,6 +5,7 @@ import { Card } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import "./MyForm.css";
 import { ReactTable } from "./ReactTable";
+import DataTable from "./NewTable";
 export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
   const skipResetRef = useRef(false);
   return (
@@ -23,20 +24,27 @@ export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
 
 const CardBody = memo(
   forwardRef(({ children: { stateAPIStatus, ...rest } }, ref) => {
-    if (stateAPIStatus === "loading")
-      return (
-        <div className="w-100 h-100 text-center">
-          <h2>LOADING</h2>
-        </div>
-      );
-    else if (stateAPIStatus === "success")
-      return <ReactTable ref={ref}>{{ ...rest }}</ReactTable>;
-    else if (stateAPIStatus === "error")
-      return (
-        <div className="w-100 h-100 text-center">
-          <h2>ERROR</h2>
-        </div>
-      );
+    console.log(stateAPIStatus);
+
+    switch (stateAPIStatus) {
+      case "loading":
+        return (
+          <div className="w-100 h-100 text-center">
+            <h2>LOADING</h2>
+          </div>
+        );
+      case "success":
+        return <ReactTable ref={ref}>{{ ...rest }}</ReactTable>;
+      case "error":
+        return (
+          <div className="w-100 h-100 text-center">
+            <h2>ERROR</h2>
+          </div>
+        );
+
+      default:
+        return <div>loading</div>;
+    }
   }),
   isEqual
 );

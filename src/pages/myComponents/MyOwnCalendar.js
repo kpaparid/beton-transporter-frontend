@@ -1,4 +1,11 @@
-import React, { useEffect, useState, memo, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  memo,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import {
   Button,
   Card,
@@ -18,82 +25,109 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TextareaAutosize from "react-textarea-autosize";
 import { isEqual } from "lodash";
 import { CustomDropdown } from "./CustomDropdown";
+import { IconButton, TextField } from "@mui/material";
 
-export const DateSelectorDropdown = ({
-  value,
-  onChange,
-  maxWidth,
-  minWidth,
-  disabled = false,
-  portal = true,
-  withButton = false,
-}) => {
-  const ref = useRef(null);
+import Cleave from "cleave.js/react";
+export const DateSelectorDropdown = memo(
+  ({
+    value,
+    onChange,
+    maxWidth,
+    minWidth,
+    disabled = false,
+    portal = true,
+    withButton = false,
+    onBlur,
+    // inputProps,
+    Input,
+  }) => {
+    const ref = useRef(null);
+    // const [text, setText] = useState(value);
+    const handleSelectorChange = useCallback((value) => {
+      moment(value, "D/M/YYYY", true).isValid() && onChange(value);
+    }, []);
+    const handleInputChange = useCallback((e) => {
+      const v = e.target.value;
+      // onChange && onChange(v.length === 2 || v.length === 5 ? v + "/" : v);
+      onChange && onChange(v);
+    }, []);
 
-  const [text, setText] = useState(value);
-  const handleChange = useCallback((value) => {
-    moment(value, "D/M/YYYY", true).isValid() && setText(value);
-  }, []);
-  const handleInputChange = useCallback((e) => {
-    setText(e.target.value);
-  }, []);
-  useEffect(() => {
-    onChange && onChange(text);
-  }, [text]);
-  useEffect(() => {
-    setText(value);
-  }, [value]);
+    const domInput = useCallback(
+      (props) =>
+        Input ? (
+          <Input {...props} autoFocus></Input>
+        ) : (
+          <div className="d-block w-100">
+            <TextareaAutosize {...props} />
+          </div>
+        ),
+      [Input]
+    );
 
-  const toggleComponent = withButton ? (
-    <div
-      size="sm"
-      variant="primary"
-      className="p-0 px-2 d-flex justify-content-center align-items-center h-100"
-      style={{ width: "40px" }}
-    >
-      <FontAwesomeIcon icon={faCalendar} />
-    </div>
-  ) : (
-    <div className="d-block w-100">
-      <TextareaAutosize value={text} onChange={handleInputChange} />
-    </div>
-  );
+    const toggleComponent = useCallback(
+      ({ withButton, ...props }) =>
+        withButton ? (
+          <div style={{ width: "0px" }}>
+            <IconButton
+              aria-label="datepicker"
+              style={{ padding: 8, left: "-30px", bottom: "-10px" }}
+            >
+              <FontAwesomeIcon
+                style={{ width: "24px", height: "24px" }}
+                icon={faCalendar}
+              />
+            </IconButton>
+          </div>
+        ) : (
+          domInput({ ...props, autoFocus: true })
+        ),
+      [domInput]
+    );
 
-  return (
-    <>
-      <div className="d-block w-100">
-        <div className="d-flex flex-nowrap w-100">
-          {withButton && (
-            <TextareaAutosize
-              style={{ paddingLeft: "40px" }}
-              className="w-100"
-              value={text}
-              onChange={handleInputChange}
-            />
-          )}
-          <CustomDropdown
-            id={"TourFilter"}
-            as={ButtonGroup}
-            disabled={disabled}
-            ref={{ ref: ref }}
-            toggleAs="custom"
-            // className="w-100"
-            portal={portal}
-            value={toggleComponent}
-          >
-            <DateSelector
-              singleDate
-              onChange={handleChange}
-              date={text}
-              maxWidth={maxWidth}
-              minWidth={minWidth}
-            />
-          </CustomDropdown>
+    return (
+      <>
+        <div className="d-block w-100">
+          <div className="d-flex flex-nowrap w-100 align-items-center">
+            {withButton && (
+              <div className="d-block w-100">
+                {domInput({
+                  value: value,
+                  onChange: handleInputChange,
+                  onBlur: onBlur,
+                })}
+              </div>
+            )}
+
+            <CustomDropdown
+              id={"TourFilter"}
+              as={ButtonGroup}
+              disabled={disabled}
+              ref={{ ref: ref }}
+              toggleAs="custom"
+              className={!withButton ? "w-100" : null}
+              portal={portal}
+              value={toggleComponent({
+                value: value,
+                onChange: handleInputChange,
+                onBlur: onBlur,
+                withButton: withButton,
+              })}
+            >
+              <DateSelector
+                singleDate
+                onChange={handleSelectorChange}
+                date={value}
+                maxWidth={maxWidth}
+                minWidth={minWidth}
+              />
+            </CustomDropdown>
+          </div>
         </div>
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  },
+  isEqual
+);
 
 export const DateSelector = memo((props) => {
   const {

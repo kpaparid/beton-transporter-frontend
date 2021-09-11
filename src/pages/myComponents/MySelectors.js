@@ -184,9 +184,40 @@ const nestedFilterTourData = createSelector(
 const modalLabelsReselect = createSelector(
   [allLabelsId, labelsById, availableValuesReselect],
   (allLabelsId, labelsById, availableValues) => {
+    // const pages = allLabelsId.reduce(
+    //   (prev, curr) => new Set([...prev, labelsById[curr].page]),
+    //   [1]
+    // );
+    // const v = [...pages].map((pageIndex) =>
+    //   allLabelsId
+    //     .filter((id) => labelsById[id].page === pageIndex)
+    //     .map((labelId) => {
+    //       const { id, text, type, measurement, grid, page, required } =
+    //         labelsById[labelId];
+    //       const props = { id, text, type, measurement, grid, page, required };
+    //       return type === "constant"
+    //         ? { ...props, availableValues: availableValues[id] }
+    //         : type === "date"
+    //         ? { ...props, portal: false, withButton: true }
+    //         : props;
+    //     })
+    // );
+
+    // console.log(v);
+    // return v;
     return allLabelsId.map((labelId) => {
-      const { id, text, type, measurement, grid } = labelsById[labelId];
-      const props = { id, text, type, measurement, grid };
+      const { id, text, type, measurement, grid, page, required, priority } =
+        labelsById[labelId];
+      const props = {
+        id,
+        text,
+        type,
+        measurement,
+        grid,
+        page,
+        required,
+        priority,
+      };
       return type === "constant"
         ? { ...props, availableValues: availableValues[id] }
         : type === "date"

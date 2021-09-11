@@ -23,23 +23,27 @@ import "./scss/volt.scss";
 
 // vendor styles
 import "@fortawesome/fontawesome-free/css/all.css";
+import "./pages/myComponents/MyForm.css";
 
 // import "./scss/kpaparid/components/mycalendarstyles.css";
 
 import HomePage from "./pages/HomePage";
 import ScrollToTop from "./components/ScrollToTop";
 import { store } from "./pages/myComponents/MyConsts";
-
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
 // import AdapterDateFns from "@mui/lab/AdapterDateFns";
 // import LocalizationProvider from "@mui/lab/LocalizationProvider";
 
 ReactDOM.render(
-  // <LocalizationProvider dateAdapter={AdapterDateFns}>
+  //
   <Provider store={store}>
-    <HashRouter>
-      <ScrollToTop />
-      <HomePage />
-    </HashRouter>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <HashRouter>
+        <ScrollToTop />
+        <HomePage />
+      </HashRouter>
+    </LocalizationProvider>
   </Provider>,
   // </LocalizationProvider>
   document.getElementById("root")

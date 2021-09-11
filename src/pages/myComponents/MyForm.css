@@ -83,7 +83,7 @@
   height: auto;
   background-image: none;
 }
-textarea {
+.wrapper textarea {
   min-width: 20px;
   width: fit-content;
   background-color: transparent;
@@ -95,11 +95,11 @@ textarea {
   overflow: hidden;
   color: #2e3650;
 }
-textarea:focus-visible {
+.wrapper textarea:focus-visible {
   outline: 0;
 }
 
-textarea :focus {
+.wrapper textarea :focus {
   outline: none;
 }
 .text-container {
@@ -295,6 +295,9 @@ textarea :focus {
 .light {
   background-color: #f5f8fb;
 }
+.light-green {
+  background-color: #f6fcfc;
+}
 
 .danger-btn {
   background-color: #2b7a78 !important;
@@ -306,4 +309,8 @@ textarea :focus {
 }
 .text-input-group.measured .text-container {
   padding-left: 50px;
+}
+.timepicker {
+  /* background-color: red; */
+  max-height: 25px;
 }

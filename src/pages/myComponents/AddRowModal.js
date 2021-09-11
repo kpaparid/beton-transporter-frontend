@@ -1,9 +1,178 @@
-import React, { memo, useEffect, useState } from "react";
-import { Form, Modal } from "@themesberg/react-bootstrap";
-import { TextInput } from "./TextArea/MyNewInput";
+import React, { memo, useEffect, useMemo, useState } from "react";
+import { Card, Form, Modal } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import "./MyForm.css";
 import { MyBtn } from "./MyButtons";
+import { TextField, ThemeProvider, Button, Grid } from "@mui/material";
+import {
+  MuiCustomDatePicker,
+  MuiCustomTimePicker,
+  MuiCustomSelect,
+  inputComponentsTheme,
+  MuiCustomTextField,
+  MuiController,
+} from "./InputComponents";
+
+import { useForm, Controller } from "react-hook-form";
+import moment from "moment";
+const ModalRow = memo(
+  ({
+    onChange,
+    text,
+    grid,
+    measurement,
+    id,
+    type,
+    availableValues,
+    control,
+    required,
+    ...rest
+  }) => {
+    const theme = useMemo(() => inputComponentsTheme, []);
+    const t = type === "text" ? type : "number";
+    const input =
+      type === "constant" ? (
+        <MuiController
+          id={id}
+          control={control}
+          label={text}
+          availableValues={availableValues}
+          rules={{ required, validate: (value) => value !== undefined }}
+          Input={(params) => <MuiCustomSelect {...params} />}
+        />
+      ) : type === "time" ? (
+        <MuiController
+          id={id}
+          control={control}
+          label={text}
+          rules={{
+            required,
+            validate: (value) => moment(value, "HH:mm", true).isValid(),
+          }}
+          Input={(params) => <MuiCustomTimePicker {...params} />}
+        />
+      ) : type === "date" ? (
+        <MuiController
+          id={id}
+          control={control}
+          label={text}
+          rules={{
+            required,
+            validate: (value) => moment(value, "DD/MM/YYYY", true).isValid(),
+          }}
+          Input={(params) => <MuiCustomDatePicker {...params} />}
+        ></MuiController>
+      ) : (
+        <MuiController
+          id={id}
+          control={control}
+          label={text}
+          multiline={type === "multiline"}
+          type={t}
+          rules={{ required, min: t === "number" && 0 }}
+          Input={(params) => <TextField {...params} />}
+        />
+      );
+
+    return (
+      <Grid item md={grid} sm={12} xs={12} className="p-2">
+        <ThemeProvider theme={theme}>{input}</ThemeProvider>
+      </Grid>
+    );
+  },
+  isEqual
+);
+const AddRowModal = memo(({ labels, title, show, onClose }) => {
+  const [row, setRow] = useState({});
+  function handleChange(id, value) {
+    setRow((old) => ({ ...old, [id]: value }));
+  }
+
+  const { handleSubmit, control } = useForm();
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+  return (
+    <>
+      <MyModal
+        Header={Header({ title })}
+        Body={
+          <Body
+            labels={labels}
+            onChange={handleChange}
+            control={control}
+          ></Body>
+        }
+        Footer={<Footer onSubmit={handleSubmit(onSubmit)}></Footer>}
+        title={title}
+        show={show}
+        onClose={onClose}
+      />
+    </>
+  );
+}, isEqual);
+const Header = ({ title = "Add Row" }) => {
+  return (
+    <>
+      <Modal.Title className="h4">{title}</Modal.Title>
+    </>
+  );
+};
+const Body = memo((props) => {
+  const { labels, onChange, control } = props;
+  console.log(labels);
+  return (
+    <>
+      <Form>
+        <Form.Group
+          className="d-flex flex-wrap justify-content-around"
+          controlId="formBasicEmail"
+        >
+          <Grid container spacing={6} className="w-100 m-0">
+            {[8, 4, 12, 12].map((pageGrid, pageIndex) => {
+              return (
+                <Grid item xl={pageGrid} md={pageGrid} sm={12} className="p-4">
+                  <Card className="w-100 h-100">
+                    <Card.Body>
+                      <Grid
+                        container
+                        direction="row"
+                        className="w-100 h-100 m-0"
+                        alignItems="center"
+                        justifyContent="space-around"
+                      >
+                        {labels
+                          .filter((l) => l.page === pageIndex + 1)
+                          .map((label, index) => {
+                            return (
+                              <ModalRow
+                                control={control}
+                                key={index}
+                                {...label}
+                                onChange={onChange}
+                              />
+                            );
+                          })}
+                      </Grid>
+                    </Card.Body>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Form.Group>
+      </Form>
+    </>
+  );
+}, isEqual);
+
+const Footer = ({ onSubmit }) => {
+  return (
+    <>
+      <MyBtn onClick={onSubmit} value="Submit" className="primary-btn"></MyBtn>
+    </>
+  );
+};
 export const MyModal = (props) => {
   const {
     Header = () => <></>,
@@ -12,6 +181,7 @@ export const MyModal = (props) => {
     show,
     onClose,
     title,
+    onSubmit,
   } = props;
 
   return (
@@ -23,115 +193,16 @@ export const MyModal = (props) => {
         onHide={onClose}
         size="xl"
       >
-        <div className="px-0">
+        <div className="px-0 light-green">
           <Modal.Header className="justify-content-center my-secondary-bg">
             {Header}
           </Modal.Header>
           <Modal.Body>{Body}</Modal.Body>
           <Modal.Footer className="justify-content-center">
-            <Footer></Footer>
+            {Footer}
           </Modal.Footer>
         </div>
       </Modal>
-    </>
-  );
-};
-const ModalRow = memo(({ onChange, text, grid, measurement, id, ...rest }) => {
-  // console.log(grid);
-  const [value, setValue] = useState("");
-  function handleChange(newValue) {
-    if (newValue !== value) {
-      setValue(newValue);
-      onChange && onChange(id, newValue);
-      // console.log("mR handlechange", { id, newValue });
-    }
-  }
-  const [selectedDate, handleDateChange] = useState("2018-01-01T00:00:00.000Z");
-  const measured = measurement ? "measured" : "";
-  return (
-    <div className="col-5 p-2">
-      <Form.Label className="mb-1">{text}</Form.Label>
-      <div className="d-flex flex-nowrap">
-        <div className={"text-input-group " + measured}>
-          {/* <Input editable value={value} onChange={handleChange} {...rest} /> */}
-          <div className="wrapper wrapper-editable w-100 p-0">
-            <div className="text-container">
-              <TextInput
-                className="w-100"
-                inputClassName="w-100"
-                value={value}
-                onChange={handleChange}
-                {...rest}
-              ></TextInput>
-            </div>
-          </div>
-
-          {measurement && (
-            <div
-              className="px-2 measurement d-flex justify-content-center"
-              style={{ width: "50px" }}
-            >
-              {measurement}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}, isEqual);
-const AddRowModal = memo(({ labels, title, show, onClose }) => {
-  const [row, setRow] = useState({});
-  useEffect(() => {
-    // console.log("effect", row);
-  }, [row]);
-  function handleChange(id, value) {
-    setRow((old) => ({ ...old, [id]: value }));
-  }
-  return (
-    <>
-      <MyModal
-        Header={Header({ title })}
-        Body={Body({ labels, onChange: handleChange })}
-        Footer={Footer}
-        title={title}
-        show={show}
-        onClose={onClose}
-      />
-    </>
-  );
-}, isEqual);
-
-export const AddRow = (props) => {
-  return <></>;
-};
-const Body = (props) => {
-  const { labels, onChange } = props;
-  return (
-    <>
-      <Form>
-        <Form.Group
-          className="d-flex flex-wrap justify-content-around"
-          controlId="formBasicEmail"
-        >
-          {labels.map((label, index) => {
-            return <ModalRow key={index} {...label} onChange={onChange} />;
-          })}
-        </Form.Group>
-      </Form>
-    </>
-  );
-};
-const Header = ({ title = "Add Row" }) => {
-  return (
-    <>
-      <Modal.Title className="h4">{title}</Modal.Title>
-    </>
-  );
-};
-const Footer = (onSubmit) => {
-  return (
-    <>
-      <MyBtn onSubmit={onSubmit} value="Submit" className="primary-btn"></MyBtn>
     </>
   );
 };

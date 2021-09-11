@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import "../MyForm.css";
-import { imgInvalid, imgValid, validationType } from "../MyConsts";
+import { green, imgInvalid, imgValid, red, validationType } from "../MyConsts";
 import { MyFormSelect } from "../MyFormSelect";
 import { DateSelectorDropdown } from "../MyOwnCalendar";
 import {
@@ -19,7 +19,9 @@ import {
 } from "../util/utilities";
 import { isEqual } from "lodash";
 import LazyLoad from "react-lazyload";
-// import DatePicker from "@mui/lab/DatePicker";
+import TimePicker from "@mui/lab/TimePicker";
+import TextField from "@mui/material/TextField";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export const Input = memo((props) => {
   const {
@@ -30,7 +32,7 @@ export const Input = memo((props) => {
     maxWidth = "150px",
     minWidth = "10px",
     style: inputStyle = {},
-    lazyLoad = false,
+    lazyLoad = true,
     ...rest
   } = props;
   const isValid = useMemo(
@@ -69,6 +71,99 @@ export const Input = memo((props) => {
         lazyLoad={lazyLoad}
         extendable={extendable}
       />
+    </div>
+  );
+}, isEqual);
+
+export const Container2 = memo((props) => {
+  const { label, onChange, value, editable, isValid, isInvalid, ...rest } =
+    props;
+  const theme = createTheme({
+    palette: {
+      error: { main: "#fa5252" },
+      primary: { main: "#2e3650" },
+    },
+    components: {
+      MuiOutlinedInput: {
+        defaultProps: { value: "hi" },
+        styleOverrides: {
+          root: {
+            // backgroundColor: "white",
+            padding: "0.5rem",
+            "& .MuiFormHelperText-root": {
+              color: "green",
+            },
+            ":hover": {
+              boxShadow: "0 0 0 0.2rem rgb(46, 54, 80, 50%)",
+              border: 0,
+              backgroundColor: "white",
+            },
+            "&.Mui-error:hover": {
+              boxShadow: "0 0 0 0.2rem rgb(250, 82, 82, 50%)",
+            },
+          },
+          notchedOutline: {
+            top: 0,
+          },
+          input: {
+            width: "100%",
+            fontSize: "0.875rem",
+            color: "#2e3650",
+            lineHeight: "21px",
+            top: 0,
+            textAlign: "center",
+            padding: 0,
+            "&[type=number]": {
+              "-moz-appearance": "textfield",
+            },
+            "&::-webkit-outer-spin-button": {
+              "-webkit-appearance": "none",
+              margin: 0,
+            },
+            "&::-webkit-inner-spin-button": {
+              "-webkit-appearance": "none",
+              margin: 0,
+            },
+          },
+
+          disabled: {},
+          focused: {},
+        },
+      },
+    },
+  });
+
+  return (
+    <div>
+      <div
+        className="px-3"
+        style={{
+          width: "fit-content",
+          minWidth: "80px",
+          maxWidth: "250px",
+          fontSize: "0.875rem",
+          height: editable ? 0 : "inherit",
+          visibility: editable ? "hidden" : "inherit",
+          overflow: "auto",
+        }}
+      >
+        {value}
+      </div>
+      <LazyLoad>
+        <ThemeProvider theme={theme}>
+          <TextField
+            hidden={!editable}
+            {...rest}
+            value={value}
+            error={isInvalid}
+            fullWidth
+            multiline
+            onChange={(e) => onChange(e.target.value)}
+            variant="outlined"
+            readOnly
+          ></TextField>
+        </ThemeProvider>
+      </LazyLoad>
     </div>
   );
 }, isEqual);
@@ -128,6 +223,7 @@ export const TextInput = memo(
         availableValues,
         inputClassName = "",
         className = "",
+        modal = false,
         ...rest
       },
       ref
@@ -138,9 +234,6 @@ export const TextInput = memo(
       function handleTextAreaChange(e) {
         onChange(e.target.value);
       }
-      const [selectedDate, handleDateChange] = useState(
-        "2018-01-01T00:00:00.000Z"
-      );
       switch (type) {
         case "date":
           return (
@@ -160,15 +253,7 @@ export const TextInput = memo(
               labelIsDisabled
             />
           );
-        // case "time":
-        //   return (
-        //     <DatePicker
-        //       renderInput={(props) => <div {...props} />}
-        //       label="DateTimePicker"
-        //       {...rest}
-        //       onChange={onChange}
-        //     />
-        //   );
+
         default:
           return (
             <div className={"d-block " + className}>
