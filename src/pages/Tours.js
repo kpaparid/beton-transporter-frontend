@@ -256,7 +256,7 @@ function useTableProps() {
       },
     });
   }, []);
-  const onSelectedRowsChange = useCallback((rows) => {
+  const setSelectedRows = useCallback((rows) => {
     dispatch({
       type: ACTIONS.CHECK_ONE,
       payload: {
@@ -266,7 +266,7 @@ function useTableProps() {
   }, []);
 
   return {
-    onSelectedRowsChange,
+    setSelectedRows,
     dataSelector,
     headersSelector,
     hiddenColumnsSelector,

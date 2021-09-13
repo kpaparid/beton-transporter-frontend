@@ -208,7 +208,7 @@ export const Container = memo(
 
 const LazyContainer = memo((props) => {
   return (
-    <LazyLoad>
+    <LazyLoad className="w-100">
       <TextInput {...props} />
     </LazyLoad>
   );
@@ -234,6 +234,9 @@ export const TextInput = memo(
       function handleTextAreaChange(e) {
         onChange(e.target.value);
       }
+      function handleOutsideClick(e) {
+        domRef.current.focus();
+      }
       switch (type) {
         case "date":
           return (
@@ -256,7 +259,10 @@ export const TextInput = memo(
 
         default:
           return (
-            <div className={"d-block " + className}>
+            <div
+              onClick={handleOutsideClick}
+              className={"d-block text-center" + className}
+            >
               <TextareaAutosize
                 className={inputClassName}
                 {...rest}

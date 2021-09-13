@@ -62,6 +62,7 @@ export const ReactTable = memo(
     useEffect(() => {
       skipResetRef.current = false;
     }, [data]);
+    console.log(data);
     return (
       <>
         <RTables
@@ -86,7 +87,7 @@ const RTables = memo(
         hiddenColumnsSelector,
         editSelector,
         maxPageSize = 20,
-        onSelectedRowsChange,
+        setSelectedRows,
       },
       ref
     ) => {
@@ -124,7 +125,7 @@ const RTables = memo(
           data,
           defaultColumn,
           updateMyData,
-          initialState: { pageSize: 20 },
+          initialState: { pageSize: 20, hiddenColumns: ["id"] },
           autoResetPage: !ref.current,
           autoResetSelectedRows: !ref.current,
           autoResetSortBy: !ref.current,
@@ -150,7 +151,7 @@ const RTables = memo(
                   </div>
                 ),
                 Cell: ({ row }) => (
-                  <div>
+                  <div className="d-flex justify-content-center">
                     <IndeterminateCheckbox
                       {...row.getToggleRowSelectedProps()}
                     />
@@ -163,15 +164,16 @@ const RTables = memo(
         }
       );
       useEffect(() => {
-        onSelectedRowsChange(selectedFlatRows.map((_) => _.original.id));
+        console.log(selectedFlatRows);
+        setSelectedRows(selectedFlatRows.map((_) => _.original.id));
       }, [selectedFlatRows]);
+      // console.log(getTableBodyProps());
       return (
         <>
           <Table
             hover
             responsive
-            className="align-items-center table-flush align-items-center table"
-            {...getTableBodyProps()}
+            className="align-items-center table-flush align-items-center user-table"
           >
             <TableHead headerGroups={headerGroups}></TableHead>
             <TableBody
@@ -271,7 +273,7 @@ const TableBody = ({ page, prepareRow, hiddenColumnsSelector }) => {
 };
 
 const TableCell = memo(({ cell, hiddenColumns }) => {
-  const display = hiddenColumns.includes(cell.column.label)
+  const display = hiddenColumns.includes(cell.column.id)
     ? "none"
     : "table-cell";
   return (
@@ -281,7 +283,9 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
       }}
       className="px-2 py-1"
     >
-      {cell.render("Cell")}
+      <div className="d-flex justify-content-center w-100">
+        {cell.render("Cell")}
+      </div>
     </td>
   );
 }, isEqual);

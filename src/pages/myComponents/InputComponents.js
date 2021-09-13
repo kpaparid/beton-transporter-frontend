@@ -46,8 +46,10 @@ export const MuiCustomSelect = memo(
           fullWidth
           variant="standard"
         >
-          {availableValues.map((v) => (
-            <MenuItem value={v}>{v}</MenuItem>
+          {availableValues.map((v, index) => (
+            <MenuItem value={v} key={"select-" + index}>
+              {v}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -58,7 +60,6 @@ export const MuiCustomSelect = memo(
 export const MuiCustomTimePicker = memo(
   ({ value = "", onChange, label, error }) => {
     const formattedValue = moment(value, "HH:m");
-    console.log(value);
     const recalcError =
       error ||
       (value !== "" &&

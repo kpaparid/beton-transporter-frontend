@@ -131,7 +131,14 @@ const Body = memo((props) => {
           <Grid container spacing={6} className="w-100 m-0">
             {[8, 4, 12, 12].map((pageGrid, pageIndex) => {
               return (
-                <Grid item xl={pageGrid} md={pageGrid} sm={12} className="p-4">
+                <Grid
+                  item
+                  xl={pageGrid}
+                  md={pageGrid}
+                  sm={12}
+                  className="p-4"
+                  key={"gridItem-" + pageIndex}
+                >
                   <Card className="w-100 h-100">
                     <Card.Body>
                       <Grid

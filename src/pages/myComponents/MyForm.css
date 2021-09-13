@@ -53,6 +53,7 @@
 
 .wrapper.wrapper-editable {
   border: 1.5px solid rgb(46, 54, 80, 100%);
+  width: 100%;
 }
 .wrapper.wrapper-editable.valid {
   border: 1.5px solid rgb(5, 166, 119, 100%);
@@ -85,7 +86,6 @@
 }
 .wrapper textarea {
   min-width: 20px;
-  width: fit-content;
   background-color: transparent;
   border: none;
   text-align: center;
@@ -94,6 +94,11 @@
   padding: 0;
   overflow: hidden;
   color: #2e3650;
+}
+.wrapper.wrapper-editable textarea {
+  /* width: fit-content; */
+  /* width: fit-content; */
+  /* background-color: red; */
 }
 .wrapper textarea:focus-visible {
   outline: 0;
@@ -123,6 +128,9 @@
   height: inherit;
   width: 100%;
   visibility: visible;
+  position: inherit;
+  top: inherit;
+  left: inherit;
 }
 .wrapper .editable-container {
   height: 0px;
@@ -130,6 +138,9 @@
   visibility: hidden;
   display: flex;
   justify-content: center;
+  position: fixed;
+  top: 0px;
+  left: 0px;
 }
 .img-container {
   background-position-y: center;
