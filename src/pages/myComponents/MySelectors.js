@@ -3,18 +3,19 @@ import { inputLabelsWidths } from "./MyConsts";
 import { createSelector } from "reselect";
 import moment from "moment";
 
-const status = (state) => state.tourTable.status;
-const changesById = (state) => state.tourTable.changesById;
-const editMode = (state) => state.tourTable.editMode;
-const tourDate = (state) => state.tourTable.tourDate;
-const allId = (state) => state.tourTable.allId;
-const checkedId = (state) => state.tourTable.checkedId;
-const shownId = (state) => state.tourTable.shownId;
-const allLabelsId = (state) => state.tourTable.allLabelsId;
-const filteredOutValues = (state) => state.tourTable.filteredOutValues;
-const byId = (state) => state.tourTable.byId;
-const checkedLabelsId = (state) => state.tourTable.checkedLabelsId;
-const labelsById = (state) => state.tourTable.labelsById;
+const changesById = (state) => state.changesById;
+const tourDate = (state) => state.tourDate;
+const allId = (state) => state.allId;
+const checkedId = (state) => state.checkedId;
+const shownId = (state) => state.shownId;
+const allLabelsId = (state) => state.allLabelsId;
+const filteredOutValues = (state) => state.filteredOutValues;
+const byId = (state) => state.byId;
+const checkedLabelsId = (state) => state.checkedLabelsId;
+
+const labelsById = (state) => state.labelsById;
+
+const editMode = (state) => state.editMode;
 
 const labelsReselect = createSelector(
   [allLabelsId, labelsById],
@@ -89,6 +90,7 @@ const shownToursReselect = createSelector(
     return table;
   }
 );
+
 const reactTableData = createSelector(
   [allLabelsId, shownToursReselect, labelsById, availableValuesReselect],
   (allLabelsId, shownToursReselect, labelsById, availableValues) => {
@@ -118,6 +120,39 @@ const reactTableData = createSelector(
     }));
   }
 );
+
+const reactTableData2 = (name) => {
+  return createSelector(
+    [allLabelsId, shownToursReselect, labelsById, availableValuesReselect],
+    (allLabelsId, shownToursReselect, labelsById, availableValues) => {
+      console.log(name);
+      return shownToursReselect.map(({ id, value }) => ({
+        id: id,
+        ...convertArrayToObject(
+          allLabelsId.map((label) => {
+            const props = {
+              id: id,
+              value: value[label],
+              label: label,
+              type: labelsById[label].type,
+              measurement: labelsById[label].measurement,
+              minWidth: "10px",
+              maxWidth: "250px",
+            };
+            if (props.type !== "constant") return { ["col-" + label]: props };
+            else
+              return {
+                ["col-" + label]: {
+                  ...props,
+                  availableValues: availableValues[label],
+                },
+              };
+          })
+        ),
+      }));
+    }
+  );
+};
 
 const hiddenColumnsReselect = createSelector(
   [labelsReselect, checkedLabelsId],

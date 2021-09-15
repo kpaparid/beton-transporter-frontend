@@ -5,42 +5,29 @@ import Select from "react-select";
 import { red } from "./MyConsts";
 
 export const MyFormSelect = (props) => {
-  const {
-    label,
-    availableValues,
-    id,
-    value,
-    defaultValue,
-    onChange,
-    onBlur,
-    labelIsDisabled = true,
-    hidden = false,
-  } = props;
+  const { availableValues, value, onChange, hidden = false } = props;
   const [selectedValue, setSelectedValue] = useState(value);
 
   useEffect(() => {
-    // console.log("sel:", value);
     setSelectedValue(value);
   }, [value]);
   function handleChange(selectedOption) {
     setSelectedValue(selectedOption.value);
     onChange && onChange(selectedOption.value);
-    // );
   }
 
-  const options = availableValues.map((v, index) => ({
+  const options = availableValues.map((v) => ({
     value: v,
     label: v,
   }));
-  // console.log((selectedValue + "").length);
   return (
     <>
       {!hidden && (
         <Select
           placeholder={selectedValue}
           options={options}
+          value={selectedValue}
           className="w-100"
-          // style={{ width: `${8 * selectedValue.length + 100}px` }}
           onChange={handleChange}
           components={{
             IndicatorSeparator: () => null,
@@ -59,23 +46,21 @@ export const MyFormSelect = (props) => {
               ...base,
               padding: 0,
               paddingLeft: 27,
-              // paddingRight: 15,
               justifyContent: "center",
               width: 8 * (selectedValue + "").length + 100,
-              // width: 100,
             }),
             singleValue: (base) => ({
               ...base,
               padding: 0,
-              paddingLeft: 15,
-              paddingRight: 15,
+              paddingLeft: 5,
+              paddingRight: 5,
               color: "#2E3650",
             }),
             placeholder: (base) => ({
               ...base,
               padding: 0,
-              paddingLeft: 15,
-              paddingRight: 15,
+              paddingLeft: 5,
+              paddingRight: 5,
               color: "#2E3650",
             }),
             dropdownIndicator: (base) => ({
@@ -87,7 +72,6 @@ export const MyFormSelect = (props) => {
 
             indicatorSeparator: (base) => ({ ...base, margin: 3 }),
             indicatorsContainer: (base) => ({ ...base, paddingRight: 7 }),
-            // indicatorContainer: (base) => ({ ...base, transition: "none" }),
             input: (base) => ({
               ...base,
               padding: 0,

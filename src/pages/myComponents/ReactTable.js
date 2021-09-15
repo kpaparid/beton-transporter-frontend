@@ -7,11 +7,12 @@ import React, {
   useState,
   useMemo,
 } from "react";
+import _ from "lodash";
 import { TableLabel } from "./Table/TableLabel";
 import { useTable, usePagination, useSortBy, useRowSelect } from "react-table";
 
 import { useDispatch, useSelector } from "react-redux";
-import { hiddenColumnsReselect } from "./MySelectors";
+// import { hiddenColumnsReselect } from "./MySelectors";
 import {
   Card,
   Form,
@@ -116,7 +117,6 @@ const RTables = memo(
         gotoPage,
         nextPage,
         previousPage,
-        getTableBodyProps,
         selectedFlatRows,
         state: { pageIndex },
       } = useTable(
@@ -167,7 +167,6 @@ const RTables = memo(
         console.log(selectedFlatRows);
         setSelectedRows(selectedFlatRows.map((_) => _.original.id));
       }, [selectedFlatRows]);
-      // console.log(getTableBodyProps());
       return (
         <>
           <Table
@@ -175,7 +174,10 @@ const RTables = memo(
             responsive
             className="align-items-center table-flush align-items-center user-table"
           >
-            <TableHead headerGroups={headerGroups}></TableHead>
+            <TableHead
+              headerGroups={headerGroups}
+              hiddenColumnsSelector={hiddenColumnsSelector}
+            ></TableHead>
             <TableBody
               page={page}
               prepareRow={prepareRow}
@@ -214,14 +216,29 @@ const EditableCell = React.memo(
     editSelector,
   }) => {
     const [value, setValue] = useState(initialValue);
-    const onChange = useCallback((e) => {
-      console.log("editable", e);
-      setValue(e);
-    }, []);
-    const handleUpdateData = useCallback(() => {
-      if (!isEqual(value, initialValue))
-        updateMyData(index, id, value, label, tourId);
-    }, [value, initialValue]);
+    const handleUpdateData = useCallback(
+      (v = value) => {
+        // console.log({ v, initialValue }, !isEqual(v, initialValue));
+        // if (!isEqual(v, initialValue)) {
+        console.log("updating changes", v);
+        updateMyData(index, id, v, label, tourId);
+        // }
+      },
+      [value, initialValue]
+    );
+
+    // useEffect(() => {
+    //   console.log("initialvaluechange", initialValue);
+    // }, [initialValue]);
+    const onChange = useCallback(
+      (value, type) => {
+        console.log("editable", value);
+        setValue(value);
+        console.log(type);
+        if (type === "select") handleUpdateData(value);
+      },
+      [handleUpdateData]
+    );
     const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
 
     const editMode = useSelector(editSelector);
@@ -236,7 +253,7 @@ const EditableCell = React.memo(
       <Input
         extendable
         {...{
-          label,
+          // label,
           value,
           onChange,
           onBlur,
@@ -293,7 +310,6 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
 const TableColumn = ({ column, sortedComponent, display }) => {
   return (
     <th
-      // {...column.getHeaderProps()}
       className="border-bottom px-3"
       style={{
         display,
@@ -309,8 +325,8 @@ const TableColumn = ({ column, sortedComponent, display }) => {
   );
 };
 
-const TableHead = ({ headerGroups }) => {
-  const hiddenColumns = useSelector(hiddenColumnsReselect);
+const TableHead = ({ headerGroups, hiddenColumnsSelector }) => {
+  const hiddenColumns = useSelector(hiddenColumnsSelector);
   return (
     <thead className="thead-light">
       {headerGroups.map((headerGroup, index) => (

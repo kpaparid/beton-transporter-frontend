@@ -1,4 +1,4 @@
-import { createStore } from "redux";
+import { combineReducers, createStore } from "redux";
 import moment from "moment";
 import produce from "immer";
 import { tourDate } from "../myComponents/MySelectors";
@@ -21,43 +21,18 @@ export const ACTIONS = {
   NESTEDFILTER_ADD_FILTER: "NESTEDFILTER_ADD_FILTER",
 };
 export const myInitialState = {
-  checkedAll: "",
-  transactionsTable: [],
-  checked: [],
-  changes: [],
-  transactionsDate: "12-2021",
-  transactionsFilter: {
-    nestedFilter: [
-      {
-        label: "",
-        filter: [
-          {
-            checked: true,
-            value: "",
-          },
-        ],
-      },
-    ],
-    checked: [],
-  },
-
-  tourTable: {
-    status: "IDLE",
-    byId: {},
-    allId: [],
-    shownId: [],
-    checkedId: [],
-    changesById: {},
-    tableChanges: {},
-    editMode: false,
-
-    allLabelsId: [],
-    checkedLabelsId: [],
-    labelsById: {},
-    tourDate: "12/2021",
-
-    filteredOutValues: {},
-  },
+  status: "IDLE",
+  byId: {},
+  allId: [],
+  shownId: [],
+  checkedId: [],
+  changesById: {},
+  editMode: false,
+  allLabelsId: [],
+  checkedLabelsId: [],
+  labelsById: {},
+  tourDate: "12/2021",
+  filteredOutValues: {},
 };
 
 function MyReducer(state = myInitialState, action) {
@@ -66,6 +41,7 @@ function MyReducer(state = myInitialState, action) {
       const { table, labels } = action.payload;
 
       console.log("LOADING TOUR TABLE", labels);
+      console.log(state);
 
       const newTourTableById = table
         .map((item, index) => ({ ["Tour" + index]: { ...item } }))
@@ -81,21 +57,27 @@ function MyReducer(state = myInitialState, action) {
       const newShownId = newTourTableAllId.filter(
         (id) =>
           moment(newTourTableById[id].datum, "DD/MM/YYYY").format("MM/YYYY") ===
-          state.tourTable.tourDate
+          state.tourDate
       );
-
+      console.log({
+        ...state,
+        byId: newTourTableById,
+        allId: [...newTourTableAllId],
+        shownId: newShownId,
+        labelsById: newLabelsById,
+        allLabelsId: newAllLabelsId,
+        checkedLabelsId: checkedLabelsId,
+        filteredOutValues: { datum: [state.tourDate] },
+      });
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          byId: newTourTableById,
-          allId: [...newTourTableAllId],
-          shownId: newShownId,
-          labelsById: newLabelsById,
-          allLabelsId: newAllLabelsId,
-          checkedLabelsId: checkedLabelsId,
-          filteredOutValues: { datum: [state.tourTable.tourDate] },
-        },
+        byId: newTourTableById,
+        allId: [...newTourTableAllId],
+        shownId: newShownId,
+        labelsById: newLabelsById,
+        allLabelsId: newAllLabelsId,
+        checkedLabelsId: checkedLabelsId,
+        filteredOutValues: { datum: [state.tourDate] },
       };
     }
 
@@ -103,17 +85,15 @@ function MyReducer(state = myInitialState, action) {
       const { status } = action.payload;
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          status: status,
-        },
+        ...state,
+        status: status,
       };
     }
     case ACTIONS.TOGGLE_COLUMN: {
       const { id } = action.payload;
       console.log("Toggle_Column: " + id);
 
-      const checkedLabelsId = [...state.tourTable.checkedLabelsId];
+      const checkedLabelsId = [...state.checkedLabelsId];
       const newCheckedLabelsId =
         checkedLabelsId.indexOf(id) === -1
           ? [...checkedLabelsId, id]
@@ -121,45 +101,31 @@ function MyReducer(state = myInitialState, action) {
 
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          checkedLabelsId: newCheckedLabelsId,
-        },
+        checkedLabelsId: newCheckedLabelsId,
       };
     }
 
     case ACTIONS.EDIT_TOGGLE: {
       const c = produce(state, (draftState) => {
-        draftState.tourTable.editMode = !draftState.tourTable.editMode;
+        draftState.editMode = !draftState.editMode;
         return draftState;
       });
       return c;
-
-      // return {
-      //   ...state,
-      //   editMode: true,
-      // };
     }
 
     case ACTIONS.TOGGLE_CHECK_ALL: {
-      const tourTable = state.tourTable;
+      const tourTable = state;
       const checkedAll = tourTable.checkedId.length === tourTable.allId.length;
       var newCheckedId = checkedAll ? [] : tourTable.allId;
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          checkedId: [...newCheckedId],
-        },
+        checkedId: [...newCheckedId],
       };
     }
     case ACTIONS.CLOSE_CHECK_ALL: {
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          checkedId: [],
-        },
+        checkedId: [],
       };
     }
 
@@ -167,17 +133,14 @@ function MyReducer(state = myInitialState, action) {
       const { ids } = action.payload;
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          checkedId: ids,
-        },
+        checkedId: ids,
       };
     }
 
     case ACTIONS.SAVE_CHANGES: {
       console.log("Saving Changes!");
-      const changesById = state.tourTable.changesById;
-      const newById = { ...state.tourTable.byId };
+      const changesById = state.changesById;
+      const newById = { ...state.byId };
       Object.keys(changesById).forEach((tour) => {
         newById[tour] = { ...newById[tour], ...changesById[tour] };
       });
@@ -189,37 +152,28 @@ function MyReducer(state = myInitialState, action) {
 
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          byId: newById,
-          changesById: {},
-          status: "IDLE",
-        },
+        byId: newById,
+        changesById: {},
+        status: "IDLE",
       };
     }
     case ACTIONS.ADD_CHANGE: {
       const { id, key, change } = action.payload;
-      const newChangesById = { ...state.tourTable.changesById };
+      const newChangesById = { ...state.changesById };
       newChangesById[id] = { ...newChangesById[id], [key]: change };
       console.log("add change: ", newChangesById);
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          changesById: newChangesById,
-        },
+        changesById: newChangesById,
       };
     }
     case ACTIONS.RESET_CHANGES: {
-      if (Object.keys(state.tourTable.changesById).length !== 0) {
+      if (Object.keys(state.changesById).length !== 0) {
         console.log("clearing changes");
         return {
           ...state,
-          tourTable: {
-            ...state.tourTable,
-            changesById: {},
-            status: "IDLE",
-          },
+          changesById: {},
+          status: "IDLE",
         };
       }
       return state;
@@ -228,20 +182,17 @@ function MyReducer(state = myInitialState, action) {
       const { label, value } = action.payload;
       console.log(value);
       const newValues = {
-        ...state.tourTable.filteredOutValues,
+        ...state.filteredOutValues,
         [label]: value,
       };
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          filteredOutValues: newValues,
-        },
+        filteredOutValues: newValues,
       };
     }
     case ACTIONS.NESTEDFILTER_TOGGLE_ONE: {
       const { label, value } = action.payload;
-      const newFilteredOutValues = { ...state.tourTable.filteredOutValues };
+      const newFilteredOutValues = { ...state.filteredOutValues };
       console.log(label, value);
       const newLabel = newFilteredOutValues[label]
         ? newFilteredOutValues[label].find((item) => item === value)
@@ -251,25 +202,19 @@ function MyReducer(state = myInitialState, action) {
       const newValues = { ...newFilteredOutValues, [label]: newLabel };
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          filteredOutValues: newValues,
-        },
+        filteredOutValues: newValues,
       };
     }
     case ACTIONS.NESTEDFILTER_TOGGLE_ALL: {
       const { label, data } = action.payload;
-      const filteredOutValues = state.tourTable.filteredOutValues;
+      const filteredOutValues = state.filteredOutValues;
       const newFilteredOutValues =
         !filteredOutValues[label] || filteredOutValues[label].length === 0
           ? { ...filteredOutValues, [label]: data }
           : { ...filteredOutValues, [label]: [] };
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          filteredOutValues: newFilteredOutValues,
-        },
+        filteredOutValues: newFilteredOutValues,
       };
     }
     case ACTIONS.TOURTABLE_CHANGE_TOURDATE: {
@@ -277,10 +222,7 @@ function MyReducer(state = myInitialState, action) {
 
       return {
         ...state,
-        tourTable: {
-          ...state.tourTable,
-          tourDate: date,
-        },
+        tourDate: date,
       };
     }
 
@@ -291,7 +233,30 @@ function MyReducer(state = myInitialState, action) {
 
 const enableReduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION__?.();
 
+function createNamedWrapperReducer(reducerFunction, reducerName) {
+  return (state, action) => {
+    const { name } = action;
+    const isInitializationCall = state === undefined;
+    if (name !== reducerName && !isInitializationCall) return state;
+
+    return reducerFunction(state, action);
+  };
+}
+
+const rootReducer = combineReducers({
+  tourTable: createNamedWrapperReducer(MyReducer, "tourTable"),
+  workHours: createNamedWrapperReducer(MyReducer, "WorkHours"),
+  // counterB: MyReducer,
+});
+
+// const rootReducer = combineReducers({
+//   tourTable: MyReducer,
+//   Arbeitszeiten: MyReducer,
+//   // counterB: MyReducer,
+// });
+
 export function createReduxStore() {
-  const store = createStore(MyReducer, enableReduxDevTools);
+  const store = createStore(rootReducer, enableReduxDevTools);
+  console.log(store.getState());
   return store;
 }

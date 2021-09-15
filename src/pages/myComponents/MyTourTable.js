@@ -6,6 +6,7 @@ import { isEqual } from "lodash";
 import "./MyForm.css";
 import { ReactTable } from "./ReactTable";
 import DataTable from "./NewTable";
+import { useSelector } from "react-redux";
 export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
   const skipResetRef = useRef(false);
   return (
@@ -24,6 +25,8 @@ export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
 
 const CardBody = memo(
   forwardRef(({ children: { stateAPIStatus, ...rest } }, ref) => {
+    const c = useSelector((state) => state);
+    console.log(c);
     console.log(stateAPIStatus);
 
     switch (stateAPIStatus) {

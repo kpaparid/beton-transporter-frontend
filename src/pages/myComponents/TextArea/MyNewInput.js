@@ -231,18 +231,24 @@ export const TextInput = memo(
       const backupRef = useRef(null);
       const domRef = ref ? ref : backupRef;
 
-      function handleTextAreaChange(e) {
-        onChange(e.target.value);
-      }
-      function handleOutsideClick(e) {
+      const handleTextAreaChange = useCallback((e) => {
+        onChange(e.target.value, "text");
+      }, []);
+      const handleDateChange = useCallback((value) => {
+        onChange(value, "text");
+      }, []);
+      const handleSelectChange = useCallback((value) => {
+        onChange(value, "select");
+      }, []);
+      const handleOutsideClick = useCallback(() => {
         domRef.current.focus();
-      }
+      }, []);
       switch (type) {
         case "date":
           return (
             <DateSelectorDropdown
               className={className}
-              onChange={onChange}
+              onChange={handleDateChange}
               {...rest}
             />
           );
@@ -250,7 +256,7 @@ export const TextInput = memo(
           return (
             <MyFormSelect
               className={className}
-              onChange={onChange}
+              onChange={handleSelectChange}
               availableValues={availableValues}
               {...rest}
               labelIsDisabled

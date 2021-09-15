@@ -29,11 +29,12 @@ import AddRowModal from "./myComponents/AddRowModal";
 import { MyBtn } from "./myComponents/MyButtons";
 
 export const Tours = memo(() => {
-  const stateAPIStatus = useLoadToursData();
-  const buttonGroupProps = useButtonGroupProps();
-  const filterProps = useFilterProps();
-  const tableProps = useTableProps();
-  const { title } = useTableLabelProps();
+  const reducerName = "tourTable";
+  const stateAPIStatus = useLoadToursData(reducerName);
+  const buttonGroupProps = useButtonGroupProps(reducerName);
+  const filterProps = useFilterProps(reducerName);
+  const tableProps = useTableProps(reducerName);
+  const { title } = useTableLabelProps(reducerName);
   return (
     <>
       <div className="d-block pt-4 mb-4 mb-md-0">
@@ -59,11 +60,12 @@ export const Tours = memo(() => {
   );
 }, isEqual);
 
-export const FilterComponent = memo(({ type, label, ...rest }) => {
+export const FilterComponent = memo(({ type, label, reducerName, ...rest }) => {
   const dispatch = useDispatch();
   const toggleOne = useCallback((value) => {
     console.log("click nestedFilter Single");
     dispatch({
+      name: reducerName,
       type: ACTIONS.NESTEDFILTER_TOGGLE_ONE,
       payload: {
         label: label,
@@ -74,6 +76,7 @@ export const FilterComponent = memo(({ type, label, ...rest }) => {
   const toggleAll = useCallback((data) => {
     console.log("click nestedFilter All", data);
     dispatch({
+      name: reducerName,
       type: ACTIONS.NESTEDFILTER_TOGGLE_ALL,
       payload: {
         label: label,
@@ -84,6 +87,7 @@ export const FilterComponent = memo(({ type, label, ...rest }) => {
   const dateChange = useCallback((dates) => {
     console.log("click nestedFilter Date", dates);
     dispatch({
+      name: reducerName,
       type: ACTIONS.NESTEDFILTER_ADD_FILTER,
       payload: {
         label: "datum",
@@ -116,7 +120,7 @@ export const FilterComponent = memo(({ type, label, ...rest }) => {
       break;
   }
 }, isEqual);
-function useLoadToursData() {
+function useLoadToursData(reducerName) {
   const [stateAPIStatus, setAPIStatus] = useState("idle");
   const dispatch = useDispatch();
 
@@ -125,6 +129,7 @@ function useLoadToursData() {
     loadToursData()
       .then((data) => {
         dispatch({
+          name: reducerName,
           type: ACTIONS.LOAD_TOUR_TABLE,
           payload: {
             table: data.table,
@@ -140,32 +145,39 @@ function useLoadToursData() {
 
   return stateAPIStatus;
 }
-function useButtonGroupProps() {
+function useButtonGroupProps(reducerName) {
   const dispatch = useDispatch();
-  const edit = useSelector(editMode);
-  const checkedRows = useSelector(checkedId);
-  const changes = useSelector(changesById);
+  const edit = useSelector((state) => editMode(state[reducerName]));
+  const checkedRows = useSelector((state) => checkedId(state[reducerName]));
+  const changes = useSelector((state) => changesById(state[reducerName]));
   const checkedRowsExist = checkedRows.length !== 0;
   const changesExist = Object.keys(changes).length !== 0;
-
+  const labelsSelector = useCallback(
+    (state) => modalLabelsReselect(state[reducerName]),
+    [reducerName]
+  );
   const forceClose = useCallback(() => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.RESET_CHANGES,
     });
   }, []);
 
   const onToggleEdit = useCallback(() => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.EDIT_TOGGLE,
     });
   }, []);
   const onSave = useCallback(() => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.SAVE_CHANGES,
     });
   }, []);
   const onClose = useCallback(() => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.RESET_CHANGES,
     });
   }, []);
@@ -178,6 +190,7 @@ function useButtonGroupProps() {
   const onDelete = useCallback(() => {
     console.log("on Delete");
   }, []);
+
   return {
     onToggleEdit,
     onSave,
@@ -189,15 +202,16 @@ function useButtonGroupProps() {
     editMode: edit,
     checkedRowsExist,
     changesExist,
-    labelsSelector: modalLabelsReselect,
+    labelsSelector,
     titleModal: "Add Tour",
   };
 }
-function useTableLabelProps() {
+function useTableLabelProps(reducerName) {
   const dispatch = useDispatch();
-  const date = useSelector(tourDate);
+  const date = useSelector((state) => tourDate(state[reducerName]));
   const handlerMonthChange = useCallback((date) => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.TOURTABLE_CHANGE_TOURDATE,
       payload: {
         date: date,
@@ -217,16 +231,20 @@ function useTableLabelProps() {
   );
   return { title };
 }
-function useFilterProps() {
+function useFilterProps(reducerName) {
   const dispatch = useDispatch();
-  const filterDataSelector = nestedFilterTourData;
+  const filterDataSelector = useCallback(
+    (state) => nestedFilterTourData(state[reducerName]),
+    [reducerName]
+  );
   const nestedFilterComponent = useMemo(
-    () => <FilterComponent></FilterComponent>,
-    []
+    () => <FilterComponent reducerName={reducerName}></FilterComponent>,
+    [reducerName]
   );
   const onToggleFilterColumn = useCallback((id) => {
     console.log(id);
     dispatch({
+      name: reducerName,
       type: ACTIONS.TOGGLE_COLUMN,
       payload: {
         id: id,
@@ -240,14 +258,27 @@ function useFilterProps() {
   };
 }
 
-function useTableProps() {
+function useTableProps(reducerName) {
   const dispatch = useDispatch();
-  const dataSelector = reactTableData;
-  const headersSelector = visibleHeaders;
-  const hiddenColumnsSelector = hiddenColumnsReselect;
-  const editSelector = editMode;
+  const dataSelector = useCallback(
+    (state) => reactTableData(state[reducerName]),
+    [reducerName]
+  );
+  const headersSelector = useCallback(
+    (state) => visibleHeaders(state[reducerName]),
+    [reducerName]
+  );
+  const hiddenColumnsSelector = useCallback(
+    (state) => hiddenColumnsReselect(state[reducerName]),
+    [reducerName]
+  );
+  const editSelector = useCallback(
+    (state) => editMode(state[reducerName]),
+    [reducerName]
+  );
   const onCellChange = useCallback((id, label, value) => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.ADD_CHANGE,
       payload: {
         id: id,
@@ -258,6 +289,7 @@ function useTableProps() {
   }, []);
   const setSelectedRows = useCallback((rows) => {
     dispatch({
+      name: reducerName,
       type: ACTIONS.CHECK_ONE,
       payload: {
         ids: rows,
