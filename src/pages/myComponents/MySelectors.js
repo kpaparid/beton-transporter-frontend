@@ -1,24 +1,26 @@
 import { convertArrayToObject } from "./util/utilities";
-import { inputLabelsWidths } from "./MyConsts";
+import { maxWidthByType } from "./MyConsts";
 import { createSelector } from "reselect";
 import moment from "moment";
+import { TextField } from "@mui/material";
+import Input from "./TextArea/MyNewInput";
 
-const changesById = (state) => state.changesById;
-const tourDate = (state) => state.tourDate;
-const allId = (state) => state.allId;
-const checkedId = (state) => state.checkedId;
-const shownId = (state) => state.shownId;
-const allLabelsId = (state) => state.allLabelsId;
-const filteredOutValues = (state) => state.filteredOutValues;
-const byId = (state) => state.byId;
-const checkedLabelsId = (state) => state.checkedLabelsId;
-
-const labelsById = (state) => state.labelsById;
-
-const editMode = (state) => state.editMode;
+const changesByIdSelector = (state) => (state && state.changesById) || {};
+const dateSelector = (state) =>
+  (state && state.date) || moment().format("MM/YYYY");
+const allIdSelector = (state) => (state && state.allId) || [];
+const checkedIdSelector = (state) => (state && state.checkedId) || [];
+const allLabelsIdSelector = (state) => (state && state.allLabelsId) || [];
+const filteredOutValuesSelector = (state) =>
+  (state && state.filteredOutValues) || {};
+const byIdSelector = (state) => (state && state.byId) || {};
+const checkedLabelsIdSelector = (state) =>
+  (state && state.checkedLabelsId) || [];
+const labelsByIdSelector = (state) => (state && state.labelsById) || {};
+const editModeSelector = (state) => (state && state.editMode) || false;
 
 const labelsReselect = createSelector(
-  [allLabelsId, labelsById],
+  [allLabelsIdSelector, labelsByIdSelector],
   (allLabelsId, labelsById) => {
     const labels = [...allLabelsId].sort(
       (a, b) => labelsById[a].priority - labelsById[b].priority
@@ -28,7 +30,7 @@ const labelsReselect = createSelector(
 );
 
 const availableValuesReselect = createSelector(
-  [allId, byId, allLabelsId],
+  [allIdSelector, byIdSelector, allLabelsIdSelector],
   (allId, byId, allLabelsId) => {
     return convertArrayToObject(
       allLabelsId.map((label) => {
@@ -68,8 +70,15 @@ function customFilterFunction({ type, values, value, defaultDate }) {
   }
 }
 const shownToursReselect = createSelector(
-  [allId, filteredOutValues, byId, changesById, labelsById, tourDate],
-  (allId, filteredOutValues, byId, changes, labelsById, tourDate) => {
+  [
+    allIdSelector,
+    filteredOutValuesSelector,
+    byIdSelector,
+    changesByIdSelector,
+    labelsByIdSelector,
+    dateSelector,
+  ],
+  (allId, filteredOutValues, byId, changes, labelsById, date) => {
     const table = allId
       .filter((id) => {
         return Object.keys(filteredOutValues).find((label) =>
@@ -77,7 +86,7 @@ const shownToursReselect = createSelector(
             type: labelsById[label].filterType,
             values: filteredOutValues[label],
             value: byId[id][label],
-            defaultDate: tourDate,
+            defaultDate: date,
           })
         )
           ? false
@@ -92,7 +101,12 @@ const shownToursReselect = createSelector(
 );
 
 const reactTableData = createSelector(
-  [allLabelsId, shownToursReselect, labelsById, availableValuesReselect],
+  [
+    allLabelsIdSelector,
+    shownToursReselect,
+    labelsByIdSelector,
+    availableValuesReselect,
+  ],
   (allLabelsId, shownToursReselect, labelsById, availableValues) => {
     return shownToursReselect.map(({ id, value }) => ({
       id: id,
@@ -105,9 +119,10 @@ const reactTableData = createSelector(
             type: labelsById[label].type,
             measurement: labelsById[label].measurement,
             minWidth: "10px",
-            maxWidth: "250px",
+            // maxWidth: "70px",
+            maxWidth: maxWidthByType(labelsById[label].type),
           };
-          if (props.type !== "constant") return { ["col-" + label]: props };
+          if (props.type !== "select") return { ["col-" + label]: props };
           else
             return {
               ["col-" + label]: {
@@ -121,49 +136,24 @@ const reactTableData = createSelector(
   }
 );
 
-const reactTableData2 = (name) => {
-  return createSelector(
-    [allLabelsId, shownToursReselect, labelsById, availableValuesReselect],
-    (allLabelsId, shownToursReselect, labelsById, availableValues) => {
-      console.log(name);
-      return shownToursReselect.map(({ id, value }) => ({
-        id: id,
-        ...convertArrayToObject(
-          allLabelsId.map((label) => {
-            const props = {
-              id: id,
-              value: value[label],
-              label: label,
-              type: labelsById[label].type,
-              measurement: labelsById[label].measurement,
-              minWidth: "10px",
-              maxWidth: "250px",
-            };
-            if (props.type !== "constant") return { ["col-" + label]: props };
-            else
-              return {
-                ["col-" + label]: {
-                  ...props,
-                  availableValues: availableValues[label],
-                },
-              };
-          })
-        ),
-      }));
-    }
-  );
-};
-
 const hiddenColumnsReselect = createSelector(
-  [labelsReselect, checkedLabelsId],
+  [labelsReselect, checkedLabelsIdSelector],
   (labels, checkedLabelsId) => {
     return labels
       .filter(({ id }) => !checkedLabelsId.includes(id))
       .map(({ id }) => "col-" + id);
   }
 );
+const hiddenColumnsReselect2 = createSelector(
+  [labelsReselect, checkedLabelsIdSelector],
+  (labels, checkedLabelsId) => {
+    return labels
+      .filter(({ id }) => !checkedLabelsId.includes(id))
+      .map(({ id }) => id);
+  }
+);
 const filteredOutValuesReselect = createSelector(
-  [filteredOutValues, (_, label) => label],
+  [filteredOutValuesSelector, (_, label) => label],
   (filteredOutValues, label) => {
     return label ? filteredOutValues[label] : filteredOutValues;
   }
@@ -172,12 +162,12 @@ const filteredOutValuesReselect = createSelector(
 const nestedFilterTourData = createSelector(
   [
     labelsReselect,
-    checkedLabelsId,
+    checkedLabelsIdSelector,
     availableValuesReselect,
     filteredOutValuesReselect,
-    tourDate,
+    dateSelector,
   ],
-  (labels, checkedLabelsId, availableValues, filteredOutValues, tourDate) => {
+  (labels, checkedLabelsId, availableValues, filteredOutValues, date) => {
     return labels.map(({ id, text, filterType }) => {
       const disabled = filterType === "none" || availableValues[id].length <= 1;
       const checked = checkedLabelsId.includes(id);
@@ -185,7 +175,7 @@ const nestedFilterTourData = createSelector(
         filterType !== "none" && availableValues[id].length > 1;
       const data =
         filterType === "date"
-          ? { month: tourDate.split("/")[0], year: tourDate.split("/")[1] }
+          ? { month: date.split("/")[0], year: date.split("/")[1] }
           : availableValues[id].map((value) => ({
               text: value,
               checked: !(
@@ -194,7 +184,7 @@ const nestedFilterTourData = createSelector(
                   type: filterType,
                   values: filteredOutValues[id],
                   value,
-                  defaultDate: tourDate,
+                  defaultDate: date,
                 })
               ),
             }));
@@ -217,7 +207,7 @@ const nestedFilterTourData = createSelector(
   }
 );
 const modalLabelsReselect = createSelector(
-  [allLabelsId, labelsById, availableValuesReselect],
+  [allLabelsIdSelector, labelsByIdSelector, availableValuesReselect],
   (allLabelsId, labelsById, availableValues) => {
     return allLabelsId.map((labelId) => {
       const { id, text, type, measurement, grid, page, required, priority } =
@@ -232,7 +222,7 @@ const modalLabelsReselect = createSelector(
         required,
         priority,
       };
-      return type === "constant"
+      return type === "select"
         ? { ...props, availableValues: availableValues[id] }
         : type === "date"
         ? { ...props, portal: false, withButton: true }
@@ -240,15 +230,82 @@ const modalLabelsReselect = createSelector(
     });
   }
 );
+const reactTableData2 = createSelector(
+  [
+    allLabelsIdSelector,
+    shownToursReselect,
+    labelsByIdSelector,
+    availableValuesReselect,
+  ],
+  (allLabelsId, shownToursReselect, labelsById, availableValues) => {
+    return shownToursReselect.map(({ id, value }) => ({
+      id: id,
+      ...convertArrayToObject(
+        allLabelsId.map((label) => {
+          const props = {
+            id: id,
+            value: value[label],
+            label: label,
+            type: labelsById[label].type,
+            measurement: labelsById[label].measurement,
+            minWidth: "10px",
+            maxWidth: "250px",
+          };
+
+          return { id: id, [label]: value[label] };
+        })
+      ),
+    }));
+  }
+);
+
+const visibleHeaders2 = createSelector(
+  [labelsReselect, hiddenColumnsReselect2, checkedIdSelector, editModeSelector],
+  (labels, hiddenColumns, checkedId, editMode) => {
+    const editable = (id) => editMode && checkedId.includes(id);
+    return labels.map(({ text, id }) => ({
+      field: id,
+      headerName: text,
+      // maxWidth: 250,
+      flex: 1,
+      minWidth: 100,
+      // maxWidth: 250,
+      // editable: true,
+      disableClickEventBubbling: true,
+      hide: hiddenColumns.includes(id),
+      renderCell: (params) => {
+        // return (
+        //   <div style={{ overflow: "visible" }} value={params.value}>
+        //     {params.value}
+        //   </div>
+        // );
+        //   // console.log(id, editable(id));
+        return (
+          // <div>{params.value}</div>
+          <Input
+            minWidth="10px"
+            maxWidth="250px"
+            value={params.value}
+            editable={editable(params.id)}
+            extendable
+          ></Input>
+        );
+        //   // return <div>hi</div>;
+      },
+    }));
+  }
+);
 
 export {
+  visibleHeaders2,
   modalLabelsReselect,
-  changesById,
-  checkedId,
+  changesByIdSelector,
+  checkedIdSelector,
   nestedFilterTourData,
   hiddenColumnsReselect,
-  tourDate,
+  dateSelector,
   reactTableData,
-  editMode,
+  reactTableData2,
+  editModeSelector,
   visibleHeaders,
 };

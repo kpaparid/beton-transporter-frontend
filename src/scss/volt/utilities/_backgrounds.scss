@@ -2,40 +2,222 @@
  * = Backgrounds
 */
 
+.date-selector {
+  tbody {
+    :first-child {
+      td {
+        padding-top: 0.75rem !important;
+      }
+    }
+  }
+}
+
+.select_user__control {
+  border: $border !important;
+  .select_user__menu {
+    margin: 0 !important;
+  }
+  .select_user__indicator-separator {
+    background-color: $gray-500 !important;
+  }
+
+  .select_user__indicator {
+    color: $gray-600 !important;
+  }
+  .select_user__single-value {
+    color: $gray-700 !important;
+  }
+  &:hover {
+    border-color: $light-blue !important;
+    .select_user__single-value {
+      color: $light-blue !important;
+    }
+    .select_user__indicator-separator {
+      background-color: $light-blue !important;
+    }
+    .select_user__indicator {
+      color: $light-blue !important;
+    }
+  }
+}
+.select_user__control--is-focused {
+  border-color: $light-blue !important;
+  box-shadow: $box-shadow-inset-primary !important;
+}
+.card-dark {
+  .btn-title {
+    background-color: $white !important;
+    color: $black !important;
+    border: 0;
+    box-shadow: none;
+  }
+  .card-table {
+    padding: 0.25rem;
+  }
+  > .card-body {
+    background-color: white;
+    border-radius: 0.5rem !important;
+    padding-top: 0;
+  }
+  > .card-header {
+    padding: 0.25rem;
+    background-color: $white !important;
+    color: black !important;
+
+    .btn-title {
+      h5,
+      h6,
+      h4,
+      h1 {
+        margin: 0;
+        padding: 1rem !important;
+        font-weight: 700;
+        color: black !important;
+      }
+      &:hover {
+        :first-child {
+          color: $tertiary !important;
+        }
+      }
+      &:focus:active {
+        box-shadow: none;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      align-items: center;
+      padding-right: 0.565rem;
+
+      button {
+        background-color: transparent !important;
+        border: none;
+        padding: 0;
+        color: $secondary !important;
+        width: 45px;
+        height: 45px;
+        box-shadow: none;
+        &:hover {
+          color: $tertiary !important;
+        }
+        &:focus {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+  .table {
+    tbody {
+      background-color: white;
+      tr {
+        background-color: white !important;
+        &:hover {
+          background-color: lighten($primary, 76%) !important;
+        }
+      }
+      :first-child {
+        td {
+          padding-top: 10px !important;
+          // padding-bottom: 10px !important;
+        }
+      }
+    }
+    thead {
+      background-color: $gray-500;
+      th :first-child:hover {
+        color: $tertiary !important;
+      }
+    }
+  }
+  thead .form-check-input[type="checkbox"] {
+    border-color: $gray-600;
+  }
+
+  .table .form-check-input[type="checkbox"] {
+    background-color: white;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: $gray-600;
+      filter: brightness(100%);
+    }
+    &:indeterminate,
+    &:checked {
+      background-color: $primary;
+    }
+  }
+}
+
+.gradient-primary-secondary {
+  /* background: rgb(0,50,96); */
+  background: linear-gradient(
+    11deg,
+    rgba(0, 50, 96, 1) 0%,
+    rgba(67, 146, 207, 1) 100%,
+    rgba(0, 212, 255, 1) 100%
+  ) !important;
+  h5 {
+    color: white !important;
+    padding: 0.5rem !important;
+  }
+  svg {
+    color: white !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0.5rem !important;
+  }
+  button {
+    // background-color: red;
+    display: flex;
+    padding: 0 !important;
+    margin: 0 0.15rem !important;
+    border-radius: 2rem !important;
+    // &:hover {
+    //   background-color: $secondary !important;
+    // }
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgb(229 233 236) !important;
+    }
+  }
+}
 @each $color, $value in $theme-colors {
-	@include bg-gradient-variant(".bg-gradient-#{$color}", $value);
+  @include btn-variant(".btn-#{$color}", $value);
+}
+
+@each $color, $value in $theme-colors {
+  @include bg-gradient-variant(".bg-gradient-#{$color}", $value);
 }
 
 // Backgrounds Overlay
 @each $color, $value in $theme-colors {
-    .overlay-#{$color}{ 
-        &:before{
-            position: absolute;
-            content:"";
-            background: $value;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0.8;
-            z-index: 0;
-        }
+  .overlay-#{$color} {
+    &:before {
+      position: absolute;
+      content: "";
+      background: $value;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0.8;
+      z-index: 0;
     }
+  }
 }
 
 .section-image {
-   @include background-image(no-repeat, cover); 
+  @include background-image(no-repeat, cover);
 }
 
-.bg-secondary-alt{
-    background-color: lighten($secondary, 15% );
+.bg-secondary-alt {
+  background-color: lighten($secondary, 15%);
 }
 
 .form-bg-image {
-    background-repeat: no-repeat !important;
-    background-position: top center !important;
+  background-repeat: no-repeat !important;
+  background-position: top center !important;
 }
 
 .fill-soft {
-    fill: $soft;
+  fill: $soft;
 }

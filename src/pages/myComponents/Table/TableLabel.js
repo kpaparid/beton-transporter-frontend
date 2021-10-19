@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from "react";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faFilter } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonGroup } from "@themesberg/react-bootstrap";
 import { forwardRef, useRef } from "react";
@@ -14,37 +14,39 @@ import { CustomDropdown } from "../CustomDropdown";
 import { isEqual } from "lodash";
 
 import "../MyForm.css";
+import { getGridType, GRIDTYPE } from "../MyConsts";
 export const TableLabel = memo(
   forwardRef(
     (
       {
-        title,
+        titleProps: { title },
         buttonGroupProps,
-        filterProps: {
-          filterDataSelector,
-          onToggleFilterColumn,
-          nestedFilterComponent,
-        },
+        // filterProps: {
+        //   filterDataSelector,
+        //   onToggleFilterColumn,
+        //   nestedFilterComponent,
+        // },
       },
       ref
     ) => {
-      const data = useSelector(filterDataSelector);
-      const ref1 = useRef(null);
-      const ref2 = useRef(null);
+      // const data = useSelector(filterDataSelector) || [];
+      // const ref1 = useRef(null);
+      // const ref2 = useRef(null);
 
-      const items = [
-        <NestedDropdown
-          key="NestedDropdown"
-          ref={ref2}
-          data={data}
-          component={nestedFilterComponent}
-          onToggleItem={onToggleFilterColumn}
-        />,
-      ];
+      // const items = [
+      //   <NestedDropdown
+      //     key="NestedDropdown"
+      //     ref={ref2}
+      //     data={data}
+      //     component={nestedFilterComponent}
+      //     onToggleItem={onToggleFilterColumn}
+      //   />,
+      // ];
 
       return (
         <div className="d-flex justify-content-between flex-wrap align-items-center py-0">
-          <div className="d-flex align-items-center">
+          {title}
+          {/* <div className="d-flex align-items-center">
             <ButtonGroup>
               <CustomDropdown
                 id={"TourFilter"}
@@ -66,7 +68,7 @@ export const TableLabel = memo(
               </CustomDropdown>
               {title}
             </ButtonGroup>
-          </div>
+          </div> */}
           <div className="flex-wrap d-flex">
             <TableButtons ref={ref} {...buttonGroupProps}></TableButtons>
           </div>
@@ -76,5 +78,63 @@ export const TableLabel = memo(
   ),
   isEqual
 );
+
+export const Filter = memo(({ entityId, ...rest }) => {
+  return (
+    <>
+      {/* // getGridType(entityId) === GRIDTYPE.TABLE && //{" "} */}
+      <DefaultFilter {...rest}></DefaultFilter>
+    </>
+  );
+}, isEqual);
+
+export const DefaultFilter = memo(
+  forwardRef((props, ref) => {
+    // console.log({ props });
+    const {
+      selectItemsFilter,
+      onToggleLabel,
+      nestedFilterComponent,
+      selectNestedCheckboxFilter,
+    } = props;
+    // const f = (state) => selectNestedCheckboxFilter(state, "duration");
+    // const c = useSelector(f);
+    // console.log({ c });
+
+    const data = useSelector(selectItemsFilter) || [];
+    const ref1 = useRef(null);
+    const ref2 = useRef(null);
+
+    const items = [
+      <NestedDropdown
+        key="NestedDropdown"
+        ref={ref2}
+        data={data}
+        component={nestedFilterComponent}
+        onToggleItem={onToggleLabel}
+      />,
+    ];
+    return (
+      <CustomDropdown
+        id={"TourFilter"}
+        as={ButtonGroup}
+        toggleClassName="primary-btn"
+        toggleStyle={{ transition: "none" }}
+        menuClassName="py-1"
+        ref={{ ref: ref1, refList: [ref1, ref2] }}
+        value={
+          <>
+            {/* Filter */}
+            <FontAwesomeIcon icon={faFilter} />
+          </>
+        }
+      >
+        {items}
+      </CustomDropdown>
+    );
+  }),
+  isEqual
+);
+
 TableLabel.displayName = "TableLabel";
 TableButtons.displayName = "TableButtons";

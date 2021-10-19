@@ -75,7 +75,7 @@
   min-height: 0;
   visibility: hidden;
   height: 0;
-  white-space: normal !important;
+  white-space: none !important;
 }
 
 .wrapper.wrapper-editable .dummy.dummy-visible {
@@ -134,7 +134,8 @@
 }
 .wrapper .editable-container {
   height: 0px;
-  width: 0px;
+  /* width: 0px; */
+  width: 100%;
   visibility: hidden;
   display: flex;
   justify-content: center;
@@ -193,10 +194,6 @@
 }
 .wrapper.wrapper-editable .editable-container select {
   visibility: visible;
-}
-.wrapper.wrapper-editable.selection .dummy {
-  /* padding-right: 35px;
-  padding-left: 35px; */
 }
 .overflowX-hidden {
   overflow-x: hidden;
@@ -273,7 +270,7 @@
   box-shadow: none;
 }
 
-.myprimary-bg {
+/* .myprimary-bg {
   background-color: #253b43 !important;
   border-color: #17252a !important;
 }
@@ -292,16 +289,16 @@
 .my-nav-link:hover {
   background-color: #2b7a78 !important;
   border-color: #2b7a78 !important;
-}
+} */
 
-.primary-btn {
+/* .primary-btn {
   background-color: #2b7a78 !important;
   border-color: #2b7a78 !important;
 }
 .primary-btn:hover {
   background-color: #215d5b !important;
   border-color: #215d5b !important;
-}
+} */
 
 .light {
   background-color: #f5f8fb;

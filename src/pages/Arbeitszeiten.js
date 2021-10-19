@@ -1,23 +1,103 @@
-import React from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
-import { Breadcrumb } from "@themesberg/react-bootstrap";
+import { Breadcrumb, Form } from "@themesberg/react-bootstrap";
 
-import { MonthlyWorkHours, Mycard } from "./myComponents/MyTables";
+import { isEqual } from "lodash";
+import { useLoadData, grids } from "./myComponents/MyConsts";
+
+import { workHoursSlice } from "./reducers/redux2";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  absentTable,
-  vacationsClaim,
-  vacationsOverview,
-  workHoursKonto,
-} from "../data/tables";
+  GridCardComponent,
+  GridTableComponent,
+} from "./myComponents/GridComponent";
+import { Button, Card } from "react-bootstrap";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { MyFormSelect } from "./myComponents/MyFormSelect";
+import { Box } from "@mui/system";
+import { OutlinedSelect } from "./myComponents/MuiSelect";
+import { createSelector } from "reselect";
 
-export default () => {
-  const month = 3;
-  const workerName = "Maik Litt";
-  const workerID = 1;
+export const ArbeitsZeiten = memo(() => {
+  const sliceName = "workHoursTable";
+  const { actions, selectors } = workHoursSlice;
+  const stateAPIStatus = useLoadData(sliceName, actions);
+  const dispatch = useDispatch();
+  const selectMeta = useMemo(
+    () =>
+      createSelector(
+        [
+          selectors.metaSelector.selectEntities,
+          selectors.usersSelector.selectEntities,
+          selectors.usersSelector.selectAll,
+        ],
+        (meta, users, all) => {
+          const currentUserId = meta && meta.user && meta.user.value;
+          const allUsers = all.map(({ id, firstName, lastName }) => ({
+            value: id,
+            label: lastName + " " + firstName,
+          }));
+          const currentUser = {
+            value: currentUserId,
+            label:
+              users[currentUserId] &&
+              users[currentUserId].lastName +
+                " " +
+                users[currentUserId].firstName,
+          };
+          return {
+            currentUser,
+            users: allUsers,
+          };
+        }
+      ),
+    [selectors]
+  );
+  const onChangeSelect = useCallback((e) =>
+    dispatch(actions.changeCurrentUser(e.value))
+  );
+  const { currentUser, users } = useSelector(selectMeta);
+
+  const renderComponent = useCallback(
+    (entityId, props) => {
+      const type = grids[entityId].type;
+      // console.log(type);
+      return (
+        <>
+          {/* <Loader stateAPIStatus={stateAPIStatus}> */}
+          {/* {type === GRIDTYPE.TABLE ? ( */}
+          {true ? (
+            <GridTableComponent
+              {...{
+                stateAPIStatus,
+                actions,
+                selectors,
+                entityId,
+              }}
+            />
+          ) : (
+            <GridCardComponent
+              {...{
+                stateAPIStatus,
+                actions,
+                stateOffset: entityId,
+                ...props,
+              }}
+            />
+          )}
+          {/* </Loader> */}
+        </>
+      );
+    },
+    [stateAPIStatus]
+  );
+
   return (
     <>
       <div className="d-block pt-4 mb-4 mb-md-0">
+        {/* <button onClick={handleClick}>click</button>
+        <button onClick={handleClick2}>click2</button> */}
         <Breadcrumb
           className="d-none d-md-inline-block"
           listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
@@ -25,51 +105,34 @@ export default () => {
           <Breadcrumb.Item>
             <FontAwesomeIcon icon={faHome} />
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Home</Breadcrumb.Item>
-          <Breadcrumb.Item active>Nachrichten</Breadcrumb.Item>
+          <Breadcrumb.Item>faHome</Breadcrumb.Item>
+          <Breadcrumb.Item active>ArbeitsZeiten</Breadcrumb.Item>
         </Breadcrumb>
       </div>
-      <div className="col-12 d-flex flex-wrap">
-        <div className="col-12 col-xxl-8">
-          <MonthlyWorkHours workerID={workerID} month={month} />
-        </div>
-        <div className="col-12 col-xxl-4">
-          <div className="col-12 ">
-            <Mycard
-              className="ms-xxl-2 mt-xxl-0 mt-3"
-              footer={["GESAMT", "", "10"]}
-              headers={["MITARBEITER", "Monat", "Stunden"]}
-              title={"Arbeitszeitkonto"}
-              table={workHoursKonto}
-            />
+
+      <div className="d-flex pb-3">
+        <OutlinedSelect
+          onChange={onChangeSelect}
+          value={currentUser}
+          values={users}
+        ></OutlinedSelect>
+      </div>
+      <div className="col-12 pb-2 d-flex flex-wrap">
+        <div className="col-12 col-xxl-7">{renderComponent("workHours")}</div>
+        <div className="col-12 col-xxl-5 ps-3">
+          <div className="col-12 pb-2">
+            {renderComponent("vacationsOverview")}
           </div>
-          <div className="col-12 ">
-            <Mycard
-              className="ms-xxl-2 mt-xxl-0 mt-3"
-              headers={["MITARBEITER", "Bereits Genommen", "Rest"]}
-              title={"Urlaubsanspruch"}
-              table={vacationsClaim}
-            />
-          </div>
-          <div className="col-12 ">
-            <Mycard
-              className="ms-xxl-2 mt-xxl-0 mt-3"
-              footer={["GESAMT", "", "", "50"]}
-              headers={["MITARBEITER", "VON", "BIS", "TAGE"]}
-              title={"Urlaubsübersicht"}
-              table={vacationsOverview}
-            />
-          </div>
-          <div className="col-12 ">
-            <Mycard
-              className="ms-xxl-2 mt-xxl-0 mt-3"
-              headers={["MITARBEITER", "VON", "BIS", "TAGE", ""]}
-              title={"Fehlzeiten"}
-              table={absentTable}
-            />
-          </div>
+          <div className="col-12 py-2">{renderComponent("vacations")}</div>
+
+          <div className="col-12 py-2">{renderComponent("workHoursBank")}</div>
+          <div className="col-12 py-2">{renderComponent("absent")}</div>
         </div>
       </div>
     </>
   );
-};
+}, isEqual);
+
+ArbeitsZeiten.displayName = "ArbeitsZeiten";
+
+export default ArbeitsZeiten;

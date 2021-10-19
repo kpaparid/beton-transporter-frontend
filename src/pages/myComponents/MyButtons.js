@@ -4,11 +4,12 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { primaryVariant } from "./MyConsts";
 
 import "./MyForm.css";
+import { editMode } from "./MySelectors";
 
 const defaultVariant = "primary";
 
 export const EditBtn = (props) => {
-  const editMode = useSelector((state) => state.tourTable.editMode);
+  const editMode = useSelector(editMode);
   const { onClick, className = "", size, variant, value = "Edit" } = props;
   return (
     <MyBtn
@@ -21,7 +22,7 @@ export const EditBtn = (props) => {
   );
 };
 export const SaveBtn = (props) => {
-  const editMode = useSelector((state) => state.tourTable.editMode);
+  const editMode = useSelector(editMode);
   const { onClick, className = "", size, variant, value = "Save" } = props;
   return (
     <MyBtn
@@ -34,7 +35,7 @@ export const SaveBtn = (props) => {
   );
 };
 export const BreakBtn = (props) => {
-  const editMode = useSelector((state) => state.tourTable.editMode);
+  const editMode = useSelector(editMode);
   const { onClick, className = "", size, variant, value = "Break" } = props;
   return (
     <MyBtn
@@ -62,16 +63,16 @@ export const MyBtn = (props) => {
   const {
     onClick = "",
     value = "",
-    className = "primary-btn",
+    // className = "primary-btn",
     size = "",
-    variant = defaultVariant,
+    variant = "primary",
     disabled,
     type,
   } = props;
   return (
     <Button
       type={type}
-      className={className}
+      variant={variant}
       onClick={onClick}
       size={size}
       disabled={disabled}

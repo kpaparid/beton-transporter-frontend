@@ -8,7 +8,7 @@ import {
   faTrash,
   faWindowClose,
 } from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, { useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonGroup } from "@themesberg/react-bootstrap";
 import { forwardRef, useEffect, useState } from "react";
@@ -16,93 +16,101 @@ import { useDispatch, useSelector } from "react-redux";
 import { ACTIONS } from "../reducers/redux";
 import AddRowModal from "./AddRowModal";
 import { BreakBtn, DownloadBtn, EditBtn, MyBtn, SaveBtn } from "./MyButtons";
+import { Filter } from "./Table/TableLabel";
 
 const TableButtons = forwardRef(
   (
     {
-      onToggleEdit,
+      selectSelectedRowsExist,
+      selectChangesExist,
+      selectEditMode,
       onAdd,
-      onSave,
+      onDelete,
       onDownload,
       onClose,
-      onDelete,
+      onSave,
+      onToggleEdit,
       forceClose,
-      editMode = false,
-      checkedRowsExist = "hi",
-      changesExist = false,
-      labelsSelector,
-      titleModal = "Add Row",
+      modalProps,
+      filterProps,
+      download,
+      remove,
     },
     ref
   ) => {
-    const modalLabels = useSelector(labelsSelector);
+    const editMode = useSelector(selectEditMode);
+    const selectedRowsExist = useSelector(selectSelectedRowsExist);
+    const changesExist = useSelector(selectChangesExist);
+    // const modalLabels = useSelector(labelsSelector);
     const [showModalDefault, setShowModalDefault] = useState(false);
     const handleAddRow = () => setShowModalDefault(true);
     const handleCloseAddRow = () => setShowModalDefault(false);
-
-    const handleEditEnable = () => {
+    const clearChanges = useCallback(() => {
+      onClose();
+    }, [onClose]);
+    const handleEditEnable = useCallback(() => {
       onToggleEdit();
-    };
-    const handleEditDisable = () => {
+    }, [onToggleEdit]);
+    const handleEditDisable = useCallback(() => {
       ref.current = true;
       console.log("handleEditDisable", ref.current);
       onToggleEdit();
       clearChanges();
-    };
-    const handleSave = () => {
+    }, [onToggleEdit, clearChanges]);
+    const handleSave = useCallback(() => {
       ref.current = true;
       console.log("handleSave", ref.current);
       onSave();
-      onToggleEdit();
-    };
-    const handleDownload = () => {
+    }, [onSave]);
+    const handleDownload = useCallback(() => {
       onDownload();
-    };
-    const handleDelete = () => {
+    }, [onDownload]);
+    const handleDelete = useCallback(() => {
       onDelete();
-    };
-    function clearChanges() {
-      onClose();
-    }
+    }, [onDelete]);
+
     useEffect(() => {
-      if (editMode && !checkedRowsExist) {
+      if (editMode && !selectedRowsExist) {
         ref.current = true;
         console.log("handleEditDisable", ref.current);
         onToggleEdit();
-        clearChanges();
+        // clearChanges();
       }
-    }, [checkedRowsExist]);
+    }, [selectedRowsExist, editMode]);
     return (
-      <ButtonGroup
-        className="btn-toolbar flex-wrap justify-content-end"
-        variant="danger"
-      >
-        {(checkedRowsExist || (editMode && !checkedRowsExist)) && (
+      <div className="d-flex flex-nowrap button-group">
+        {/* <ButtonGroup
+         className="btn-toolbar flex-wrap justify-content-end"
+         variant="danger"
+       > */}
+        {(selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn
             disabled={editMode}
             onClick={handleEditEnable}
             value={<FontAwesomeIcon icon={faEdit} />}
           />
         )}
-        {checkedRowsExist && (
+        {remove && (selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn
             disabled={editMode}
             onClick={handleDelete}
             value={<FontAwesomeIcon icon={faTrash} />}
           ></MyBtn>
         )}
-        <AddRowModal
+        {/* <AddRowModal
           labels={modalLabels}
           title={titleModal}
           onClose={handleCloseAddRow}
           show={showModalDefault}
-        />
+        /> */}
 
-        <MyBtn
-          disabled={editMode}
-          onClick={handleDownload}
-          value={<FontAwesomeIcon icon={faDownload} />}
-        />
+        {download && (
+          <MyBtn
+            disabled={editMode}
+            onClick={handleDownload}
+            value={<FontAwesomeIcon icon={faDownload} />}
+          />
+        )}
         {editMode && (
           <MyBtn
             disabled={!changesExist}
@@ -110,18 +118,23 @@ const TableButtons = forwardRef(
             value={<FontAwesomeIcon icon={faSave} />}
           />
         )}
-        <MyBtn
-          value={<FontAwesomeIcon icon={faPlus} />}
-          onClick={handleAddRow}
-        ></MyBtn>
+        {modalProps && (
+          <MyBtn
+            value={<FontAwesomeIcon icon={faPlus} />}
+            onClick={handleAddRow}
+          ></MyBtn>
+        )}
+
+        {filterProps && <Filter {...filterProps}></Filter>}
         {editMode && (
           <MyBtn
-            className="danger-btn"
+            variant="danger"
             onClick={handleEditDisable}
             value={<FontAwesomeIcon icon={faWindowClose} />}
           />
         )}
-      </ButtonGroup>
+        {/* </ButtonGroup> */}
+      </div>
     );
   }
 );

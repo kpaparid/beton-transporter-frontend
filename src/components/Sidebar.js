@@ -73,12 +73,12 @@ const Sidebar = (props = {}) => {
       icon,
       image,
       badgeText,
-      badgeBg = "secondary",
+      badgeBg = "tertiary",
       badgeColor = "primary",
     } = props;
     const classNames = badgeText
-      ? "d-flex justify-content-start align-items-center justify-content-between my-nav-link"
-      : "my-nav-link";
+      ? "d-flex justify-content-start align-items-center justify-content-between"
+      : "";
     const navItemClassName = link === pathname ? "active" : "";
     const linkProps = external ? { href: link } : { as: Link, to: link };
 
@@ -142,8 +142,7 @@ const Sidebar = (props = {}) => {
       </Navbar>
       <CSSTransition timeout={300} in={show} classNames="sidebar-transition">
         <SimpleBar
-          // className={`collapse ${showClass} sidebar d-md-block text-white bg-primary`}
-          className={`collapse ${showClass} sidebar d-md-block text-white myprimary-bg`}
+          className={`collapse ${showClass} sidebar d-md-block text-white bg-primary`}
         >
           <div className="sidebar-inner px-4 pt-3">
             <div className="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">

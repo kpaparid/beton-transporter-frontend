@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Nav,
   Card,
@@ -10,6 +10,8 @@ import { workHours } from "../../data/tables";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { ButtonGroup, Dropdown } from "@themesberg/react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Input from "./TextArea/MyNewInput";
+import { useSelector } from "react-redux";
 
 export const MonthlyWorkHours = (props) => {
   const totalWorkHours = workHours.length;
@@ -20,25 +22,33 @@ export const MonthlyWorkHours = (props) => {
     return (
       <tr className="text-center">
         <td>
-          <span className="fw-bolder">{workerName}</span>
+          {/* <span className="fw-bolder">{workerName}</span> */}
+
+          <Input extendable value={workerName}></Input>
         </td>
         <td>
-          <span className="fw-normal">{date}</span>
+          <Input extendable={true} value={date}></Input>
+          {/* <span className="fw-normal">{date}</span> */}
         </td>
         <td>
-          <span className="fw-normal">{day}</span>
+          <Input extendable value={day}></Input>
+          {/* <span className="fw-normal">{day}</span> */}
         </td>
         <td>
-          <span className="fw-normal">{start}</span>
+          <Input extendable value={start}></Input>
+          {/* <span className="fw-normal">{start}</span> */}
         </td>
         <td>
-          <span className="fw-normal">{end}</span>
+          <Input extendable value={end}></Input>
+          {/* <span className="fw-normal">{end}</span> */}
         </td>
         <td>
-          <span className="fw-normal">{pause}</span>
+          <Input extendable value={pause}></Input>
+          {/* <span className="fw-normal">{pause}</span> */}
         </td>
         <td>
-          <span className="fw-normal">{duration}</span>
+          <Input extendable value={duration}></Input>
+          {/* <span className="fw-normal">{duration}</span> */}
         </td>
       </tr>
     );
@@ -125,14 +135,7 @@ export const MonthlyWorkHours = (props) => {
 };
 
 export const Mycard = (props) => {
-  const {
-    className,
-    title,
-    headers,
-    table = "",
-    footer = "",
-    options = "",
-  } = props;
+  const { className, title, headers, table = "", footer, options = "" } = props;
 
   const TableRow = (props) => {
     const table = props.table;
@@ -141,8 +144,8 @@ export const Mycard = (props) => {
         {Object.keys(table)
           .filter((key) => key !== "id")
           .map((key) => (
-            <td key={`${title}-${key}`}>
-              <span className="fw-normal text-wrap">{table[key]}</span>
+            <td key={`${title}-${key}`} className="p-0">
+              <Input extendable value={table[key]}></Input>
             </td>
           ))}
       </tr>
@@ -150,21 +153,17 @@ export const Mycard = (props) => {
   };
   const FooterRow = (props) => {
     const { table } = props;
-
-    if (footer !== "") {
-      return (
-        <tr className="text-center thead-light">
-          {table.map((t) => (
-            <th className="thead-light py-1 " scope="row" key={`${title}-${t}`}>
-              <span className="fw-bolder " style={{ fontSize: "13px" }}>
-                {t}
-              </span>
-            </th>
-          ))}
-        </tr>
-      );
-    }
-    return ``;
+    return (
+      <tr className="text-center thead-light">
+        {table.map((t, key) => (
+          <th className="thead-light py-1 " scope="row" key={`${title}-${key}`}>
+            <span className="fw-bolder " style={{ fontSize: "13px" }}>
+              {t}
+            </span>
+          </th>
+        ))}
+      </tr>
+    );
   };
 
   return (
@@ -196,7 +195,7 @@ export const Mycard = (props) => {
               {table.map((t) => (
                 <TableRow key={`tr-${title}-${t.id}`} table={t} />
               ))}
-              <FooterRow table={footer}></FooterRow>
+              {footer && <FooterRow table={footer}></FooterRow>}
             </tbody>
           </Table>
         </Card.Body>

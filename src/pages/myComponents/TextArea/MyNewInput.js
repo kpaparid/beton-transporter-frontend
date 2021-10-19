@@ -22,15 +22,14 @@ import LazyLoad from "react-lazyload";
 import TimePicker from "@mui/lab/TimePicker";
 import TextField from "@mui/material/TextField";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
 export const Input = memo((props) => {
   const {
     value = "",
     type = "text",
     extendable = false,
     editable = false,
-    maxWidth = "150px",
-    minWidth = "10px",
+    // maxWidth = "150px",
+    // minWidth = "10px",
     style: inputStyle = {},
     lazyLoad = true,
     ...rest
@@ -52,12 +51,11 @@ export const Input = memo((props) => {
     () =>
       "wrapper" +
       (editable ? " wrapper-editable" : "") +
-      (isInvalid ? " invalid" : isValid ? " valid" : "") +
-      (type === "constant" ? " selection" : ""),
+      (isInvalid ? " invalid" : isValid ? " valid" : ""),
     [editable, isValid, isInvalid, type]
   );
   const style = extendable
-    ? { maxWidth, minWidth, ...inputStyle }
+    ? { ...inputStyle }
     : { width: "100%", ...inputStyle };
   return (
     <div className={className} style={style}>
@@ -75,101 +73,18 @@ export const Input = memo((props) => {
   );
 }, isEqual);
 
-export const Container2 = memo((props) => {
-  const { label, onChange, value, editable, isValid, isInvalid, ...rest } =
-    props;
-  const theme = createTheme({
-    palette: {
-      error: { main: "#fa5252" },
-      primary: { main: "#2e3650" },
-    },
-    components: {
-      MuiOutlinedInput: {
-        defaultProps: { value: "hi" },
-        styleOverrides: {
-          root: {
-            // backgroundColor: "white",
-            padding: "0.5rem",
-            "& .MuiFormHelperText-root": {
-              color: "green",
-            },
-            ":hover": {
-              boxShadow: "0 0 0 0.2rem rgb(46, 54, 80, 50%)",
-              border: 0,
-              backgroundColor: "white",
-            },
-            "&.Mui-error:hover": {
-              boxShadow: "0 0 0 0.2rem rgb(250, 82, 82, 50%)",
-            },
-          },
-          notchedOutline: {
-            top: 0,
-          },
-          input: {
-            width: "100%",
-            fontSize: "0.875rem",
-            color: "#2e3650",
-            lineHeight: "21px",
-            top: 0,
-            textAlign: "center",
-            padding: 0,
-            "&[type=number]": {
-              "-moz-appearance": "textfield",
-            },
-            "&::-webkit-outer-spin-button": {
-              "-webkit-appearance": "none",
-              margin: 0,
-            },
-            "&::-webkit-inner-spin-button": {
-              "-webkit-appearance": "none",
-              margin: 0,
-            },
-          },
-
-          disabled: {},
-          focused: {},
-        },
-      },
-    },
-  });
-
-  return (
-    <div>
-      <div
-        className="px-3"
-        style={{
-          width: "fit-content",
-          minWidth: "80px",
-          maxWidth: "250px",
-          fontSize: "0.875rem",
-          height: editable ? 0 : "inherit",
-          visibility: editable ? "hidden" : "inherit",
-          overflow: "auto",
-        }}
-      >
-        {value}
-      </div>
-      <LazyLoad>
-        <ThemeProvider theme={theme}>
-          <TextField
-            hidden={!editable}
-            {...rest}
-            value={value}
-            error={isInvalid}
-            fullWidth
-            multiline
-            onChange={(e) => onChange(e.target.value)}
-            variant="outlined"
-            readOnly
-          ></TextField>
-        </ThemeProvider>
-      </LazyLoad>
-    </div>
-  );
-}, isEqual);
-
 export const Container = memo(
-  ({ img, value, type, extendable, lazyLoad = true, measurement, ...rest }) => {
+  ({
+    img,
+    value,
+    type,
+    extendable,
+    lazyLoad = true,
+    measurement,
+    maxWidth,
+    minWidth,
+    ...rest
+  }) => {
     return (
       <>
         <div className="text-container">
@@ -182,6 +97,7 @@ export const Container = memo(
               <div className="text-flex">
                 <span
                   className="text-span"
+                  style={{ maxWidth, minWidth }}
                   onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
                 >
                   {formatInput(value, type)}
@@ -194,9 +110,11 @@ export const Container = memo(
           )}
           <div className="editable-container">
             {lazyLoad ? (
-              <LazyContainer {...{ value, type, ...rest }} />
+              <LazyContainer
+                {...{ value, type, maxWidth, minWidth, ...rest }}
+              />
             ) : (
-              <TextInput {...{ value, type, ...rest }} />
+              <TextInput {...{ value, type, maxWidth, minWidth, ...rest }} />
             )}
           </div>
         </div>
@@ -208,8 +126,9 @@ export const Container = memo(
 
 const LazyContainer = memo((props) => {
   return (
-    <LazyLoad className="w-100">
+    <LazyLoad className="w-100" placeholder={<div>{props.value}</div>}>
       <TextInput {...props} />
+      {/* <div>{props.value}</div> */}
     </LazyLoad>
   );
 }, isEqual);
@@ -224,6 +143,8 @@ export const TextInput = memo(
         inputClassName = "",
         className = "",
         modal = false,
+        minWidth,
+        maxWidth,
         ...rest
       },
       ref
@@ -235,7 +156,8 @@ export const TextInput = memo(
         onChange(e.target.value, "text");
       }, []);
       const handleDateChange = useCallback((value) => {
-        onChange(value, "text");
+        console.log("CHNAGEEEEEEEEEEEEEEEEEEEEEEE", value);
+        onChange(value, "date");
       }, []);
       const handleSelectChange = useCallback((value) => {
         onChange(value, "select");
@@ -250,31 +172,47 @@ export const TextInput = memo(
               className={className}
               onChange={handleDateChange}
               {...rest}
+              inputStyle={{ maxWidth, minWidth }}
             />
           );
         case "constant":
+          return (
+            <div className={"d-block text-center disabled" + className}>
+              {rest.value}
+            </div>
+          );
+        case "select":
           return (
             <MyFormSelect
               className={className}
               onChange={handleSelectChange}
               availableValues={availableValues}
               {...rest}
+              maxWidth={maxWidth}
+              minWidth={minWidth}
               labelIsDisabled
             />
           );
-
         default:
           return (
             <div
               onClick={handleOutsideClick}
-              className={"d-block text-center" + className}
+              className={"d-block text-center w-100" + className}
             >
               <TextareaAutosize
                 className={inputClassName}
                 {...rest}
                 onChange={handleTextAreaChange}
                 ref={domRef}
+                style={{ width: "100%", maxWidth, minWidth }}
               />
+              {/* <TextareaAutosize
+                className={inputClassName}
+                {...rest}
+                onChange={handleTextAreaChange}
+                ref={domRef}
+                style={{ width: "100%" }}
+              /> */}
             </div>
           );
       }

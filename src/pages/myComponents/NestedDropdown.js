@@ -53,10 +53,10 @@ export const NestedDropdown = memo(
                   </div>
                 }
               >
-                <Dropdown.Item className="p-0">
-                  {React.cloneElement(component, { ...props })}
-                  {children}
-                </Dropdown.Item>
+                {/* <Dropdown.Item className="p-0"> */}
+                {React.cloneElement(component, { ...props })}
+                {/* {children} */}
+                {/* </Dropdown.Item> */}
               </CustomDropdown>
             </CheckboxRow>
           );

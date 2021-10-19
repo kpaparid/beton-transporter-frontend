@@ -7,7 +7,7 @@ import React, {
   useState,
   useMemo,
 } from "react";
-import _ from "lodash";
+import _, { isArray, isObject, transform, isEqual } from "lodash";
 import { TableLabel } from "./Table/TableLabel";
 import { useTable, usePagination, useSortBy, useRowSelect } from "react-table";
 
@@ -21,56 +21,89 @@ import {
   Table,
 } from "@themesberg/react-bootstrap";
 import Input from "./TextArea/MyNewInput";
-import { isEqual } from "lodash";
 import "./MyForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
 import TextareaAutosize from "react-textarea-autosize";
+import { getLabel } from "./MyConsts";
 
 export const ReactTable = memo(
   forwardRef(({ children }, skipResetRef) => {
-    const { dataSelector, headersSelector, onCellChange, ...rest } = children;
-    const tours = useSelector(dataSelector);
-    const columns = useSelector(headersSelector);
-    const [data, setData] = useState(tours);
-    const updateMyData = useCallback((rowIndex, columnId, value, label, id) => {
-      skipResetRef.current = true;
-      onCellChange(id, label, value);
-      setData((old) =>
-        old.map((row, index) => {
-          if (index === rowIndex) {
-            return {
-              ...row,
-              [columnId]: { ...row[columnId], value: value },
-            };
-          }
-          return row;
-        })
-      );
-    }, []);
+    const { selectData, selectShownColumns, onCellChange, ...rest } = children;
+    const data = useSelector(selectData);
+    const headers = useSelector(selectShownColumns);
+    const [cells, setCells] = useState(data);
+    const [columns, setColumns] = useState(headers);
+    // updateMyData(index, id, v, label, idx, cellId);
+
+    const updateMyData = useCallback(
+      (rowIndex, columnId, value, labelId, labelIdx, cellId, links) => {
+        console.log("updating data", value);
+        skipResetRef.current = true;
+        const oldRow = cells[rowIndex];
+
+        if (oldRow[labelId].value !== value) {
+          console.log("yikes", value, oldRow[labelId].value);
+          const changesById = {
+            [labelId]: value,
+            ...links.reduce(
+              (a, { connection, dependencies, format }) => ({
+                ...a,
+                [connection]: format(
+                  dependencies.map((d) =>
+                    d === labelId ? value : oldRow[d].value
+                  )
+                ),
+              }),
+              {}
+            ),
+          };
+          onCellChange({ rowId: cellId, changes: changesById });
+          const changesIds = Object.keys(changesById);
+          const mappedChanges = changesIds.reduce(
+            (a, id) => ({
+              ...a,
+              [id]: { ...oldRow[id], value: changesById[id] },
+            }),
+            { ...oldRow }
+          );
+          const newRow = { ...oldRow, ...mappedChanges };
+          setCells((old) =>
+            old.map((row, index) => {
+              if (rowIndex === index) {
+                return newRow;
+              }
+              return row;
+            })
+          );
+        }
+      },
+      [cells]
+    );
 
     useEffect(() => {
-      if (!isEqual(data, tours)) {
+      if (!isEqual(cells, data)) {
         skipResetRef.current = true;
-        setData(tours);
+        console.log("new data", data, cells);
+        setCells(data);
       }
-    }, [tours]);
+    }, [data, cells]);
     useEffect(() => {
-      if (!isEqual(data, tours)) {
+      if (!isEqual(headers, columns)) {
+        setColumns(headers);
       }
-    }, [columns]);
+    }, [headers, columns]);
 
     useEffect(() => {
       skipResetRef.current = false;
-    }, [data]);
-    console.log(data);
+    }, [cells]);
     return (
       <>
         <RTables
           ref={skipResetRef}
           {...rest}
           columns={columns}
-          data={data}
+          data={cells}
           updateMyData={updateMyData}
         />
       </>
@@ -85,10 +118,11 @@ const RTables = memo(
         columns,
         data,
         updateMyData,
-        hiddenColumnsSelector,
-        editSelector,
+        selectHiddenColumns,
+        editModeSelector,
         maxPageSize = 20,
         setSelectedRows,
+        massEdit,
       },
       ref
     ) => {
@@ -99,11 +133,21 @@ const RTables = memo(
             row: { index, isSelected },
             column: { id },
             updateMyData,
-          }) => (
-            <EditableCell
-              {...{ value, index, id, updateMyData, editSelector, isSelected }}
-            />
-          ),
+          }) => {
+            // console.log(value);
+            return (
+              <EditableCell
+                {...{
+                  value,
+                  index,
+                  id,
+                  updateMyData,
+                  editModeSelector,
+                  isSelected: massEdit || isSelected,
+                }}
+              />
+            );
+          },
         }),
         []
       );
@@ -137,51 +181,51 @@ const RTables = memo(
         },
         useSortBy,
         usePagination,
-        useRowSelect,
+        !massEdit && useRowSelect,
         (hooks) => {
-          hooks.visibleColumns.push((columns) => {
-            return [
-              {
-                id: "selection",
-                Header: ({ getToggleAllPageRowsSelectedProps }) => (
-                  <div>
-                    <IndeterminateCheckbox
-                      {...getToggleAllPageRowsSelectedProps()}
-                    />
-                  </div>
-                ),
-                Cell: ({ row }) => (
-                  <div className="d-flex justify-content-center">
-                    <IndeterminateCheckbox
-                      {...row.getToggleRowSelectedProps()}
-                    />
-                  </div>
-                ),
-              },
-              ...columns,
-            ];
-          });
+          !massEdit &&
+            hooks.visibleColumns.push((columns) => {
+              return [
+                {
+                  id: "checkbox",
+                  Header: ({ getToggleAllPageRowsSelectedProps }) => (
+                    <div>
+                      <IndeterminateCheckbox
+                        {...getToggleAllPageRowsSelectedProps()}
+                      />
+                    </div>
+                  ),
+                  Cell: ({ row }) => (
+                    <div className="d-flex justify-content-center">
+                      <IndeterminateCheckbox
+                        {...row.getToggleRowSelectedProps()}
+                      />
+                    </div>
+                  ),
+                },
+                ...columns,
+              ];
+            });
         }
       );
       useEffect(() => {
-        console.log(selectedFlatRows);
-        setSelectedRows(selectedFlatRows.map((_) => _.original.id));
+        !massEdit &&
+          setSelectedRows(selectedFlatRows.map((_) => _.original.id));
       }, [selectedFlatRows]);
       return (
         <>
           <Table
-            hover
             responsive
             className="align-items-center table-flush align-items-center user-table"
           >
             <TableHead
               headerGroups={headerGroups}
-              hiddenColumnsSelector={hiddenColumnsSelector}
+              selectHiddenColumns={selectHiddenColumns}
             ></TableHead>
             <TableBody
               page={page}
               prepareRow={prepareRow}
-              hiddenColumnsSelector={hiddenColumnsSelector}
+              selectHiddenColumns={selectHiddenColumns}
             ></TableBody>
           </Table>
           {maxPageSize < data.length && (
@@ -208,40 +252,44 @@ const RTables = memo(
 
 const EditableCell = React.memo(
   ({
-    value: { value: initialValue, label, id: tourId, ...rest },
+    value: {
+      value: initialValue = "error",
+      label,
+      idx,
+      id: cellId,
+      links,
+      format,
+      ...rest
+    },
     index,
     isSelected,
     id,
     updateMyData,
-    editSelector,
+    editModeSelector,
   }) => {
+    // console.log({ connections });
     const [value, setValue] = useState(initialValue);
     const handleUpdateData = useCallback(
       (v = value) => {
-        // console.log({ v, initialValue }, !isEqual(v, initialValue));
-        // if (!isEqual(v, initialValue)) {
-        console.log("updating changes", v);
-        updateMyData(index, id, v, label, tourId);
-        // }
+        console.log("UPDATING DATA");
+        updateMyData(index, id, v, label, idx, cellId, links);
       },
       [value, initialValue]
     );
-
-    // useEffect(() => {
-    //   console.log("initialvaluechange", initialValue);
-    // }, [initialValue]);
+    const debouncedUpdate = _.debounce(handleUpdateData, 300);
     const onChange = useCallback(
       (value, type) => {
-        console.log("editable", value);
         setValue(value);
-        console.log(type);
-        if (type === "select") handleUpdateData(value);
+        debouncedUpdate(value);
+
+        // if (type === "select" || type === "date") handleUpdateData(value);
       },
       [handleUpdateData]
     );
-    const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
+    const onBlur = useCallback(() => console.log("blur"), [handleUpdateData]);
+    // const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
 
-    const editMode = useSelector(editSelector);
+    const editMode = useSelector(editModeSelector);
     useEffect(() => {
       setValue(initialValue);
     }, [initialValue]);
@@ -253,7 +301,6 @@ const EditableCell = React.memo(
       <Input
         extendable
         {...{
-          // label,
           value,
           onChange,
           onBlur,
@@ -266,8 +313,8 @@ const EditableCell = React.memo(
   isEqual
 );
 
-const TableBody = ({ page, prepareRow, hiddenColumnsSelector }) => {
-  const hiddenColumns = useSelector(hiddenColumnsSelector);
+const TableBody = ({ page, prepareRow, selectHiddenColumns }) => {
+  const hiddenColumns = useSelector(selectHiddenColumns);
   return (
     <tbody>
       {page.map((row, index) => {
@@ -293,6 +340,7 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
   const display = hiddenColumns.includes(cell.column.id)
     ? "none"
     : "table-cell";
+
   return (
     <td
       style={{
@@ -310,9 +358,10 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
 const TableColumn = ({ column, sortedComponent, display }) => {
   return (
     <th
-      className="border-bottom px-3"
+      className="border-0"
       style={{
         display,
+        width: column.id === "checkbox" ? "20px" : "inherit",
       }}
     >
       <div>
@@ -325,10 +374,10 @@ const TableColumn = ({ column, sortedComponent, display }) => {
   );
 };
 
-const TableHead = ({ headerGroups, hiddenColumnsSelector }) => {
-  const hiddenColumns = useSelector(hiddenColumnsSelector);
+const TableHead = ({ headerGroups, selectHiddenColumns }) => {
+  const hiddenColumns = useSelector(selectHiddenColumns);
   return (
-    <thead className="thead-light">
+    <thead>
       {headerGroups.map((headerGroup, index) => (
         <tr
           // {...headerGroup.getHeaderGroupProps()}

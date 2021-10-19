@@ -1,18 +1,25 @@
-export async function loadToursData() {
-  res = await window.fetch("http://127.0.0.1:8887/tours-labels.json");
-  if (!res.ok) {
-    throw new Error("API failed");
-  } else {
-    console.log("success");
-  }
-  const labels = await res.json();
-  var res = await window.fetch("http://127.0.0.1:8887/tours.json");
-  if (!res.ok) {
-    throw new Error("API failed");
-  } else {
-    console.log("success");
-  }
-  const table = await res.json();
+const tourTableUrl = "http://127.0.0.1:8887/tours.json";
+const workHoursTableUrl = "http://127.0.0.1:8887/workhours.json";
 
-  return { table: table, labels: labels };
+export async function loadTableData(tableName) {
+  switch (tableName) {
+    case "toursTable":
+      return loadUrls(tourTableUrl);
+    case "workHoursTable":
+      return loadUrls(workHoursTableUrl);
+    default:
+      break;
+  }
+}
+
+async function loadUrls(url) {
+  const res = await window.fetch(url);
+  const table = await res.json();
+  if (!res.ok) {
+    throw new Error("API failed");
+  } else {
+    console.log("loaded TableData ");
+  }
+
+  return table;
 }

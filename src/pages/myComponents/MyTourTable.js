@@ -5,16 +5,15 @@ import { Card } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import "./MyForm.css";
 import { ReactTable } from "./ReactTable";
-import DataTable from "./NewTable";
-import { useSelector } from "react-redux";
 export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
   const skipResetRef = useRef(false);
   return (
-    <Card border="light">
+    <Card className="card-dark">
+      {/* <Card.Header className="border-0 gradient-primary-secondary"> */}
       <Card.Header className="border-0">
         <TableLabel ref={skipResetRef} {...rest}></TableLabel>
       </Card.Header>
-      <Card.Body className="px-1">
+      <Card.Body>
         <CardBody ref={skipResetRef}>
           {{ ...tableProps, stateAPIStatus }}
         </CardBody>
@@ -25,10 +24,6 @@ export const MyTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
 
 const CardBody = memo(
   forwardRef(({ children: { stateAPIStatus, ...rest } }, ref) => {
-    const c = useSelector((state) => state);
-    console.log(c);
-    console.log(stateAPIStatus);
-
     switch (stateAPIStatus) {
       case "loading":
         return (

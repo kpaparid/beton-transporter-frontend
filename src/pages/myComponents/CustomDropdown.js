@@ -7,7 +7,7 @@ import DropdownToggle from "@themesberg/react-bootstrap/lib/esm/DropdownToggle";
 export const CustomDropdown = forwardRef(
   (
     {
-      variant = "tertiary",
+      variant = "primary",
       value = "Dropdown Button",
       as,
       className = "",
@@ -16,6 +16,7 @@ export const CustomDropdown = forwardRef(
       disabled = false,
       children,
       toggleAs = "default",
+      toggleStyle = {},
       portal = true,
     },
     { ref, refList = [] }
@@ -46,6 +47,7 @@ export const CustomDropdown = forwardRef(
           as={toggleAsComponent}
           variant={variant}
           id="dropdown-basic"
+          style={toggleStyle}
           className={"shadow-none py-1 " + toggleClassName}
         >
           {value}

@@ -34,6 +34,7 @@ export const DateSelectorDropdown = memo(
     onChange,
     maxWidth,
     minWidth,
+    inputStyle,
     disabled = false,
     portal = true,
     withButton = false,
@@ -51,17 +52,16 @@ export const DateSelectorDropdown = memo(
       // onChange && onChange(v.length === 2 || v.length === 5 ? v + "/" : v);
       onChange && onChange(v);
     }, []);
-
     const domInput = useCallback(
       (props) =>
         Input ? (
           <Input {...props} autoFocus></Input>
         ) : (
-          <div className="d-block w-100">
-            <TextareaAutosize {...props} />
+          <div className="d-block w-100 text-center">
+            <TextareaAutosize {...props} style={inputStyle} />
           </div>
         ),
-      [Input]
+      [Input, inputStyle]
     );
 
     const toggleComponent = useCallback(
@@ -219,6 +219,7 @@ export const DateSelector = memo((props) => {
   };
 
   function sendOutside(days, mY = monthYear) {
+    console.log("sending outside", days, mY);
     const change =
       days && mY
         ? days.map((day) =>
@@ -227,7 +228,7 @@ export const DateSelector = memo((props) => {
               "D/MM/YYYY"
             ).format("DD/MM/YYYY")
           )
-        : moment(mY, "MMMM YYYY").format("MM/YYYY");
+        : [];
     onChange && change.length === 1 ? onChange(change[0]) : onChange(change);
   }
 
@@ -250,14 +251,31 @@ export const DateSelector = memo((props) => {
     const id = parseInt(event.target.id.replace("Btn", ""));
     if (singleDate && clickedId.length === 1) {
       setClickedId([id]);
+      singleDate && sendOutside([id]);
     } else if (!singleDate && clickedId.length === 2) {
       setClickedId([]);
       setHoveredId();
+      sendOutside();
     } else if (!singleDate && clickedId.length === 1 && clickedId[0] === id) {
       setClickedId([]);
       setHoveredId();
+      sendOutside();
     } else {
-      setClickedId([...clickedId, id].sort((a, b) => a - b));
+      const newClicked = [...clickedId, id].sort((a, b) => a - b);
+      setClickedId(newClicked);
+      switch (newClicked.length) {
+        case 0:
+          sendOutside();
+          break;
+        case 1:
+          singleDate && sendOutside(newClicked);
+          break;
+        case 2:
+          !singleDate && sendOutside(newClicked);
+          break;
+        default:
+          break;
+      }
     }
   }
 
@@ -265,22 +283,22 @@ export const DateSelector = memo((props) => {
     const id = parseInt(event.target.id.replace("Btn", ""));
     !singleDate && clickedId.length === 1 && setHoveredId(id);
   }
-  useEffect(() => {
-    const size = clickedId.length;
-    switch (size) {
-      case 0:
-        sendOutside();
-        break;
-      case 1:
-        singleDate && sendOutside(clickedId);
-        break;
-      case 2:
-        !singleDate && sendOutside(clickedId);
-        break;
-      default:
-        break;
-    }
-  }, [clickedId]);
+  // useEffect(() => {
+  //   const size = clickedId.length;
+  //   switch (size) {
+  //     case 0:
+  //       sendOutside();
+  //       break;
+  //     case 1:
+  //       singleDate && sendOutside(clickedId);
+  //       break;
+  //     case 2:
+  //       !singleDate && sendOutside(clickedId);
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }, [clickedId]);
 
   return <DateSelectorComponent data={data}></DateSelectorComponent>;
 }, isEqual);
@@ -305,7 +323,7 @@ const DateSelectorComponent = memo((props) => {
     <>
       <Card
         border="light"
-        className="shadow-sm flex-fill"
+        className="shadow-sm flex-fill date-selector"
         style={{ width: "300px", minWidth: "300px", cursor: "default" }}
       >
         <Card.Body className="px-3">
@@ -440,7 +458,7 @@ export const CalendarButton = (props) => {
 
   return (
     <Button variant="white" style={{ padding: "0.25rem" }}>
-      <h5 className="m-0">{value}</h5>
+      <h6 className="m-0">{value}</h6>
     </Button>
   );
 };
@@ -475,12 +493,12 @@ export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
     <>
       <Dropdown>
         <Dropdown.Toggle
-          split
-          variant="light"
-          className="rounded-0 rounded-end light"
+          // split
+          variant="transparent"
+          className="btn-title"
           // style={{ backgroundColor: "#f5f8fb" }}
         >
-          <h5 className="m-0 py-0 px-2">
+          <h5>
             {title} {moment(date, "MM/YYYY").format("MMMM YYYY")}
           </h5>
         </Dropdown.Toggle>
@@ -565,16 +583,14 @@ const MonthSelectorComponent = memo((props) => {
         style={{ width: "250px", minWidth: "250px" }}
       >
         <Card.Body>
-          <div className="container-fluid d-flex p-1 pb-3 justify-content-between align-items-center">
-            <Button
-              variant="light"
-              onClick={() => handlerYearChange(-1)}
-            >{`<`}</Button>
+          <div className="container-fluid d-flex p-0 mb-3 justify-content-between align-items-center">
+            <Button variant="primary" onClick={() => handlerYearChange(-1)}>
+              <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
+            </Button>
             <h5 className="text-center m-0">{year}</h5>
-            <Button
-              variant="light"
-              onClick={() => handlerYearChange(1)}
-            >{`>`}</Button>
+            <Button variant="primary" onClick={() => handlerYearChange(1)}>
+              <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
+            </Button>
           </div>
           <div className="d-flex flex-wrap">
             {moment.monthsShort().map((month, index) => {
