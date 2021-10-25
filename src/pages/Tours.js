@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { Breadcrumb } from "@themesberg/react-bootstrap";
 
-import { MyTable } from "./myComponents/MyTourTable";
+import { CardTable } from "./myComponents/MyTourTable";
 
 import { isEqual } from "lodash";
 import {
@@ -19,57 +19,18 @@ import { createSelector } from "reselect";
 import {
   GridCardComponent,
   GridTableComponent,
+  Loader,
 } from "./myComponents/GridComponent";
+import moment from "moment";
 
 export const Tours = memo(() => {
-  const sliceName = "workHoursTable";
   const { actions, selectors } = workHoursSlice;
   const stateAPIStatus = useLoadData("toursTable", actions);
-  const dispatch = useDispatch();
-  const selectMeta = useMemo(
-    () =>
-      createSelector(
-        [
-          selectors.metaSelector.selectEntities,
-          selectors.usersSelector.selectEntities,
-          selectors.usersSelector.selectAll,
-        ],
-        (meta, users, all) => {
-          const currentUserId = meta && meta.user && meta.user.value;
-          const allUsers = all.map(({ id, firstName, lastName }) => ({
-            value: id,
-            label: lastName + " " + firstName,
-          }));
-          const currentUser = {
-            value: currentUserId,
-            label:
-              users[currentUserId] &&
-              users[currentUserId].lastName +
-                " " +
-                users[currentUserId].firstName,
-          };
-          return {
-            currentUser,
-            users: allUsers,
-          };
-        }
-      ),
-    [selectors]
-  );
-  const onChangeSelect = useCallback((e) =>
-    dispatch(actions.changeCurrentUser(e.value))
-  );
-  const { currentUser, users } = useSelector(selectMeta);
-
   const renderComponent = useCallback(
-    (entityId, props) => {
-      // const type = grids[entityId].type;
-      // console.log(type);
+    (entityId) => {
       return (
         <>
-          {/* <Loader stateAPIStatus={stateAPIStatus}> */}
-          {/* {type === GRIDTYPE.TABLE ? ( */}
-          {true ? (
+          <Loader stateAPIStatus={stateAPIStatus}>
             <GridTableComponent
               {...{
                 stateAPIStatus,
@@ -78,21 +39,11 @@ export const Tours = memo(() => {
                 entityId,
               }}
             />
-          ) : (
-            <GridCardComponent
-              {...{
-                stateAPIStatus,
-                actions,
-                stateOffset: entityId,
-                ...props,
-              }}
-            />
-          )}
-          {/* </Loader> */}
+          </Loader>
         </>
       );
     },
-    [stateAPIStatus]
+    [selectors, actions, stateAPIStatus]
   );
 
   return (

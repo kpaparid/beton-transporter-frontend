@@ -146,6 +146,20 @@
       background-color: $primary;
     }
   }
+  .pagination .page-item {
+    .page-link {
+      border: $border;
+      &:hover {
+        background-color: $gray-400 !important;
+      }
+    }
+    &.active .page-link {
+      background-color: $primary !important;
+      &:hover {
+        background-color: $primary !important;
+      }
+    }
+  }
 }
 
 .gradient-primary-secondary {

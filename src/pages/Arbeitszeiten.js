@@ -4,13 +4,18 @@ import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { Breadcrumb, Form } from "@themesberg/react-bootstrap";
 
 import { isEqual } from "lodash";
-import { useLoadData, grids } from "./myComponents/MyConsts";
+import {
+  useLoadData,
+  grids,
+  loadWorkHoursPageGrids,
+} from "./myComponents/MyConsts";
 
 import { workHoursSlice } from "./reducers/redux2";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GridCardComponent,
   GridTableComponent,
+  Loader,
 } from "./myComponents/GridComponent";
 import { Button, Card } from "react-bootstrap";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
@@ -54,20 +59,20 @@ export const ArbeitsZeiten = memo(() => {
       ),
     [selectors]
   );
-  const onChangeSelect = useCallback((e) =>
-    dispatch(actions.changeCurrentUser(e.value))
+  const onChangeSelect = useCallback(
+    (e) =>
+      loadWorkHoursPageGrids(e.value, actions, dispatch).then(() =>
+        dispatch(actions.changeCurrentUser(e.value))
+      ),
+    [actions, dispatch]
   );
   const { currentUser, users } = useSelector(selectMeta);
 
   const renderComponent = useCallback(
     (entityId, props) => {
-      const type = grids[entityId].type;
-      // console.log(type);
       return (
         <>
-          {/* <Loader stateAPIStatus={stateAPIStatus}> */}
-          {/* {type === GRIDTYPE.TABLE ? ( */}
-          {true ? (
+          <Loader stateAPIStatus={stateAPIStatus}>
             <GridTableComponent
               {...{
                 stateAPIStatus,
@@ -76,17 +81,7 @@ export const ArbeitsZeiten = memo(() => {
                 entityId,
               }}
             />
-          ) : (
-            <GridCardComponent
-              {...{
-                stateAPIStatus,
-                actions,
-                stateOffset: entityId,
-                ...props,
-              }}
-            />
-          )}
-          {/* </Loader> */}
+          </Loader>
         </>
       );
     },
@@ -96,8 +91,6 @@ export const ArbeitsZeiten = memo(() => {
   return (
     <>
       <div className="d-block pt-4 mb-4 mb-md-0">
-        {/* <button onClick={handleClick}>click</button>
-        <button onClick={handleClick2}>click2</button> */}
         <Breadcrumb
           className="d-none d-md-inline-block"
           listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}

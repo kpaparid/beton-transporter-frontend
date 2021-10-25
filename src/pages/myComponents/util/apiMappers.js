@@ -27,7 +27,7 @@ export function normalizeRows(data, nanoidLabelsTable) {
     tables,
   };
 }
-export function normalizeApi({ data }) {
+export function normalizeApi({ data, url }) {
   const mObject = getConnections(data);
   const tableIds = Object.keys(mObject);
 
@@ -42,7 +42,7 @@ export function normalizeApi({ data }) {
     .map((r) => rowsByTableId[r])
     .reduce((a, b) => [...a, ...b], []);
 
-  const tables = getTable(mObject, labelsByTableId);
+  const tables = getTable(mObject, labelsByTableId, url);
 
   const editModes = tableIds.map((id) => ({ id: id, value: false }));
   return {
@@ -52,7 +52,7 @@ export function normalizeApi({ data }) {
     editModes,
   };
 }
-export function getTable(mObject, labelsByTableId) {
+export function getTable(mObject, labelsByTableId, url) {
   return Object.keys(mObject).map((tableId) => {
     const tableRowsIds = mObject[tableId].map(({ id }) => id);
     const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
@@ -67,6 +67,7 @@ export function getTable(mObject, labelsByTableId) {
       selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
       selectedLabels: tableLabelIds,
       meta: getGridMeta(tableId),
+      url,
       nanoids: nanoids,
     };
   });
@@ -137,30 +138,14 @@ export function getConnections(m) {
 }
 export function getNanoidLabelsTable(mObject) {
   const tableIds = Object.keys(mObject);
-
   return tableIds
     .map((tableId) => ({
-      [tableId]: getGridLabels(tableId).reduce(
-        (a, b) => ({ ...a, [b]: nanoid() }),
+      [tableId]: Object.keys(getGridLabels(tableId)).reduce(
+        (a, b) => ({ ...a, [b]: getGridLabels(tableId)[b].nanoid }),
         {}
       ),
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
-
-  // return tableIds
-  //   .map((tableId) => ({
-  //     [tableId]: Object.values(mObject[tableId]).reduce(
-  //       (a, { id, ...rest }) => ({
-  //         ...a,
-  //         ...Object.keys(rest).reduce(
-  //           (prev, next) => ({ ...prev, [next]: nanoid() }),
-  //           {}
-  //         ),
-  //       }),
-  //       {}
-  //     ),
-  //   }))
-  //   .reduce((a, b) => ({ ...a, ...b }), {});
 }
 export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
   const tableIds = Object.keys(mObject);
@@ -212,8 +197,6 @@ export function mapPromiseData(data, entityId) {
 export function mapWork(data) {
   const { vacations, workHours = [], workHoursBank = [], absent = [] } = data;
   return {
-    // date,
-    // id,
     tables: {
       vacations: [
         { id: "vacations1", rest: vacations.rest, taken: vacations.taken },

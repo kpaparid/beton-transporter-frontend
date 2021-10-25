@@ -6,6 +6,7 @@ import { createSelector } from "reselect";
 import {
   FilterComponent,
   getGridLabelFormat,
+  getGridUrl,
   getGridWidgets,
   gridLabels,
   maxWidthByType,
@@ -374,6 +375,7 @@ export const useGridCallbacks = ({
     changeDate,
     addFilter,
     toggleColumn,
+    fetchEntityGrid,
   },
   entityId,
   dispatch,
@@ -416,7 +418,18 @@ export const useGridCallbacks = ({
     (value) => {
       dispatch(changeDate(value));
     },
-    [dispatch, entityId, changeDate]
+    [dispatch, changeDate]
+  );
+  const onChangeCurrentUser = useCallback(
+    (value) => {
+      dispatch(
+        fetchEntityGrid({
+          entityId,
+          url: "users/" + value + "/" + getGridUrl(entityId) + ".json",
+        })
+      );
+    },
+    [dispatch, changeDate]
   );
   const onToggleCheckboxFilter = useCallback(
     (filter) => {
@@ -467,6 +480,7 @@ export const useGridCallbacks = ({
   );
 
   return {
+    onChangeCurrentUser,
     onCellChange,
     setSelectedRows: setSelectedRowsCallback,
     forceClose,
@@ -551,7 +565,16 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     ]
   );
 
-  const { filter, add, download, remove, massEdit } = getGridWidgets(entityId);
+  const {
+    filter,
+    add,
+    download,
+    remove,
+    massEdit,
+    pagination,
+    pageSize,
+    counter,
+  } = getGridWidgets(entityId);
   const tableProps = {
     editModeSelector: selectEditMode,
     selectShownColumns: selectShownHeadersReactTable,
@@ -560,6 +583,9 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     setSelectedRows,
     onCellChange,
     massEdit,
+    pagination,
+    pageSize,
+    counter,
   };
   const filterProps = filter && {
     selectItemsFilter,

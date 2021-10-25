@@ -1,7 +1,9 @@
+/* #0a3761
+0a3761 */
 .wrapper {
   height: 100%;
   font-size: 0.875rem;
-  color: #2e3650 !important;
+  color: #0a3761 !important;
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -16,7 +18,7 @@
 }
 .wrapper select {
   /* height: 25px; */
-  color: #2e3650;
+  color: #0a3761;
   border: none;
   width: 100%;
   background-color: transparent;
@@ -93,7 +95,7 @@
   vertical-align: bottom;
   padding: 0;
   overflow: hidden;
-  color: #2e3650;
+  color: #0a3761;
 }
 .wrapper.wrapper-editable textarea {
   /* width: fit-content; */
@@ -233,7 +235,7 @@
 }
 .measurement {
   font-size: 0.875rem;
-  color: "#2E3650" !important;
+  color: "#0a3761" !important;
 }
 .text-input-group {
   display: flex;

@@ -1,16 +1,23 @@
+import { isEqual } from "lodash";
 import * as React from "react";
 import Select from "react-select";
+import { useState, memo, useEffect } from "react";
+export const OutlinedSelect = memo(({ onChange, value, values }) => {
+  const [selectedValue, setSelectedValue] = useState(value);
+  useEffect(() => setSelectedValue(value), [value]);
 
-export const OutlinedSelect = ({ onChange, value, values }) => {
+  function handleChange(e) {
+    setSelectedValue(e);
+    onChange(e);
+  }
+
   return (
     <div style={{ minWidth: "250px" }}>
       <Select
-        // styles={customStyles}
         className="basic-select"
         classNamePrefix="select_user"
-        value={value}
-        // value={values[0]}
-        onChange={onChange}
+        value={selectedValue}
+        onChange={handleChange}
         options={values}
         theme={(theme) => ({
           ...theme,
@@ -22,4 +29,4 @@ export const OutlinedSelect = ({ onChange, value, values }) => {
       />
     </div>
   );
-};
+}, isEqual);

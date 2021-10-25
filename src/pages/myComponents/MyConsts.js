@@ -21,7 +21,10 @@ import { DateSelector, MonthSelectorDropdown } from "./MyOwnCalendar";
 import { MyCheckboxFilter } from "./MyCheckbox";
 import { nanoid } from "@reduxjs/toolkit";
 import { Button } from "@themesberg/react-bootstrap";
-import { getFormLabelUtilityClasses } from "@mui/material";
+import {
+  BottomNavigationAction,
+  getFormLabelUtilityClasses,
+} from "@mui/material";
 import { MyRangeSlider } from "./MyRangeSlider";
 import { Box } from "@material-ui/system";
 import { Portal } from "react-portal";
@@ -94,30 +97,39 @@ const validationType = (type) =>
 const imgValid = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2305A677' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e")`;
 const imgInvalid = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23FA5252' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23FA5252' stroke='none'/%3e%3c/svg%3e")`;
 
-function filtersToUrl(filters) {
-  console.log({ filters });
+function filtersToUrl(props) {
   // ?exclude=/aboutMe%7C/address
-  return (
-    "/filter?" +
-    [...filters, ...filters, { label: "ende", value: ["15", "30"] }]
-      .map(({ label, type, value }) => {
-        switch (type) {
-          case "checkbox":
-            return label + "=" + value;
-          case "range":
-            return label + "=" + value;
-          case "date":
-            return label + "=" + value;
-          default:
-            return "error";
-        }
-      })
-      .reduce((a, b) => a + "&" + b)
-  );
+  const c = Object.keys(props).map((label) => {
+    const neq =
+      (props[label] &&
+        props[label].neq &&
+        props[label].neq.length !== 0 &&
+        props[label].neq
+          .reduce((a, b) => a + b + ",", "+" + label + ".exclude=[")
+          .slice(0, -1) + "]") ||
+      "";
+    const gte =
+      (props[label].gte && "+" + label + ".gte=" + props[label].gte) || "";
+    const lte =
+      (props[label].lte && "+" + label + ".lte=" + props[label].lte) || "";
+    return (neq + gte + lte).substring(1);
+  });
+  const urli = c.reduce((a, b) => a + "+" + b, "");
+  return urli === "+" ? "" : urli;
+  // + => &
 }
 
 const dateToDay = (date) => moment(date[0], "DD/MM/YYYY").format("dddd");
-const calcDifference = (a) => "5";
+const calcDaysDifference = (arr) => {
+  const t1 = moment(arr[0], "DD/MM/YYYY");
+  const t2 = moment(arr[1], "DD/MM/YYYY");
+  return t2.diff(t1, "days");
+};
+const calcMinuteDifference = (arr) => {
+  const t1 = moment(arr[0], "HH:mm");
+  const t2 = moment(arr[1], "HH:mm");
+  return t2.diff(t1, "minutes");
+};
 
 export const getGridTitle = (entityId) => gridLabels[entityId].title;
 export const getGridUrl = (entityId) => gridLabels[entityId].url;
@@ -131,17 +143,12 @@ export const getGridLabelLinks = (entityId, labelIdx) =>
     dependencies: gridLabels[entityId].labels[c].dependencies,
   }));
 export const getGridLabelProps = (entityId, labelIdx) => {
-  const { format, id, connections, ...rest } =
+  const { format, id, connections, nanoid, ...rest } =
     gridLabels[entityId].labels[labelIdx];
   return { idx: id, ...rest };
 };
 export const getGridLabels = (entityId) => {
-  return gridLabels[entityId].secondaryLabels
-    ? [
-        ...gridLabels[entityId].primaryLabels,
-        ...gridLabels[entityId].secondaryLabels,
-      ]
-    : gridLabels[entityId].primaryLabels;
+  return gridLabels[entityId].labels || [];
 };
 const GRIDTYPE = {
   CARD: "card",
@@ -158,6 +165,9 @@ export const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
+      pagination: true,
+      counter: true,
+      pageSize: 20,
     },
     title: "Tours",
     gridType: GRIDTYPE.TABLE,
@@ -201,90 +211,106 @@ export const gridLabels = {
     ],
     labels: {
       date: {
+        nanoid: nanoid(),
         id: "date",
         text: "Date",
         type: "date",
         filterType: "date",
       },
       vehicle: {
+        nanoid: nanoid(),
         id: "vehicle",
         text: "Vehicle",
         type: "constant",
         filterType: "checkbox",
       },
       workPlant: {
+        nanoid: nanoid(),
         id: "workPlant",
         text: "Work Plant",
         type: "text",
         filterType: "checkbox",
       },
       cbm: {
+        nanoid: nanoid(),
         id: "cbm",
         text: "Cbm",
         type: "number",
         filterType: "range",
       },
       departure: {
+        nanoid: nanoid(),
         id: "departure",
         text: "Departure",
         type: "time",
       },
       arrival: {
+        nanoid: nanoid(),
         id: "departure",
         text: "Departure",
         type: "time",
       },
       kmDeparture: {
+        nanoid: nanoid(),
         id: "kmDeparture",
         text: "Km at Departure",
         type: "number",
         filterType: "range",
       },
       kmArrival: {
+        nanoid: nanoid(),
         id: "kmArrival",
         text: "Km at Arrival",
         type: "number",
         filterType: "range",
       },
       deliveryNr: {
+        nanoid: nanoid(),
         id: "deliveryNr",
         text: "Delivery Nr",
         type: "number",
         filterType: "checkbox",
       },
       driver: {
+        nanoid: nanoid(),
         id: "driver",
         text: "Driver",
         type: "constant",
         filterType: "checkbox",
       },
       buildingSite: {
+        nanoid: nanoid(),
         id: "buildingSite",
         text: "Building Site",
         type: "text",
         filterType: "checkbox",
       },
       dischargeBegin: {
+        nanoid: nanoid(),
         id: "dischargeBegin",
         text: "Discharge Begin",
         type: "time",
       },
       dischargeEnd: {
+        nanoid: nanoid(),
         id: "dischargeEnd",
         text: "Discharge End",
         type: "time",
       },
       dischargeType: {
+        nanoid: nanoid(),
         id: "dischargeType",
         text: "Discharge End",
         type: "text",
       },
       waitTime: {
+        nanoid: nanoid(),
         id: "waitTime",
         text: "Time Waiting",
         type: "number",
       },
       other: {
+        nanoid: nanoid(),
         id: "other",
         text: "Other",
         type: "text",
@@ -301,15 +327,26 @@ export const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
+      pagination: true,
+      counter: true,
+      pageSize: 35,
     },
     title: "Workhours",
     gridType: GRIDTYPE.TABLE,
-    size: 20,
     primaryLabels: ["date", "begin", "end", "pause"],
     secondaryLabels: ["day", "duration"],
     editable: ["date", "begin", "end", "pause"],
     labels: {
+      date: {
+        nanoid: nanoid(),
+        id: "date",
+        text: "Date",
+        type: "date",
+        filterType: "date",
+        connections: ["day"],
+      },
       day: {
+        nanoid: nanoid(),
         id: "day",
         text: "Day",
         type: "text",
@@ -317,35 +354,32 @@ export const gridLabels = {
         dependencies: ["date"],
         format: dateToDay,
       },
-      duration: {
-        id: "duration",
-        text: "Duration",
-        type: "number",
-        measurement: "min",
-        dependencies: ["begin", "end"],
-        format: calcDifference,
-      },
-      date: {
-        id: "date",
-        text: "Date",
-        type: "date",
-        filterType: "date",
-        connections: ["day"],
-      },
 
       begin: {
+        nanoid: nanoid(),
         id: "begin",
         text: "Begin",
         type: "time",
         connections: ["duration"],
       },
       end: {
+        nanoid: nanoid(),
         id: "end",
         text: "End",
         type: "time",
         connections: ["duration"],
       },
+      duration: {
+        nanoid: nanoid(),
+        id: "duration",
+        text: "Duration",
+        type: "number",
+        measurement: "min",
+        dependencies: ["begin", "end"],
+        format: calcMinuteDifference,
+      },
       pause: {
+        nanoid: nanoid(),
         id: "pause",
         text: "Pause",
         type: "number",
@@ -363,24 +397,28 @@ export const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
+      pagination: true,
+      counter: false,
+      pageSize: 6,
     },
-    title: "WorkhoursBank",
+    title: "Workhours Bank",
     gridType: GRIDTYPE.CARD,
-    size: 5,
     primaryLabels: ["month", "hours"],
     secondaryLabels: [],
     editable: ["hours"],
     labels: {
       month: {
+        nanoid: nanoid(),
         id: "month",
         text: "Month",
         type: "text",
       },
       hours: {
+        nanoid: nanoid(),
         id: "hours",
         text: "Hours",
         type: "number",
-        measurement: "h:m",
+        measurement: "h",
       },
     },
   },
@@ -393,34 +431,40 @@ export const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
+      pagination: true,
+      counter: false,
+      pageSize: 5,
     },
     title: "Absent",
     gridType: GRIDTYPE.CARD,
-    size: 5,
     primaryLabels: ["from", "to", "reason"],
     secondaryLabels: ["days"],
     editable: ["from", "to", "reason"],
     labels: {
       from: {
+        nanoid: nanoid(),
         id: "from",
         text: "from",
         type: "date",
         connections: ["days"],
       },
       to: {
+        nanoid: nanoid(),
         id: "to",
         text: "to",
         type: "date",
         connections: ["days"],
       },
       days: {
+        nanoid: nanoid(),
         id: "days",
         text: "Days",
         type: "number",
         dependencies: ["from", "to"],
-        format: calcDifference,
+        format: calcDaysDifference,
       },
       reason: {
+        nanoid: nanoid(),
         id: "reason",
         text: "Reason",
         type: "text",
@@ -435,6 +479,9 @@ export const gridLabels = {
       download: true,
       remove: false,
       massEdit: true,
+      pagination: false,
+      counter: false,
+      pageSize: 5,
     },
     title: "Vacations",
     gridType: GRIDTYPE.CARD,
@@ -442,6 +489,7 @@ export const gridLabels = {
     editable: ["taken", "rest"],
     labels: {
       taken: {
+        nanoid: nanoid(),
         id: "taken",
         text: "Taken",
         type: "number",
@@ -452,6 +500,7 @@ export const gridLabels = {
         // priority: 1,
       },
       rest: {
+        nanoid: nanoid(),
         id: "rest",
         text: "Rest",
         type: "number",
@@ -465,6 +514,9 @@ export const gridLabels = {
       download: true,
       remove: true,
       massEdit: false,
+      pagination: true,
+      counter: false,
+      pageSize: 5,
     },
     gridType: GRIDTYPE.CARD,
     title: "Vacations Overview",
@@ -475,24 +527,27 @@ export const gridLabels = {
     editable: ["from", "to"],
 
     labels: {
-      days: {
-        id: "days",
-        text: "Days",
-        type: "text",
-        dependencies: ["from", "to"],
-        format: calcDifference,
-      },
       from: {
+        nanoid: nanoid(),
         id: "from",
         text: "From",
         type: "date",
         connections: ["days"],
       },
       to: {
+        nanoid: nanoid(),
         id: "to",
         text: "To",
         type: "date",
         connections: ["days"],
+      },
+      days: {
+        nanoid: nanoid(),
+        id: "days",
+        text: "Days",
+        type: "text",
+        dependencies: ["from", "to"],
+        format: calcDaysDifference,
       },
     },
   },
@@ -607,29 +662,53 @@ function useLoadData2(actions) {
   }, [dispatch, fetchUsers, fetchEntityGrid]);
   return stateAPIStatus;
 }
+
+export function loadWorkHoursPageGrids(userId, { fetchEntityGrid }, dispatch) {
+  return dispatch(
+    fetchEntityGrid({
+      entityId: "workHours",
+      url: "users/" + userId + "/" + getGridUrl("workHours"),
+    })
+  )
+    .then(() =>
+      dispatch(
+        fetchEntityGrid({
+          entityId: "absent",
+          url: "users/" + userId + "/" + getGridUrl("absent"),
+        })
+      )
+    )
+    .then(() =>
+      dispatch(
+        fetchEntityGrid({
+          entityId: "vacations",
+          url: "users/" + userId + "/" + getGridUrl("vacations"),
+        })
+      )
+    )
+    .then(() =>
+      dispatch(
+        fetchEntityGrid({
+          entityId: "workHoursBank",
+          url: "users/" + userId + "/" + getGridUrl("workHoursBank"),
+        })
+      )
+    );
+}
+
 function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
   return dispatch(fetchUsers()).then(({ payload }) =>
     dispatch(
       fetchEntityGrid({
         entityId: "workHours",
-        url:
-          "users/" +
-          payload.users[0].id +
-          "/" +
-          getGridUrl("workHours") +
-          ".json",
+        url: "users/" + payload.users[0].id + "/" + getGridUrl("workHours"),
       })
     )
       .then(() =>
         dispatch(
           fetchEntityGrid({
             entityId: "absent",
-            url:
-              "users/" +
-              payload.users[0].id +
-              "/" +
-              getGridUrl("absent") +
-              ".json",
+            url: "users/" + payload.users[0].id + "/" + getGridUrl("absent"),
           })
         )
       )
@@ -637,12 +716,7 @@ function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
         dispatch(
           fetchEntityGrid({
             entityId: "vacations",
-            url:
-              "users/" +
-              payload.users[0].id +
-              "/" +
-              getGridUrl("vacations") +
-              ".json",
+            url: "users/" + payload.users[0].id + "/" + getGridUrl("vacations"),
           })
         )
       )
@@ -654,20 +728,19 @@ function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
               "users/" +
               payload.users[0].id +
               "/" +
-              getGridUrl("workHoursBank") +
-              ".json",
+              getGridUrl("workHoursBank"),
           })
         )
       )
   );
 }
-function loadToursPage({ fetchEntityGrid }, dispatch) {
+function loadToursPage({ fetchEntityGrid, changeDate }, dispatch) {
   return dispatch(
     fetchEntityGrid({
       entityId: "tours",
-      url: getGridUrl("tours") + ".json",
+      url: getGridUrl("tours"),
     })
-  );
+  ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))));
 }
 
 function useButtonGroupProps(statePath, stateOffset, actions, selectors) {
@@ -744,7 +817,7 @@ const FilterComponent = memo((props) => {
   const handleChangeRangeSlider = useCallback((values) => {
     onChangeRange({ label, gte: values[0], lte: values[1] });
   }, []);
-  const debouncedChangeRangeSlider = debounce(handleChangeRangeSlider, 500);
+  const debouncedChangeRangeSlider = debounce(handleChangeRangeSlider, 800);
   switch (type) {
     case "checkbox":
       return (

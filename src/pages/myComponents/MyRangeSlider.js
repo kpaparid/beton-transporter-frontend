@@ -106,12 +106,16 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
 
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);
-    onChange(value);
+    onChange(newValue);
   };
 
-  const handleInputChange = (event) => {
-    setValue(event.target.value === "" ? "" : Number(event.target.value));
-    onChange(value);
+  const handleInputChange = (event, index) => {
+    const newValue =
+      index === 0
+        ? [event.target.value, value[1]]
+        : [value[0], event.target.value];
+    setValue(newValue);
+    onChange(newValue);
   };
 
   // const handleBlur = () => {
@@ -142,7 +146,7 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
               <RangeInput
                 value={value[0]}
                 size="small"
-                onChange={handleInputChange}
+                onChange={(e) => handleInputChange(e, 0)}
                 // disableUnderline
                 // onBlur={handleBlur}
                 inputProps={{
@@ -158,7 +162,7 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
               <RangeInput
                 value={value[1]}
                 size="small"
-                onChange={handleInputChange}
+                onChange={(e) => handleInputChange(e, 1)}
                 // onBlur={handleBlur}
                 className="text-center"
                 inputProps={{

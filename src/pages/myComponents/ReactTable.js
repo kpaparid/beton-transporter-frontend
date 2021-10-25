@@ -1,17 +1,15 @@
 import React, {
   memo,
-  useRef,
   forwardRef,
   useCallback,
   useEffect,
   useState,
   useMemo,
 } from "react";
-import _, { isArray, isObject, transform, isEqual } from "lodash";
-import { TableLabel } from "./Table/TableLabel";
+import _ from "lodash";
+import isEqual from "lodash.isequal";
 import { useTable, usePagination, useSortBy, useRowSelect } from "react-table";
-
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 // import { hiddenColumnsReselect } from "./MySelectors";
 import {
   Card,
@@ -23,9 +21,16 @@ import {
 import Input from "./TextArea/MyNewInput";
 import "./MyForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
-import TextareaAutosize from "react-textarea-autosize";
-import { getLabel } from "./MyConsts";
+import {
+  faSortDown,
+  faSortUp,
+  faAngleLeft,
+  faAngleRight,
+  faAngleDoubleRight,
+  faAngleDoubleLeft,
+} from "@fortawesome/free-solid-svg-icons";
+import LazyLoad from "react-lazyload";
+import { ComponentPreLoader } from "../../components/ComponentPreLoader";
 
 export const ReactTable = memo(
   forwardRef(({ children }, skipResetRef) => {
@@ -120,9 +125,11 @@ const RTables = memo(
         updateMyData,
         selectHiddenColumns,
         editModeSelector,
-        maxPageSize = 20,
+        pageSize = 20,
         setSelectedRows,
         massEdit,
+        pagination,
+        counter,
       },
       ref
     ) => {
@@ -169,7 +176,7 @@ const RTables = memo(
           data,
           defaultColumn,
           updateMyData,
-          initialState: { pageSize: 20, hiddenColumns: ["id"] },
+          initialState: { pageSize, hiddenColumns: ["id"] },
           autoResetPage: !ref.current,
           autoResetSelectedRows: !ref.current,
           autoResetSortBy: !ref.current,
@@ -228,10 +235,13 @@ const RTables = memo(
               selectHiddenColumns={selectHiddenColumns}
             ></TableBody>
           </Table>
-          {maxPageSize < data.length && (
+
+          {(pagination || counter) && (
             <TableFooter
               maxRows={data.length}
               {...{
+                pagination,
+                counter,
                 pageCount,
                 nextPage,
                 previousPage,
@@ -277,16 +287,13 @@ const EditableCell = React.memo(
       [value, initialValue]
     );
     const debouncedUpdate = _.debounce(handleUpdateData, 300);
-    const onChange = useCallback(
-      (value, type) => {
-        setValue(value);
-        debouncedUpdate(value);
+    const onChange = useCallback((value, type) => {
+      setValue(value);
+      debouncedUpdate(value);
 
-        // if (type === "select" || type === "date") handleUpdateData(value);
-      },
-      [handleUpdateData]
-    );
-    const onBlur = useCallback(() => console.log("blur"), [handleUpdateData]);
+      // if (type === "select" || type === "date") handleUpdateData(value);
+    }, []);
+    const onBlur = useCallback(() => console.log("blur"), []);
     // const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
 
     const editMode = useSelector(editModeSelector);
@@ -314,27 +321,41 @@ const EditableCell = React.memo(
 );
 
 const TableBody = ({ page, prepareRow, selectHiddenColumns }) => {
-  const hiddenColumns = useSelector(selectHiddenColumns);
+  // const hiddenColumns = useSelector(selectHiddenColumns);
+
   return (
     <tbody>
       {page.map((row, index) => {
         prepareRow(row);
         return (
-          <tr key={"row" + index}>
-            {row.cells.map((cell) => (
-              <TableCell
-                cell={cell}
-                index={index}
-                key={cell.column.id + index}
-                hiddenColumns={hiddenColumns}
-              />
-            ))}
-          </tr>
+          <RenderRow
+            cells={row.cells}
+            key={"row" + index}
+            index={index}
+            // hiddenColumns={hiddenColumns}
+            selectHiddenColumns={selectHiddenColumns}
+          ></RenderRow>
         );
       })}
     </tbody>
   );
 };
+const RenderRow = memo(({ cells, index, selectHiddenColumns }) => {
+  const hiddenColumns = useSelector(selectHiddenColumns);
+  return (
+    <tr key={"row" + index}>
+      {cells.map((cell) => (
+        <TableCell
+          cell={cell}
+          index={index}
+          key={cell.column.id + index}
+          hiddenColumns={hiddenColumns}
+          // selectHiddenColumns={selectHiddenColumns}
+        />
+      ))}
+    </tr>
+  );
+}, isEqual);
 
 const TableCell = memo(({ cell, hiddenColumns }) => {
   const display = hiddenColumns.includes(cell.column.id)
@@ -349,7 +370,14 @@ const TableCell = memo(({ cell, hiddenColumns }) => {
       className="px-2 py-1"
     >
       <div className="d-flex justify-content-center w-100">
-        {cell.render("Cell")}
+        <LazyLoad
+          offset={300}
+          placeholder={
+            <ComponentPreLoader show logo={false}></ComponentPreLoader>
+          }
+        >
+          {cell.render("Cell")}
+        </LazyLoad>
       </div>
     </td>
   );
@@ -428,6 +456,7 @@ const PaginationItem = ({ page, gotoPage, active = false }) => {
 };
 const TableFooter = React.memo((props) => {
   const {
+    pagination = true,
     maxRows = 25,
     nextPage,
     previousPage,
@@ -437,34 +466,70 @@ const TableFooter = React.memo((props) => {
     pageCount,
     pageIndex,
     currentPageSize = 0,
+    counter,
   } = props;
   return (
     <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-      <Nav>
-        <Pagination className="mb-2 mb-lg-0">
-          <Pagination.Prev
-            onClick={() => previousPage()}
-            disabled={!canPreviousPage}
-          >
-            Previous
-          </Pagination.Prev>
-          {[...Array(pageCount)].map((_, index) => {
-            const itemProps = {
-              page: index + 1,
-              gotoPage,
-              active: index === pageIndex ? true : false,
-            };
-            return (
-              <PaginationItem {...itemProps} key={"pagination-item-" + index} />
-            );
-          })}
-          <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage}>
-            Next
-          </Pagination.Next>
-        </Pagination>
-      </Nav>
+      {pagination && currentPageSize < maxRows && (
+        <Nav>
+          <Pagination className="mb-2 mb-lg-0">
+            <Pagination.Prev
+              onClick={() => gotoPage(0)}
+              disabled={pageIndex === 0}
+            >
+              <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
+            </Pagination.Prev>
+            <Pagination.Prev
+              onClick={() => previousPage()}
+              disabled={!canPreviousPage}
+            >
+              <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
+            </Pagination.Prev>
+            {[...Array(pageCount > 5 ? 5 : pageCount)].map((_, index) => {
+              const itemProps = {
+                page:
+                  pageCount <= 5
+                    ? index + 1
+                    : pageIndex + 2 >= pageCount
+                    ? pageCount - 4 + index
+                    : pageIndex > 2
+                    ? pageIndex - 1 + index
+                    : index + 1,
+                gotoPage,
+                active:
+                  pageCount <= 5
+                    ? index === pageIndex
+                    : pageCount - pageIndex === 1
+                    ? 4 === index
+                    : pageCount - pageIndex === 2
+                    ? 3 === index
+                    : pageIndex > 2
+                    ? index === 2
+                    : index === pageIndex,
+              };
+              return (
+                <>
+                  <PaginationItem
+                    {...itemProps}
+                    key={"pagination-item-" + index}
+                  />
+                </>
+              );
+            })}
+            <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage}>
+              <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
+            </Pagination.Next>
+            <Pagination.Next
+              onClick={() => gotoPage(pageCount - 1)}
+              disabled={pageIndex + 1 === pageCount}
+            >
+              <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
+            </Pagination.Next>
+          </Pagination>
+        </Nav>
+      )}
 
-      {true && (
+      {counter && (
         <small className="fw-bold">
           Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
         </small>

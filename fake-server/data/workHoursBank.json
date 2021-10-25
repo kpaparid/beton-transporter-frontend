@@ -1,0 +1,146 @@
+[
+  {
+    "user": "user1",
+    "id": "61733dba536d8a53feb2c82a",
+    "hours": 4,
+    "month": "January 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbaaeed3781352e3290",
+    "hours": 10,
+    "month": "February 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dba1ac9ff0984fedce0",
+    "hours": -18,
+    "month": "March 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dba06363ab70ddd4045",
+    "hours": 14,
+    "month": "April 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbad9f3edc7c5ee4513",
+    "hours": 18,
+    "month": "May 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbad645d5adae2c59e2",
+    "hours": 40,
+    "month": "June 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dba71e0624772781661",
+    "hours": 32,
+    "month": "July 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dba9668eb66ea2b7cbb",
+    "hours": 25,
+    "month": "August 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbadf841a12e72bedcf",
+    "hours": -8,
+    "month": "September 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dba7903cd5b1e043b45",
+    "hours": 12,
+    "month": "October 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbaea50b13a21cb05d3",
+    "hours": 10,
+    "month": "November 2021"
+  },
+  {
+    "user": "user1",
+    "id": "61733dbad4b96e0da989acad",
+    "hours": -20,
+    "month": "December 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba6f2bbea6f5cdde34",
+    "hours": 37,
+    "month": "January 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dbaf444097f416d6f23",
+    "hours": 31,
+    "month": "February 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba47147deadaef4bb7",
+    "hours": -17,
+    "month": "March 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dbae47eb13404cc3f6a",
+    "hours": 18,
+    "month": "April 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba6c2c7a45b85e86ec",
+    "hours": -2,
+    "month": "May 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dbac93c7948e227dca0",
+    "hours": 4,
+    "month": "June 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba8fe5b6a5e063d1b6",
+    "hours": -14,
+    "month": "July 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dbacbd22cb12274227e",
+    "hours": 38,
+    "month": "August 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dbaa84d1a8d24cddde9",
+    "hours": 5,
+    "month": "September 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba95e2158a8e2773cd",
+    "hours": -11,
+    "month": "October 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba60dc3a65ba1f7c08",
+    "hours": -13,
+    "month": "November 2021"
+  },
+  {
+    "user": "user2",
+    "id": "61733dba4d3224baba1042bb",
+    "hours": -6,
+    "month": "December 2021"
+  }
+]

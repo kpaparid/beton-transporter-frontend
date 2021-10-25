@@ -10,9 +10,9 @@ import {
   createSlice,
 } from "@reduxjs/toolkit";
 import produce, { current } from "immer";
-import { isEqual } from "lodash";
+import { isEqual, merge } from "lodash";
 import moment from "moment";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { mapData, filtersToUrl, getGridUrl } from "../myComponents/MyConsts";
 import {
   mapPromiseData,
@@ -121,10 +121,10 @@ function createGenericSlice(sliceName) {
   const fetchEntityGrid = createAsyncThunk(
     "data/fetchEntityGrid",
     async ({ entityId, url }) => {
-      return await fetch("http://127.0.0.1:8887/" + url)
+      return await fetch("http://127.0.0.1:8887/" + url + ".json")
         .then((res) => res.json())
-        .then((data) => ({ data, entityId }))
-        .catch((e) => ({ data: { [entityId]: [] }, entityId }));
+        .then((data) => ({ data, entityId, url }))
+        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
     }
   );
 
@@ -168,30 +168,109 @@ function createGenericSlice(sliceName) {
     // .then((_) => changes);
   });
   function addFilter(props) {
-    const { id, filter } = props;
+    const { id: entityId, filter } = props;
     console.log(props);
-    console.log("Add filter", id);
+    console.log("Add filter", entityId);
     const filterUrl = "";
-    // const c = filtersAdapter.getSelectors().selectById(state.filters, id)
     // console.log(c)
-    return fetchFilteredData({ id, filter });
+    return fetchFilteredData({ entityId, filter });
   }
+
   const fetchFilteredData = createAsyncThunk(
     "data/fetchFilteredData",
-    async ({ id, filter }, thunkAPI) => {
-      return await fetch(
-        "http://127.0.0.1:8887/users/Uwe%20Schwille/workhours-filtered.json"
-      )
+    async ({ entityId, filter }, thunkAPI) => {
+      const state = thunkAPI.getState();
+      const { url, labels } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].tables, entityId);
+      const { label, value, gte, lte, action } = filter;
+      const labelIdx = labelsAdapter
+        .getSelectors()
+        .selectEntities(state[sliceName].labels);
+      const filtersSelector = filtersAdapter.getSelectors();
+      const currentFilters = filtersSelector
+        .selectAll(state[sliceName].filters)
+        .filter((e) => labels.includes(e.id));
+      // .map((e) => ({ ...e, id: labelIdx[e.id].idx }));
+      // const filterUrl = filtersToUrl([...currentFilters]);
+      var payload = {};
+      switch (action) {
+        case "toggle": {
+          console.log(action);
+          const filterById = filtersSelector.selectById(
+            state[sliceName].filters,
+            label
+          );
+          const values2 = filterById ? filterById.neq : [];
+          const newValues2 = values2.includes(value)
+            ? values2.filter((v) => v !== value)
+            : [...values2, value];
+          payload = { id: label, neq: newValues2 };
+          break;
+        }
+        case "toggleAll": {
+          const ids = tablesAdapter
+            .getSelectors()
+            .selectById(state[sliceName].tables, entityId).rows;
+          const rows = rowsAdapter
+            .getSelectors()
+            .selectEntities(state[sliceName].rows);
+          const values = ids.reduce((a, b) => [...a, rows[b][label]], []);
+          const availableValues = [...new Set(values)];
+          const filterById = filtersSelector.selectById(
+            state[sliceName].filters,
+            label
+          );
+          const values2 = filterById ? filterById.neq : [];
+          const neq = values2.length === 0 ? availableValues : [];
+          payload = { id: label, neq };
+          break;
+        }
+        case "between": {
+          payload = {
+            id: label,
+            gte,
+            lte,
+          };
+          break;
+        }
+        case "reset": {
+          filtersAdapter.removeOne(state.filters, label);
+          // payload = currentFilters.filter((e) => e.id !== label);
+          break;
+        }
+        case "resetAll": {
+          filtersAdapter.removeAll(state.filters);
+          payload = [];
+          break;
+        }
+        default:
+          break;
+      }
+
+      const { id: hi, ...rest } = payload;
+      const kk = currentFilters.reduce(
+        (a, { id, ...rest }) => ({ ...a, [id]: rest }),
+        {}
+      );
+      const s = { ...kk, [label]: { ...kk[label], ...rest } };
+      const ss = Object.keys(s).reduce(
+        (a, b) => ({ ...a, [labelIdx[b].idx]: s[b] }),
+        {}
+      );
+      const urlI = filtersToUrl(ss);
+      const f = "http://127.0.0.1:8887/" + url + urlI + ".json";
+      return await fetch("http://127.0.0.1:8887/" + url + urlI + ".json")
         .then((res) => res.json())
-        .then((res) => ({ res: res, filter, id }));
-    },
-    {
-      // condition: ({ id, filter: { label } }, { getState, extra }) => {
-      //   return (
-      //     filtersSelector.selectById(getState(), id).labels[label] !== undefined
-      //   );
-      // },
+        .then((data) => ({ data, entityId, filter, url }));
+      // .catch((e) => ({ data: { [entityId]: [] }, entityId }));
     }
+
+    // condition: ({ id, filter: { label } }, { getState, extra }) => {
+    //   return (
+    //     filtersSelector.selectById(getState(), id).labels[label] !== undefined
+    //   );
+    // },
   );
 
   const slice = createSlice({
@@ -303,9 +382,7 @@ function createGenericSlice(sliceName) {
       [fetchUsers.fulfilled](state, { payload }) {
         state.loading = false;
         console.log("fullfiled", payload);
-
         const data = payload.users;
-
         usersAdapter.setAll(state.users, data);
         metaAdapter.upsertMany(state.meta, [
           {
@@ -328,13 +405,14 @@ function createGenericSlice(sliceName) {
 
       [fetchEntityGrid.fulfilled](state, { payload }) {
         state.loading = false;
-        const { data, entityId } = payload;
+        const { data, entityId, url } = payload;
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
         const mapped = mapPromiseData(rest, entityId);
 
         const { tables, rows, labels, editModes } = normalizeApi({
           data: mapped,
+          url,
         });
         tablesAdapter.upsertMany(state.tables, tables);
         rowsAdapter.upsertMany(state.rows, rows);
@@ -394,8 +472,9 @@ function createGenericSlice(sliceName) {
       [fetchFilteredData.fulfilled](state, { payload }) {
         console.log("fetch filter fullfilled", payload);
         const {
-          res,
-          id,
+          data,
+          entityId,
+          url,
           filter: { label, value, gte, lte, action },
         } = payload;
 
@@ -412,7 +491,7 @@ function createGenericSlice(sliceName) {
             break;
           }
           case "toggleAll": {
-            const ids = tablesSelectById(state, id).rows;
+            const ids = tablesSelectById(state, entityId).rows;
             const rows = rowsSelectIds(state);
             const values = ids.reduce((a, b) => [...a, rows[b][label]], []);
             const availableValues = [...new Set(values)];
@@ -447,13 +526,26 @@ function createGenericSlice(sliceName) {
             break;
         }
 
-        const nanoids = tablesSelectById(state, id).nanoids;
-        const { rows, tables } = normalizeRows(
-          { [id]: res },
-          { [id]: nanoids }
-        );
+        console.log("fullfiled", entityId);
+        const { id, ...rest } = data;
+        const mapped = mapPromiseData(rest, entityId);
+
+        const { tables, rows } = normalizeApi({
+          data: mapped,
+          url,
+        });
         tablesAdapter.upsertMany(state.tables, tables);
         rowsAdapter.upsertMany(state.rows, rows);
+        // labelsAdapter.upsertMany(state.labels, labels);
+        // editModesAdapter.upsertMany(state.editModes, editModes);
+
+        // const nanoids = tablesSelectById(state, entityId).nanoids;
+        // const { rows, tables } = normalizeRows(
+        //   { [entityId]: data },
+        //   { [entityId]: nanoids }
+        // );
+        // tablesAdapter.upsertMany(state.tables, tables);
+        // rowsAdapter.upsertMany(state.rows, rows);
       },
     },
   });
