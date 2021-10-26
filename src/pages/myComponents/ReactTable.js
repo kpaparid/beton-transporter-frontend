@@ -31,10 +31,18 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import LazyLoad from "react-lazyload";
 import { ComponentPreLoader } from "../../components/ComponentPreLoader";
-
+import { RTables2 } from "./NewTable";
+import { nanoid } from "@reduxjs/toolkit";
 export const ReactTable = memo(
   forwardRef(({ children }, skipResetRef) => {
-    const { selectData, selectShownColumns, onCellChange, ...rest } = children;
+    const {
+      selectData,
+      selectShownColumns,
+      onCellChange,
+      pagination,
+      // counter,
+      ...rest
+    } = children;
     const data = useSelector(selectData);
     const headers = useSelector(selectShownColumns);
     const [cells, setCells] = useState(data);
@@ -104,13 +112,24 @@ export const ReactTable = memo(
     }, [cells]);
     return (
       <>
-        <RTables
+        {/* <RTables
           ref={skipResetRef}
           {...rest}
           columns={columns}
           data={cells}
           updateMyData={updateMyData}
+        /> */}
+
+        <RTables2
+          // ref={skipResetRef}
+          {...rest}
+          columns={columns}
+          data={cells}
+          updateMyData={updateMyData}
         />
+
+        {/* {/* {(pagination || counter) && ( */}
+        <TableFooter {...pagination} currentPageSize={data.length} />
       </>
     );
   }),
@@ -125,11 +144,12 @@ const RTables = memo(
         updateMyData,
         selectHiddenColumns,
         editModeSelector,
-        pageSize = 20,
+        // pageSize = 5,
         setSelectedRows,
         massEdit,
-        pagination,
-        counter,
+        // pagination = true,
+        // counter,
+        // pageCount: controlledPageCount,
       },
       ref
     ) => {
@@ -162,12 +182,12 @@ const RTables = memo(
         headerGroups,
         prepareRow,
         page,
-        canPreviousPage,
-        canNextPage,
-        pageCount,
-        gotoPage,
-        nextPage,
-        previousPage,
+        // canPreviousPage,
+        // canNextPage,
+        // pageCount,
+        // gotoPage,
+        // nextPage,
+        // previousPage,
         selectedFlatRows,
         state: { pageIndex },
       } = useTable(
@@ -176,7 +196,8 @@ const RTables = memo(
           data,
           defaultColumn,
           updateMyData,
-          initialState: { pageSize, hiddenColumns: ["id"] },
+          initialState: { hiddenColumns: ["id"] },
+          // initialState: { pageIndex: 0, pageSize, hiddenColumns: ["id"] },
           autoResetPage: !ref.current,
           autoResetSelectedRows: !ref.current,
           autoResetSortBy: !ref.current,
@@ -185,6 +206,8 @@ const RTables = memo(
           autoResetFilters: !ref.current,
           autoResetRowState: !ref.current,
           disableMultiSort: true,
+          manualPagination: true,
+          // pageCount: controlledPageCount,
         },
         useSortBy,
         usePagination,
@@ -235,24 +258,6 @@ const RTables = memo(
               selectHiddenColumns={selectHiddenColumns}
             ></TableBody>
           </Table>
-
-          {(pagination || counter) && (
-            <TableFooter
-              maxRows={data.length}
-              {...{
-                pagination,
-                counter,
-                pageCount,
-                nextPage,
-                previousPage,
-                canPreviousPage,
-                canNextPage,
-                gotoPage,
-                pageIndex,
-                currentPageSize: page.length,
-              }}
-            ></TableFooter>
-          )}
         </>
       );
     }
@@ -449,87 +454,86 @@ const TableHead = ({ headerGroups, selectHiddenColumns }) => {
 };
 const PaginationItem = ({ page, gotoPage, active = false }) => {
   return (
-    <Pagination.Item active={active} onClick={() => gotoPage(page - 1)}>
+    <Pagination.Item active={active} onClick={() => gotoPage(page)}>
       {page}
     </Pagination.Item>
   );
 };
 const TableFooter = React.memo((props) => {
   const {
-    pagination = true,
-    maxRows = 25,
-    nextPage,
-    previousPage,
-    canPreviousPage,
-    canNextPage,
-    gotoPage,
-    pageCount,
-    pageIndex,
+    paginationEnabled = true,
+    counterEnabled = true,
     currentPageSize = 0,
-    counter,
+    onPageChange,
+    selectPaginationData,
   } = props;
+  const {
+    rowsCount: maxRows,
+    page: pageIndex,
+    pagesCount,
+  } = useSelector(selectPaginationData);
   return (
     <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-      {pagination && currentPageSize < maxRows && (
+      {paginationEnabled && currentPageSize < maxRows && (
         <Nav>
           <Pagination className="mb-2 mb-lg-0">
             <Pagination.Prev
-              onClick={() => gotoPage(0)}
-              disabled={pageIndex === 0}
+              onClick={() => onPageChange(1)}
+              disabled={parseInt(pageIndex) === 1}
             >
               <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
             </Pagination.Prev>
             <Pagination.Prev
-              onClick={() => previousPage()}
-              disabled={!canPreviousPage}
+              onClick={() => onPageChange(parseInt(pageIndex) - 1)}
+              disabled={parseInt(pageIndex) === 1}
             >
               <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
             </Pagination.Prev>
-            {[...Array(pageCount > 5 ? 5 : pageCount)].map((_, index) => {
+            {[...Array(pagesCount > 5 ? 5 : pagesCount)].map((_, index) => {
               const itemProps = {
                 page:
-                  pageCount <= 5
-                    ? index + 1
-                    : pageIndex + 2 >= pageCount
-                    ? pageCount - 4 + index
-                    : pageIndex > 2
-                    ? pageIndex - 1 + index
+                  pagesCount < 3
+                    ? parseInt(pageIndex) - 2 + index
+                    : pagesCount <= parseInt(pageIndex) + 1
+                    ? pagesCount - 4 + index
+                    : pageIndex > 3
+                    ? parseInt(pageIndex) - 2 + index
                     : index + 1,
-                gotoPage,
+                gotoPage: onPageChange,
                 active:
-                  pageCount <= 5
-                    ? index === pageIndex
-                    : pageCount - pageIndex === 1
-                    ? 4 === index
-                    : pageCount - pageIndex === 2
-                    ? 3 === index
-                    : pageIndex > 2
-                    ? index === 2
-                    : index === pageIndex,
+                  pagesCount < 3
+                    ? pageIndex - 2 + index === parseInt(pageIndex)
+                    : pagesCount <= parseInt(pageIndex) + 1
+                    ? pagesCount - 4 + index === parseInt(pageIndex)
+                    : pageIndex > 3
+                    ? pageIndex - 2 + index === parseInt(pageIndex)
+                    : index + 1 === parseInt(pageIndex),
               };
               return (
-                <>
-                  <PaginationItem
-                    {...itemProps}
-                    key={"pagination-item-" + index}
-                  />
-                </>
+                <PaginationItem
+                  {...itemProps}
+                  key={"pagination-item-" + index}
+                />
               );
             })}
-            <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage}>
+            <Pagination.Next
+              onClick={() => onPageChange(parseInt(pageIndex) + 1)}
+              disabled={parseInt(pageIndex) === pagesCount}
+            >
               <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
             </Pagination.Next>
             <Pagination.Next
-              onClick={() => gotoPage(pageCount - 1)}
-              disabled={pageIndex + 1 === pageCount}
+              onClick={() => onPageChange(pagesCount)}
+              disabled={parseInt(pageIndex) === pagesCount}
             >
               <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
             </Pagination.Next>
+            <></>
           </Pagination>
         </Nav>
       )}
 
-      {counter && (
+      {counterEnabled && (
         <small className="fw-bold">
           Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
         </small>
@@ -537,6 +541,7 @@ const TableFooter = React.memo((props) => {
     </Card.Footer>
   );
 });
+
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();

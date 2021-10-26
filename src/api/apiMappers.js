@@ -1,4 +1,5 @@
 import { nanoid } from "@reduxjs/toolkit";
+import moment from "moment";
 import { normalize, schema } from "normalizr";
 import {
   getGridLabelLinks,
@@ -7,7 +8,37 @@ import {
   getGridMeta,
   getGridWidgets,
   gridLabels,
-} from "../MyConsts";
+} from "../pages/myComponents/MyConsts";
+
+export function parsePagination({ res, page, limit }) {
+  return {
+    paginationLinks: parseLinkHeader(res.headers.get("Link")),
+    rowsCount: res.headers.get("X-Total-Count"),
+    page,
+    limit,
+    pagesCount: Math.ceil(res.headers.get("X-Total-Count") / limit),
+  };
+}
+export function parseLinkHeader(linkHeader) {
+  const linkHeadersArray = linkHeader
+    .split(", ")
+    .map((header) => header.split("; "));
+  const linkHeadersMap = linkHeadersArray.map((header) => {
+    const thisHeaderRel = header[1].replace(/"/g, "").replace("rel=", "");
+    const thisHeaderUrl = header[0].slice(1, -1);
+    return [thisHeaderRel, thisHeaderUrl];
+  });
+  return Object.fromEntries(linkHeadersMap);
+}
+
+export function loadToursPage({ fetchEntityGrid, changeDate }, dispatch) {
+  return dispatch(
+    fetchEntityGrid({
+      entityId: "tours",
+      url: "tours",
+    })
+  ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))));
+}
 
 export function normalizeRows(data, nanoidLabelsTable) {
   const mObject = getConnections(data);
@@ -27,7 +58,7 @@ export function normalizeRows(data, nanoidLabelsTable) {
     tables,
   };
 }
-export function normalizeApi({ data, url }) {
+export function normalizeApi({ data, meta }) {
   const mObject = getConnections(data);
   const tableIds = Object.keys(mObject);
 
@@ -42,7 +73,7 @@ export function normalizeApi({ data, url }) {
     .map((r) => rowsByTableId[r])
     .reduce((a, b) => [...a, ...b], []);
 
-  const tables = getTable(mObject, labelsByTableId, url);
+  const tables = getTable(mObject, labelsByTableId, meta);
 
   const editModes = tableIds.map((id) => ({ id: id, value: false }));
   return {
@@ -52,7 +83,7 @@ export function normalizeApi({ data, url }) {
     editModes,
   };
 }
-export function getTable(mObject, labelsByTableId, url) {
+export function getTable(mObject, labelsByTableId, meta) {
   return Object.keys(mObject).map((tableId) => {
     const tableRowsIds = mObject[tableId].map(({ id }) => id);
     const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
@@ -67,8 +98,8 @@ export function getTable(mObject, labelsByTableId, url) {
       selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
       selectedLabels: tableLabelIds,
       meta: getGridMeta(tableId),
-      url,
       nanoids: nanoids,
+      ...meta,
     };
   });
 }
@@ -177,6 +208,8 @@ export function mapPromiseData(data, entityId) {
       }
     : entityId === "workHours"
     ? { workHours: data.workHours }
+    : entityId === "tours"
+    ? { tours: Object.values(data) }
     : data;
 
   // const tablesIds = Object.keys(data);

@@ -102,9 +102,21 @@ export const useGridSelectors = ({
       ),
     [selectShownLabels, selectAllRows, selectAllRowsById]
   );
+  const selectPaginationData = useCallback(
+    (state) =>
+      (tablesSelector.selectById(state, entityId) &&
+        tablesSelector.selectById(state, entityId).pagination) ||
+      [],
+    [tablesSelector]
+  );
+
   const selectChanges = useCallback(
     (state) => changesSelector.selectEntities(state) || [],
     [changesSelector]
+  );
+  const selectSelectedRows = useCallback(
+    (state) => tablesSelector.selectById(state, entityId).selectedRows || [],
+    [tablesSelector, entityId]
   );
   const selectChangesOverRows = useMemo(
     () =>
@@ -119,7 +131,6 @@ export const useGridSelectors = ({
       ),
     [selectShownRows, selectAllRowsById, selectChanges]
   );
-
   const selectReactTableData = useMemo(
     () =>
       createSelector(
@@ -194,6 +205,22 @@ export const useGridSelectors = ({
       createSelector(
         [selectShownLabels, selectSelectedLabels],
         (labels, selectedLabels) => {
+          return labels.reduce(
+            (a, id) => ({
+              ...a,
+              [id]: selectedLabels.includes(id) ? "table-cell" : "none",
+            }),
+            {}
+          );
+        }
+      ),
+    []
+  );
+  const selectHiddenHeadersReactTable2 = useMemo(
+    () =>
+      createSelector(
+        [selectShownLabels, selectSelectedLabels],
+        (labels, selectedLabels) => {
           return (
             labels.filter((id) => !selectedLabels.includes(id)) || []
           ).map((id) => id);
@@ -245,6 +272,12 @@ export const useGridSelectors = ({
       (tablesSelector.selectById(state, entityId) &&
         tablesSelector.selectById(state, entityId).selectedLabels) ||
       [],
+    [entityId, tablesSelector]
+  );
+  const selectSortedHeadersReactTable = useCallback(
+    (state) =>
+      tablesSelector.selectById(state, entityId) &&
+      tablesSelector.selectById(state, entityId).sort,
     [entityId, tablesSelector]
   );
 
@@ -346,6 +379,7 @@ export const useGridSelectors = ({
   );
 
   return {
+    selectSelectedRows,
     selectDate,
     selectLabelsModal,
     selectHiddenHeadersReactTable,
@@ -362,6 +396,8 @@ export const useGridSelectors = ({
     selectSelectedLabels,
     selectNestedCheckboxFilter: selectFilter,
     selectItemsFilter,
+    selectPaginationData,
+    selectSortedHeadersReactTable,
   };
 };
 
@@ -376,6 +412,10 @@ export const useGridCallbacks = ({
     addFilter,
     toggleColumn,
     fetchEntityGrid,
+    fetchPage,
+    onSelectRow,
+    toggleAllChecked,
+    fetchSortedEntityGrid,
   },
   entityId,
   dispatch,
@@ -391,6 +431,21 @@ export const useGridCallbacks = ({
       dispatch(setSelectedRows({ id: entityId, rows }));
     },
     [dispatch, entityId, setSelectedRows]
+  );
+  const onSelectRowCallback = useCallback(
+    (rowId) => {
+      dispatch(onSelectRow({ id: entityId, rowId }));
+    },
+    [dispatch, entityId, setSelectedRows]
+  );
+  const onSelectAllRowsCallback = useCallback(() => {
+    dispatch(toggleAllChecked(entityId));
+  }, [dispatch, entityId]);
+  const onToggleSort = useCallback(
+    (labelId) => {
+      dispatch(fetchSortedEntityGrid({ entityId, labelId }));
+    },
+    [dispatch, entityId, fetchSortedEntityGrid]
   );
   const forceClose = useCallback(() => {
     dispatch(resetChanges(entityId));
@@ -478,6 +533,17 @@ export const useGridCallbacks = ({
     },
     [entityId]
   );
+  const onPageChange = useCallback(
+    (page) => {
+      dispatch(
+        fetchPage({
+          entityId,
+          page,
+        })
+      );
+    },
+    [dispatch, entityId, fetchEntityGrid]
+  );
 
   return {
     onChangeCurrentUser,
@@ -496,27 +562,36 @@ export const useGridCallbacks = ({
     onChangeRangeFilter,
     onToggleLabel,
     onResetFilter,
+    onPageChange,
+    onSelectRow: onSelectRowCallback,
+    onSelectAllRows: onSelectAllRowsCallback,
+    onToggleSort,
   };
 };
 
 export const useGridTableProps = ({ actions, selectors, entityId }) => {
   const dispatch = useDispatch();
   const {
+    selectSelectedRows,
     selectDate,
     selectLabelsModal,
     selectHiddenHeadersReactTable,
     selectShownHeadersReactTable,
+    selectSortedHeadersReactTable,
     selectReactTableData,
     selectEditMode,
     selectChangesExist,
     selectSelectedRowsExist,
     selectItemsFilter,
     selectNestedCheckboxFilter,
+    selectPaginationData,
   } = useGridSelectors({ selectors, entityId });
 
   const {
     onCellChange,
     setSelectedRows,
+    onSelectRow,
+    onSelectAllRows,
     forceClose,
     onToggleEdit,
     onSave,
@@ -530,6 +605,8 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onChangeRangeFilter,
     onToggleLabel,
     onResetFilter,
+    onPageChange,
+    onToggleSort,
   } = useGridCallbacks({
     actions,
     entityId,
@@ -576,16 +653,24 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     counter,
   } = getGridWidgets(entityId);
   const tableProps = {
+    selectSelectedRows,
     editModeSelector: selectEditMode,
     selectShownColumns: selectShownHeadersReactTable,
     selectHiddenColumns: selectHiddenHeadersReactTable,
+    selectSortedColumn: selectSortedHeadersReactTable,
     selectData: selectReactTableData,
+    onSelectRow,
+    onSelectAllRows,
     setSelectedRows,
+    onToggleSort,
     onCellChange,
     massEdit,
-    pagination,
-    pageSize,
-    counter,
+    pagination: {
+      selectPaginationData,
+      paginationEnabled: true,
+      counterEnabled: true,
+      onPageChange,
+    },
   };
   const filterProps = filter && {
     selectItemsFilter,

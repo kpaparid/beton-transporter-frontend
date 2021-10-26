@@ -13,14 +13,22 @@ import produce, { current } from "immer";
 import { isEqual, merge } from "lodash";
 import moment from "moment";
 import { useCallback, useState } from "react";
-import { mapData, filtersToUrl, getGridUrl } from "../myComponents/MyConsts";
+import {
+  mapData,
+  filtersToUrl,
+  getGridUrl,
+  API,
+  calcFilters,
+} from "../myComponents/MyConsts";
 import {
   mapPromiseData,
   mapWork,
   mapWorkHours,
   normalizeApi,
   normalizeRows,
-} from "../myComponents/util/apiMappers";
+  parseLinkHeader,
+  parsePagination,
+} from "../../api/apiMappers";
 
 const myInitialState = {};
 
@@ -117,17 +125,113 @@ function createGenericSlice(sliceName) {
       res.json()
     );
   });
-
   const fetchEntityGrid = createAsyncThunk(
     "data/fetchEntityGrid",
-    async ({ entityId, url }) => {
-      return await fetch("http://127.0.0.1:8887/" + url + ".json")
-        .then((res) => res.json())
-        .then((data) => ({ data, entityId, url }))
+    async ({ entityId, url, page = "1", limit = "20" }) => {
+      return await fetch(API + url + "?_page=" + page + "&_limit=" + limit)
+        .then((res) =>
+          res.json().then((data) => {
+            return {
+              data,
+              pagination: parsePagination({ res, page, limit }),
+              entityId,
+              url,
+            };
+          })
+        )
         .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
     }
   );
+  const fetchPage = createAsyncThunk(
+    "data/fetchEntityGrid",
+    async ({ entityId, page = "1" }, thunkAPI) => {
+      const state = thunkAPI.getState();
+      const {
+        sort,
+        url,
+        pagination: { limit },
+      } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].tables, entityId);
+      const sortLink = sort
+        ? "&_sort=" + sort.id + "&_order=" + sort.order
+        : "";
+      return await fetch(
+        API + url + "?_page=" + page + "&_limit=" + limit + sortLink
+      )
+        .then((res) =>
+          res.json().then((data) => {
+            return {
+              data,
+              pagination: parsePagination({ res, page, limit }),
+              entityId,
+              url,
+              sort,
+            };
+          })
+        )
+        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+    }
+  );
+  const fetchFiltered = createAsyncThunk(
+    "data/fetchEntityGrid",
+    async (
+      { entityId, filter: { label, value, action, gte, lte } },
+      thunkAPI
+    ) => {
+      const state = thunkAPI.getState();
+      const {
+        filters,
+        sort,
+        url,
+        pagination: { limit, page },
+      } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].tables, entityId);
 
+      const { idx } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].labels, label);
+
+      const ids = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].tables, entityId).rows;
+      const rows = rowsAdapter
+        .getSelectors()
+        .selectEntities(state[sliceName].rows);
+      const values = [
+        ...new Set(ids.reduce((a, b) => [...a, rows[b][label]], [])),
+      ];
+
+      const newValue = action === "toggleAll" ? values : [value];
+      const f = calcFilters(filters, {
+        label: idx,
+        value: newValue,
+        gte,
+        lte,
+        action,
+      });
+      const sortLink = sort
+        ? "&_sort=" + sort.id + "&_order=" + sort.order
+        : "";
+      return await fetch(
+        API + url + "?_page=" + page + "&_limit=" + limit + sortLink
+      )
+        .then((res) =>
+          res.json().then((data) => {
+            return {
+              filters: f,
+              data,
+              pagination: parsePagination({ res, page, limit }),
+              entityId,
+              url,
+              sort,
+            };
+          })
+        )
+        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+    }
+  );
   const fetchData = createAsyncThunk("data/fetchData", async () => {
     const id = "user1";
     const date = "_" + "09.2021";
@@ -173,8 +277,43 @@ function createGenericSlice(sliceName) {
     console.log("Add filter", entityId);
     const filterUrl = "";
     // console.log(c)
-    return fetchFilteredData({ entityId, filter });
+    return fetchFiltered({ entityId, filter });
   }
+  const fetchSortedEntityGrid = createAsyncThunk(
+    "data/fetchEntityGrid",
+    async ({ entityId, labelId }, thunkAPI) => {
+      const state = thunkAPI.getState();
+
+      const {
+        sort,
+        url,
+        pagination: { page, limit },
+      } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].tables, entityId);
+      const { idx } = tablesAdapter
+        .getSelectors()
+        .selectById(state[sliceName].labels, labelId);
+      const order =
+        sort && sort.id === idx ? (sort.order === "desc" ? "" : "desc") : "asc";
+      const sortLink = order === "" ? "" : "&_sort=" + idx + "&_order=" + order;
+      return await fetch(
+        API + url + "?_page=" + page + "&_limit=" + limit + sortLink
+      )
+        .then((res) =>
+          res.json().then((data) => {
+            return {
+              data,
+              pagination: parsePagination({ res, page, limit }),
+              entityId,
+              url,
+              sort: order !== "" && { id: idx, order },
+            };
+          })
+        )
+        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+    }
+  );
 
   const fetchFilteredData = createAsyncThunk(
     "data/fetchFilteredData",
@@ -347,6 +486,19 @@ function createGenericSlice(sliceName) {
           },
         });
       },
+      onSelectRow: (state, action) => {
+        const { id, rowId } = action.payload;
+        const oldSelectedRows = tablesSelectById(state, id).selectedRows;
+        const newV = oldSelectedRows.includes(rowId)
+          ? oldSelectedRows.filter((r) => r !== rowId)
+          : [...oldSelectedRows, rowId];
+        tablesAdapter.updateOne(state.tables, {
+          id,
+          changes: {
+            selectedRows: newV,
+          },
+        });
+      },
       addChange: (state, action) => {
         const { id, rowId, changes } = action.payload;
         const originalRow = rowsSelectById(state, rowId);
@@ -405,14 +557,19 @@ function createGenericSlice(sliceName) {
 
       [fetchEntityGrid.fulfilled](state, { payload }) {
         state.loading = false;
-        const { data, entityId, url } = payload;
+        const { data, pagination, entityId, url, sort, filters } = payload;
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
         const mapped = mapPromiseData(rest, entityId);
 
         const { tables, rows, labels, editModes } = normalizeApi({
           data: mapped,
-          url,
+          meta: {
+            url,
+            pagination,
+            sort,
+            filters,
+          },
         });
         tablesAdapter.upsertMany(state.tables, tables);
         rowsAdapter.upsertMany(state.rows, rows);
@@ -569,6 +726,8 @@ function createGenericSlice(sliceName) {
       fetchData,
       fetchUsers,
       fetchEntityGrid,
+      fetchSortedEntityGrid,
+      fetchPage,
       saveChanges: postRows,
       addFilter,
     },

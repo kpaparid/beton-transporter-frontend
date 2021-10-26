@@ -28,12 +28,14 @@ import {
 import { MyRangeSlider } from "./MyRangeSlider";
 import { Box } from "@material-ui/system";
 import { Portal } from "react-portal";
+import { loadToursPage } from "../../api/apiMappers";
 // dark 0
 // #485354  1
 // #037070  3
 // #4B5757  2
 // #5DA3A3  4
 // #DDFFFF  5
+export const API = "http://localhost:3034/";
 const primaryVariant = "#037070";
 
 const store = createReduxStore2();
@@ -97,7 +99,7 @@ const validationType = (type) =>
 const imgValid = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2305A677' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e")`;
 const imgInvalid = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23FA5252' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23FA5252' stroke='none'/%3e%3c/svg%3e")`;
 
-function filtersToUrl(props) {
+function filtersToUrl2(props) {
   // ?exclude=/aboutMe%7C/address
   const c = Object.keys(props).map((label) => {
     const neq =
@@ -117,6 +119,44 @@ function filtersToUrl(props) {
   const urli = c.reduce((a, b) => a + "+" + b, "");
   return urli === "+" ? "" : urli;
   // + => &
+}
+export function calcFilters(
+  oldFilters,
+  { label, value = [], action, gte, lte }
+) {
+  const f =
+    oldFilters && oldFilters[label]
+      ? action === "toggle"
+        ? oldFilters[label].neq && oldFilters[label].neq.includes(value[0])
+          ? {
+              ...oldFilters,
+              [label]: {
+                ...oldFilters[label],
+                neq: oldFilters[label].neq.filter((e) => e !== value[0]),
+              },
+            }
+          : {
+              ...oldFilters,
+              [label]: {
+                ...oldFilters[label],
+                neq: [...oldFilters[label].neq, value[0]],
+              },
+            }
+        : action === "toggleAll"
+        ? { ...oldFilters, [label]: { ...oldFilters[label], neq: value } }
+        : { ...oldFilters, [label]: { neq: value, gte, lte } }
+      : { ...oldFilters, [label]: { neq: [...value], gte, lte } };
+  return f;
+}
+function filtersToUrl(filters) {
+  const c = Object.entries(filters).reduce((a, b) => {
+    const { neq, gte, lte } = b[1];
+    const neqLink = neq ? "&" + b[0] + "_ne=" + neq : "";
+    const gteLink = gte ? "&" + b[0] + "_gte=" + gte : "";
+    const lteLink = lte ? "&" + b[0] + "_lte=" + lte : "";
+    return a + "&" + neqLink + gteLink + lteLink;
+  }, "");
+  return c;
 }
 
 const dateToDay = (date) => moment(date[0], "DD/MM/YYYY").format("dddd");
@@ -156,7 +196,7 @@ const GRIDTYPE = {
 };
 export const gridLabels = {
   tours: {
-    url: "tours/tours",
+    url: "tours",
     meta: ["date", "user"],
     widgets: {
       filter: true,
@@ -629,39 +669,6 @@ function useLoadData(tableName, actions) {
 
   return stateAPIStatus;
 }
-function useLoadData2(actions) {
-  const [stateAPIStatus, setAPIStatus] = useState("idle");
-  const { fetchUsers, fetchEntityGrid } = actions;
-  const dispatch = useDispatch();
-  useEffect(() => {
-    setAPIStatus("loading");
-    dispatch(fetchUsers()).then(({ payload }) =>
-      dispatch(
-        fetchEntityGrid({ entityId: "workHours", id: payload.users[0].id })
-      )
-        .then(() =>
-          dispatch(
-            fetchEntityGrid({ entityId: "absent", id: payload.users[0].id })
-          )
-        )
-        .then(() =>
-          dispatch(
-            fetchEntityGrid({ entityId: "vacations", id: payload.users[0].id })
-          )
-        )
-        .then(() =>
-          dispatch(
-            fetchEntityGrid({
-              entityId: "workHoursBank",
-              id: payload.users[0].id,
-            })
-          )
-        )
-        .then(() => setAPIStatus("success"))
-    );
-  }, [dispatch, fetchUsers, fetchEntityGrid]);
-  return stateAPIStatus;
-}
 
 export function loadWorkHoursPageGrids(userId, { fetchEntityGrid }, dispatch) {
   return dispatch(
@@ -733,14 +740,6 @@ function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
         )
       )
   );
-}
-function loadToursPage({ fetchEntityGrid, changeDate }, dispatch) {
-  return dispatch(
-    fetchEntityGrid({
-      entityId: "tours",
-      url: getGridUrl("tours"),
-    })
-  ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))));
 }
 
 function useButtonGroupProps(statePath, stateOffset, actions, selectors) {
