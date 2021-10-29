@@ -1,32 +1,16 @@
-import { getInitialGridState } from "@mui/x-data-grid";
-import { normalize, schema } from "normalizr";
-import { createStore, applyMiddleware } from "redux";
 import {
-  combineReducers,
   configureStore,
   createAsyncThunk,
   createEntityAdapter,
-  createSelector,
   createSlice,
 } from "@reduxjs/toolkit";
-import produce, { current } from "immer";
-import { isEqual, merge } from "lodash";
-import moment from "moment";
-import { useCallback, useState } from "react";
+import { API } from "../myComponents/MyConsts";
 import {
-  mapData,
-  filtersToUrl,
-  getGridUrl,
-  API,
   calcFilters,
-} from "../myComponents/MyConsts";
-import {
   mapPromiseData,
   mapWork,
-  mapWorkHours,
+  filtersToUrl,
   normalizeApi,
-  normalizeRows,
-  parseLinkHeader,
   parsePagination,
 } from "../../api/apiMappers";
 
@@ -120,11 +104,10 @@ function createGenericSlice(sliceName) {
     (filtersSelectById(state, id) && filtersSelectById(state, id)[operator]) ||
     [];
 
-  const fetchUsers = createAsyncThunk("data/fetchUser", async () => {
-    return await fetch("http://127.0.0.1:8887/users.json").then((res) =>
-      res.json()
-    );
+  const fetchMeta = createAsyncThunk("data/fetchMeta", async () => {
+    return await fetch(API + "values").then((res) => res.json());
   });
+
   const fetchEntityGrid = createAsyncThunk(
     "data/fetchEntityGrid",
     async ({ entityId, url, page = "1", limit = "20" }) => {
@@ -139,7 +122,12 @@ function createGenericSlice(sliceName) {
             };
           })
         )
-        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+        .catch((e) => ({
+          data: [],
+          entityId,
+          url,
+          pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
+        }));
     }
   );
   const fetchPage = createAsyncThunk(
@@ -149,28 +137,43 @@ function createGenericSlice(sliceName) {
       const {
         sort,
         url,
+        filters,
         pagination: { limit },
       } = tablesAdapter
         .getSelectors()
         .selectById(state[sliceName].tables, entityId);
+      const filterLink = filtersToUrl(filters);
       const sortLink = sort
         ? "&_sort=" + sort.id + "&_order=" + sort.order
         : "";
-      return await fetch(
-        API + url + "?_page=" + page + "&_limit=" + limit + sortLink
-      )
+      const finalUrl =
+        API +
+        url +
+        "?_page=" +
+        page +
+        "&_limit=" +
+        limit +
+        sortLink +
+        filterLink;
+      return await fetch(finalUrl)
         .then((res) =>
           res.json().then((data) => {
             return {
               data,
-              pagination: parsePagination({ res, page, limit }),
               entityId,
+              filters,
+              pagination: parsePagination({ res, page, limit }),
               url,
               sort,
             };
           })
         )
-        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+        .catch((e) => ({
+          data: [],
+          entityId,
+          url,
+          pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
+        }));
     }
   );
   const fetchFiltered = createAsyncThunk(
@@ -192,93 +195,58 @@ function createGenericSlice(sliceName) {
       const { idx } = tablesAdapter
         .getSelectors()
         .selectById(state[sliceName].labels, label);
-
-      const ids = tablesAdapter
-        .getSelectors()
-        .selectById(state[sliceName].tables, entityId).rows;
-      const rows = rowsAdapter
-        .getSelectors()
-        .selectEntities(state[sliceName].rows);
-      const values = [
-        ...new Set(ids.reduce((a, b) => [...a, rows[b][label]], [])),
-      ];
-
-      const newValue = action === "toggleAll" ? values : [value];
-      const f = calcFilters(filters, {
+      const newFilters = calcFilters(filters, {
         label: idx,
-        value: newValue,
+        value:
+          action === "toggleAll"
+            ? metaAdapter
+                .getSelectors()
+                .selectById(state[sliceName].meta, "constants") &&
+              metaAdapter
+                .getSelectors()
+                .selectById(state[sliceName].meta, "constants")[idx]
+            : value && [value],
         gte,
         lte,
         action,
       });
+      const filterLink = filtersToUrl(newFilters);
       const sortLink = sort
         ? "&_sort=" + sort.id + "&_order=" + sort.order
         : "";
-      return await fetch(
-        API + url + "?_page=" + page + "&_limit=" + limit + sortLink
-      )
-        .then((res) =>
-          res.json().then((data) => {
-            return {
-              filters: f,
-              data,
-              pagination: parsePagination({ res, page, limit }),
-              entityId,
-              url,
-              sort,
-            };
-          })
-        )
-        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+      const finalUrl =
+        API +
+        url +
+        "?_page=" +
+        page +
+        "&_limit=" +
+        limit +
+        sortLink +
+        filterLink;
+
+      return await fetch(finalUrl).then((res) =>
+        res.json().then((data) => {
+          return {
+            data,
+            entityId,
+            filters: newFilters,
+            pagination: parsePagination({ res, page, limit }),
+            url,
+            sort,
+          };
+        })
+      );
     }
   );
-  const fetchData = createAsyncThunk("data/fetchData", async () => {
-    const id = "user1";
-    const date = "_" + "09.2021";
-    const f = [
-      fetch(
-        "http://127.0.0.1:8887/users/" + id + "/workhours" + date + ".json"
-      ),
-      fetch("http://127.0.0.1:8887/users/" + id + "/absent.json"),
-      fetch("http://127.0.0.1:8887/users/" + id + "/vacations.json"),
-      fetch("http://127.0.0.1:8887/users/" + id + "/workhours-bank.json"),
-    ];
-    return await Promise.all(f)
-      .then(function (responses) {
-        return Promise.all(
-          responses.map(function (response) {
-            return response.json();
-          })
-        );
-      })
-      .then(function (data) {
-        console.log(data);
-        return data;
-      });
-
-    // return await fetch(
-    //   "http://127.0.0.1:8887/users/Uwe%20Schwille/workhours.json"
-    //   // "http://127.0.0.1:8887/workhours.json"
-    // ).then((res) => res.json());
-  });
   const postRows = createAsyncThunk("data/postRows", async (id, thunkAPI) => {
     console.log(thunkAPI);
     console.log(thunkAPI.getState()[sliceName]);
     // const changes = changesSelector.selectById(thunkAPI.getState(), id);
     // console.log(changes);
-    return await fetch("http://127.0.0.1:8887/workhours.json").then((res) =>
-      res.json()
-    );
+    return await fetch(API + "/tours").then((res) => res.json());
     // .then((_) => changes);
   });
-  function addFilter(props) {
-    const { id: entityId, filter } = props;
-    console.log(props);
-    console.log("Add filter", entityId);
-    const filterUrl = "";
-    // console.log(c)
-    return fetchFiltered({ entityId, filter });
-  }
+
   const fetchSortedEntityGrid = createAsyncThunk(
     "data/fetchEntityGrid",
     async ({ entityId, labelId }, thunkAPI) => {
@@ -296,7 +264,12 @@ function createGenericSlice(sliceName) {
         .selectById(state[sliceName].labels, labelId);
       const order =
         sort && sort.id === idx ? (sort.order === "desc" ? "" : "desc") : "asc";
-      const sortLink = order === "" ? "" : "&_sort=" + idx + "&_order=" + order;
+      const sortLink =
+        order === ""
+          ? ""
+          : order === "asc"
+          ? "&_sort=" + idx
+          : "&_sort=" + idx + "&_order=" + order;
       return await fetch(
         API + url + "?_page=" + page + "&_limit=" + limit + sortLink
       )
@@ -313,103 +286,6 @@ function createGenericSlice(sliceName) {
         )
         .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
     }
-  );
-
-  const fetchFilteredData = createAsyncThunk(
-    "data/fetchFilteredData",
-    async ({ entityId, filter }, thunkAPI) => {
-      const state = thunkAPI.getState();
-      const { url, labels } = tablesAdapter
-        .getSelectors()
-        .selectById(state[sliceName].tables, entityId);
-      const { label, value, gte, lte, action } = filter;
-      const labelIdx = labelsAdapter
-        .getSelectors()
-        .selectEntities(state[sliceName].labels);
-      const filtersSelector = filtersAdapter.getSelectors();
-      const currentFilters = filtersSelector
-        .selectAll(state[sliceName].filters)
-        .filter((e) => labels.includes(e.id));
-      // .map((e) => ({ ...e, id: labelIdx[e.id].idx }));
-      // const filterUrl = filtersToUrl([...currentFilters]);
-      var payload = {};
-      switch (action) {
-        case "toggle": {
-          console.log(action);
-          const filterById = filtersSelector.selectById(
-            state[sliceName].filters,
-            label
-          );
-          const values2 = filterById ? filterById.neq : [];
-          const newValues2 = values2.includes(value)
-            ? values2.filter((v) => v !== value)
-            : [...values2, value];
-          payload = { id: label, neq: newValues2 };
-          break;
-        }
-        case "toggleAll": {
-          const ids = tablesAdapter
-            .getSelectors()
-            .selectById(state[sliceName].tables, entityId).rows;
-          const rows = rowsAdapter
-            .getSelectors()
-            .selectEntities(state[sliceName].rows);
-          const values = ids.reduce((a, b) => [...a, rows[b][label]], []);
-          const availableValues = [...new Set(values)];
-          const filterById = filtersSelector.selectById(
-            state[sliceName].filters,
-            label
-          );
-          const values2 = filterById ? filterById.neq : [];
-          const neq = values2.length === 0 ? availableValues : [];
-          payload = { id: label, neq };
-          break;
-        }
-        case "between": {
-          payload = {
-            id: label,
-            gte,
-            lte,
-          };
-          break;
-        }
-        case "reset": {
-          filtersAdapter.removeOne(state.filters, label);
-          // payload = currentFilters.filter((e) => e.id !== label);
-          break;
-        }
-        case "resetAll": {
-          filtersAdapter.removeAll(state.filters);
-          payload = [];
-          break;
-        }
-        default:
-          break;
-      }
-
-      const { id: hi, ...rest } = payload;
-      const kk = currentFilters.reduce(
-        (a, { id, ...rest }) => ({ ...a, [id]: rest }),
-        {}
-      );
-      const s = { ...kk, [label]: { ...kk[label], ...rest } };
-      const ss = Object.keys(s).reduce(
-        (a, b) => ({ ...a, [labelIdx[b].idx]: s[b] }),
-        {}
-      );
-      const urlI = filtersToUrl(ss);
-      const f = "http://127.0.0.1:8887/" + url + urlI + ".json";
-      return await fetch("http://127.0.0.1:8887/" + url + urlI + ".json")
-        .then((res) => res.json())
-        .then((data) => ({ data, entityId, filter, url }));
-      // .catch((e) => ({ data: { [entityId]: [] }, entityId }));
-    }
-
-    // condition: ({ id, filter: { label } }, { getState, extra }) => {
-    //   return (
-    //     filtersSelector.selectById(getState(), id).labels[label] !== undefined
-    //   );
-    // },
   );
 
   const slice = createSlice({
@@ -528,35 +404,23 @@ function createGenericSlice(sliceName) {
       },
     },
     extraReducers: {
-      [fetchUsers.pending](state) {
-        state.loading = true;
-      },
-      [fetchUsers.fulfilled](state, { payload }) {
+      [fetchMeta.fulfilled](state, { payload }) {
         state.loading = false;
         console.log("fullfiled", payload);
-        const data = payload.users;
-        usersAdapter.setAll(state.users, data);
-        metaAdapter.upsertMany(state.meta, [
-          {
-            id: "user",
-            value: data[0].id,
+        const data = payload.reduce((a, b) => ({ ...a, [b.id]: b.values }), {});
+        metaAdapter.upsertOne(state.meta, { id: "constants", ...data });
+      },
+      [fetchEntityGrid.pending](
+        state,
+        {
+          meta: {
+            arg: { entityId },
           },
-          {
-            id: "date",
-            value: moment().format("MM/YYYY"),
-          },
-        ]);
+        }
+      ) {
+        tablesAdapter.upsertOne(state.tables, { id: entityId, loading: true });
       },
-      [fetchUsers.rejected](state) {
-        state.loading = false;
-      },
-
-      [fetchData.pending](state) {
-        state.loading = true;
-      },
-
       [fetchEntityGrid.fulfilled](state, { payload }) {
-        state.loading = false;
         const { data, pagination, entityId, url, sort, filters } = payload;
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
@@ -569,43 +433,13 @@ function createGenericSlice(sliceName) {
             pagination,
             sort,
             filters,
+            loading: false,
           },
         });
         tablesAdapter.upsertMany(state.tables, tables);
         rowsAdapter.upsertMany(state.rows, rows);
         labelsAdapter.upsertMany(state.labels, labels);
         editModesAdapter.upsertMany(state.editModes, editModes);
-      },
-      [fetchEntityGrid.rejected](state) {
-        state.loading = false;
-      },
-
-      [fetchEntityGrid.pending](state) {
-        state.loading = true;
-      },
-
-      [fetchData.fulfilled](state, { payload }) {
-        state.loading = false;
-        console.log("fullfiled", payload);
-        const data = payload.reduce((a, b) => ({ ...a, ...b }), {});
-        const mapped = mapWork(data);
-
-        const { tables, rows, labels, editModes } = normalizeApi({
-          data: mapped.tables,
-        });
-        tablesAdapter.setAll(state.tables, tables);
-        rowsAdapter.setAll(state.rows, rows);
-        labelsAdapter.setAll(state.labels, labels);
-        editModesAdapter.setAll(state.editModes, editModes);
-      },
-      [fetchData.rejected](state) {
-        state.loading = false;
-      },
-      [postRows.rejected](state) {
-        state.loading = false;
-      },
-      [postRows.pending](state) {
-        state.loading = true;
       },
       [postRows.fulfilled](state, { meta: { arg } }) {
         state.loading = false;
@@ -619,90 +453,6 @@ function createGenericSlice(sliceName) {
           id: arg,
           value: false,
         });
-      },
-      [fetchFilteredData.rejected](state) {
-        state.loading = false;
-      },
-      [fetchFilteredData.pending](state) {
-        state.loading = true;
-      },
-      [fetchFilteredData.fulfilled](state, { payload }) {
-        console.log("fetch filter fullfilled", payload);
-        const {
-          data,
-          entityId,
-          url,
-          filter: { label, value, gte, lte, action },
-        } = payload;
-
-        switch (action) {
-          case "toggle": {
-            const values = filtersSelectByAction(state, label, "neq");
-            const newValues = values.includes(value)
-              ? values.filter((v) => v !== value)
-              : [...values, value];
-            filtersAdapter.upsertOne(state.filters, {
-              id: label,
-              neq: newValues,
-            });
-            break;
-          }
-          case "toggleAll": {
-            const ids = tablesSelectById(state, entityId).rows;
-            const rows = rowsSelectIds(state);
-            const values = ids.reduce((a, b) => [...a, rows[b][label]], []);
-            const availableValues = [...new Set(values)];
-            console.log(current(rows));
-            const neq =
-              filtersSelectByAction(state, label, "neq").length === 0
-                ? availableValues
-                : [];
-            filtersAdapter.upsertOne(state.filters, {
-              id: label,
-              neq,
-            });
-            break;
-          }
-          case "between": {
-            filtersAdapter.upsertOne(state.filters, {
-              id: label,
-              gte,
-              lte,
-            });
-            break;
-          }
-          case "reset": {
-            filtersAdapter.removeOne(state.filters, label);
-            break;
-          }
-          case "resetAll": {
-            filtersAdapter.removeAll(state.filters);
-            break;
-          }
-          default:
-            break;
-        }
-
-        console.log("fullfiled", entityId);
-        const { id, ...rest } = data;
-        const mapped = mapPromiseData(rest, entityId);
-
-        const { tables, rows } = normalizeApi({
-          data: mapped,
-          url,
-        });
-        tablesAdapter.upsertMany(state.tables, tables);
-        rowsAdapter.upsertMany(state.rows, rows);
-        // labelsAdapter.upsertMany(state.labels, labels);
-        // editModesAdapter.upsertMany(state.editModes, editModes);
-
-        // const nanoids = tablesSelectById(state, entityId).nanoids;
-        // const { rows, tables } = normalizeRows(
-        //   { [entityId]: data },
-        //   { [entityId]: nanoids }
-        // );
-        // tablesAdapter.upsertMany(state.tables, tables);
-        // rowsAdapter.upsertMany(state.rows, rows);
       },
     },
   });
@@ -723,13 +473,12 @@ function createGenericSlice(sliceName) {
     reducer: slice.reducer,
     actions: {
       ...slice.actions,
-      fetchData,
-      fetchUsers,
+      fetchMeta,
       fetchEntityGrid,
       fetchSortedEntityGrid,
       fetchPage,
       saveChanges: postRows,
-      addFilter,
+      fetchFiltered,
     },
   };
 }

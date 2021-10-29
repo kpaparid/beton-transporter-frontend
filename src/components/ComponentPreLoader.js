@@ -21,7 +21,7 @@ export const ComponentPreLoader = ({ show, logo = true }) => {
           <Image
             className="loader-element animate__animated animate__jackInTheBox"
             src={ReactLogo}
-            height={40}
+            height={400}
           />
         ) : (
           <FontAwesomeIcon

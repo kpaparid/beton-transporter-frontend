@@ -1,27 +1,13 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  forwardRef,
-  memo,
-  useRef,
-} from "react";
+import React, { useMemo, useCallback, forwardRef, memo, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import "../MyForm.css";
-import { green, imgInvalid, imgValid, red, validationType } from "../MyConsts";
+import { imgInvalid, imgValid, validationType } from "../MyConsts";
 import { MyFormSelect } from "../MyFormSelect";
 import { DateSelectorDropdown } from "../MyOwnCalendar";
-import {
-  calcInvalidation,
-  calcValidation,
-  formatInput,
-} from "../util/utilities";
+import { calcInvalidation, calcValidation } from "../util/utilities";
 import { isEqual } from "lodash";
-import LazyLoad from "react-lazyload";
-import TimePicker from "@mui/lab/TimePicker";
-import TextField from "@mui/material/TextField";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import LazyLoad from "react-lazyload";
+import { LazyLoad } from "react-observer-api";
 export const Input = memo((props) => {
   const {
     value = "",
@@ -100,7 +86,8 @@ export const Container = memo(
                   style={{ maxWidth, minWidth }}
                   onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
                 >
-                  {formatInput(value, type)}
+                  {value}
+                  {/* {formatInput(value, type)} */}
                 </span>
               </div>
               {measurement !== "" && (
@@ -124,11 +111,14 @@ export const Container = memo(
   isEqual
 );
 
-const LazyContainer = memo((props) => {
+export const LazyContainer = memo((props) => {
   return (
-    <LazyLoad className="w-100" placeholder={<div>{props.value}</div>}>
+    <LazyLoad
+      as="span"
+      className="w-100"
+      placeholder={<div>{props.value}</div>}
+    >
       <TextInput {...props} />
-      {/* <div>{props.value}</div> */}
     </LazyLoad>
   );
 }, isEqual);
@@ -153,14 +143,14 @@ export const TextInput = memo(
       const domRef = ref ? ref : backupRef;
 
       const handleTextAreaChange = useCallback((e) => {
-        onChange(e.target.value, "text");
+        onChange && onChange(e.target.value, "text");
       }, []);
       const handleDateChange = useCallback((value) => {
         console.log("CHNAGEEEEEEEEEEEEEEEEEEEEEEE", value);
-        onChange(value, "date");
+        onChange && onChange(value, "date");
       }, []);
       const handleSelectChange = useCallback((value) => {
-        onChange(value, "select");
+        onChange && onChange(value, "select");
       }, []);
       const handleOutsideClick = useCallback(() => {
         domRef.current.focus();
@@ -206,13 +196,6 @@ export const TextInput = memo(
                 ref={domRef}
                 style={{ width: "100%", maxWidth, minWidth }}
               />
-              {/* <TextareaAutosize
-                className={inputClassName}
-                {...rest}
-                onChange={handleTextAreaChange}
-                ref={domRef}
-                style={{ width: "100%" }}
-              /> */}
             </div>
           );
       }

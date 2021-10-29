@@ -116,7 +116,6 @@ export const DefaultFilter = memo(
     ];
     return (
       <CustomDropdown
-        id={"TourFilter"}
         as={ButtonGroup}
         toggleClassName="primary-btn"
         toggleStyle={{ transition: "none" }}

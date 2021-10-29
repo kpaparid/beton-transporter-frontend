@@ -29,6 +29,7 @@ import { MyRangeSlider } from "./MyRangeSlider";
 import { Box } from "@material-ui/system";
 import { Portal } from "react-portal";
 import { loadToursPage } from "../../api/apiMappers";
+import { toDate } from "date-fns";
 // dark 0
 // #485354  1
 // #037070  3
@@ -120,45 +121,8 @@ function filtersToUrl2(props) {
   return urli === "+" ? "" : urli;
   // + => &
 }
-export function calcFilters(
-  oldFilters,
-  { label, value = [], action, gte, lte }
-) {
-  const f =
-    oldFilters && oldFilters[label]
-      ? action === "toggle"
-        ? oldFilters[label].neq && oldFilters[label].neq.includes(value[0])
-          ? {
-              ...oldFilters,
-              [label]: {
-                ...oldFilters[label],
-                neq: oldFilters[label].neq.filter((e) => e !== value[0]),
-              },
-            }
-          : {
-              ...oldFilters,
-              [label]: {
-                ...oldFilters[label],
-                neq: [...oldFilters[label].neq, value[0]],
-              },
-            }
-        : action === "toggleAll"
-        ? { ...oldFilters, [label]: { ...oldFilters[label], neq: value } }
-        : { ...oldFilters, [label]: { neq: value, gte, lte } }
-      : { ...oldFilters, [label]: { neq: [...value], gte, lte } };
-  return f;
-}
-function filtersToUrl(filters) {
-  const c = Object.entries(filters).reduce((a, b) => {
-    const { neq, gte, lte } = b[1];
-    const neqLink = neq ? "&" + b[0] + "_ne=" + neq : "";
-    const gteLink = gte ? "&" + b[0] + "_gte=" + gte : "";
-    const lteLink = lte ? "&" + b[0] + "_lte=" + lte : "";
-    return a + "&" + neqLink + gteLink + lteLink;
-  }, "");
-  return c;
-}
 
+const toDateFormat = (date) => moment(date, "YYYY-MM-DD").format("DD/MM/YYYY");
 const dateToDay = (date) => moment(date[0], "DD/MM/YYYY").format("dddd");
 const calcDaysDifference = (arr) => {
   const t1 = moment(arr[0], "DD/MM/YYYY");
@@ -256,6 +220,7 @@ export const gridLabels = {
         text: "Date",
         type: "date",
         filterType: "date",
+        format: toDateFormat,
       },
       vehicle: {
         nanoid: nanoid(),
@@ -268,7 +233,7 @@ export const gridLabels = {
         nanoid: nanoid(),
         id: "workPlant",
         text: "Work Plant",
-        type: "text",
+        type: "constant",
         filterType: "checkbox",
       },
       cbm: {
@@ -286,29 +251,29 @@ export const gridLabels = {
       },
       arrival: {
         nanoid: nanoid(),
-        id: "departure",
-        text: "Departure",
+        id: "arrival",
+        text: "Arrival",
         type: "time",
       },
       kmDeparture: {
         nanoid: nanoid(),
         id: "kmDeparture",
         text: "Km at Departure",
-        type: "number",
+        type: "bigNumber",
         filterType: "range",
       },
       kmArrival: {
         nanoid: nanoid(),
         id: "kmArrival",
         text: "Km at Arrival",
-        type: "number",
+        type: "bigNumber",
         filterType: "range",
       },
       deliveryNr: {
         nanoid: nanoid(),
         id: "deliveryNr",
         text: "Delivery Nr",
-        type: "number",
+        type: "bigText",
         filterType: "checkbox",
       },
       driver: {
@@ -322,7 +287,7 @@ export const gridLabels = {
         nanoid: nanoid(),
         id: "buildingSite",
         text: "Building Site",
-        type: "text",
+        type: "bigText",
         filterType: "checkbox",
       },
       dischargeBegin: {
@@ -340,8 +305,9 @@ export const gridLabels = {
       dischargeType: {
         nanoid: nanoid(),
         id: "dischargeType",
-        text: "Discharge End",
-        type: "text",
+        text: "Discharge Type",
+        type: "constant",
+        filterType: "checkbox",
       },
       waitTime: {
         nanoid: nanoid(),
@@ -353,7 +319,7 @@ export const gridLabels = {
         nanoid: nanoid(),
         id: "other",
         text: "Other",
-        type: "text",
+        type: "bigText",
       },
     },
   },
@@ -845,7 +811,13 @@ function maxWidthByType(type) {
     ? "100px"
     : type === "time"
     ? "75px"
-    : "250px";
+    : type === "bigText"
+    ? "250px"
+    : type === "bigNumber"
+    ? "250px"
+    : type === "constant"
+    ? "200px"
+    : "75px";
 }
 
 export const grids = {
@@ -897,7 +869,6 @@ export const grids = {
 };
 
 export {
-  filtersToUrl,
   mapData,
   GRIDTYPE,
   useLoadData,

@@ -1,4 +1,5 @@
 var tours = require("./data/tours.json");
+var values = require("./data/values.json");
 var users = require("./data/users.json");
 var workHours = require("./data/workHours.json");
 var absent = require("./data/absent.json");
@@ -12,6 +13,7 @@ module.exports = function () {
     users,
     workHours,
     absent,
+    values,
     "workHours-bank": workHoursBank,
     "vacations-overview": vacationsOverview,
     // and so on

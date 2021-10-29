@@ -2,6 +2,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
 import { normalize, schema } from "normalizr";
 import {
+  getGridLabelFormat,
   getGridLabelLinks,
   getGridLabelProps,
   getGridLabels,
@@ -10,9 +11,58 @@ import {
   gridLabels,
 } from "../pages/myComponents/MyConsts";
 
+export function calcFilters(oldFilters, { label, value, action, gte, lte }) {
+  return oldFilters && oldFilters[label]
+    ? action === "toggle"
+      ? oldFilters[label].neq && oldFilters[label].neq.includes(value[0])
+        ? {
+            ...oldFilters,
+            [label]: {
+              ...oldFilters[label],
+              neq: oldFilters[label].neq.filter((e) => e !== value[0]),
+            },
+          }
+        : {
+            ...oldFilters,
+            [label]: {
+              ...oldFilters[label],
+              neq: [...oldFilters[label].neq, value[0]],
+            },
+          }
+      : action === "toggleAll"
+      ? {
+          ...oldFilters,
+          [label]: {
+            ...oldFilters[label],
+            neq:
+              oldFilters[label].neq &&
+              oldFilters[label].neq.length === value.length
+                ? []
+                : value,
+          },
+        }
+      : { ...oldFilters, [label]: { gte, lte } }
+    : { ...oldFilters, [label]: { neq: value && [...value], gte, lte } };
+}
+export function filtersToUrl(filters) {
+  return filters
+    ? Object.entries(filters).reduce((a, b) => {
+        const { neq, gte, lte } = b[1];
+        const neqLink =
+          neq && neq.length !== 0
+            ? neq.reduce((c, d) => c + "&" + b[0] + "_ne=" + d, "")
+            : "";
+        const gteLink = gte ? "&" + b[0] + "_gte=" + gte : "";
+        const lteLink = lte ? "&" + b[0] + "_lte=" + lte : "";
+        return a + neqLink + gteLink + lteLink;
+      }, "")
+    : "";
+}
+
 export function parsePagination({ res, page, limit }) {
   return {
-    paginationLinks: parseLinkHeader(res.headers.get("Link")),
+    paginationLinks:
+      res.headers.get("Link") && parseLinkHeader(res.headers.get("Link")),
     rowsCount: res.headers.get("X-Total-Count"),
     page,
     limit,
@@ -31,13 +81,18 @@ export function parseLinkHeader(linkHeader) {
   return Object.fromEntries(linkHeadersMap);
 }
 
-export function loadToursPage({ fetchEntityGrid, changeDate }, dispatch) {
-  return dispatch(
-    fetchEntityGrid({
-      entityId: "tours",
-      url: "tours",
-    })
-  ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))));
+export function loadToursPage(
+  { fetchEntityGrid, fetchMeta, changeDate },
+  dispatch
+) {
+  return dispatch(fetchMeta()).then(() =>
+    dispatch(
+      fetchEntityGrid({
+        entityId: "tours",
+        url: "tours",
+      })
+    ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))))
+  );
 }
 
 export function normalizeRows(data, nanoidLabelsTable) {
@@ -97,7 +152,6 @@ export function getTable(mObject, labelsByTableId, meta) {
       rows: tableRowsIds,
       selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
       selectedLabels: tableLabelIds,
-      meta: getGridMeta(tableId),
       nanoids: nanoids,
       ...meta,
     };
@@ -185,7 +239,12 @@ export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
       [tableId]: mObject[tableId].map(({ id, ...rest }) => {
         const d = Object.keys(rest)
           .map((idx) => ({
-            [nanoidsByLabelIdByTableId[tableId][idx]]: rest[idx],
+            [nanoidsByLabelIdByTableId[tableId][idx]]: getGridLabelFormat(
+              tableId,
+              idx
+            )
+              ? getGridLabelFormat(tableId, idx)(rest[idx])
+              : rest[idx],
           }))
           .reduce((a, b) => ({ ...a, ...b }), {});
         return { id, ...d };

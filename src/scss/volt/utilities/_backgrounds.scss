@@ -40,6 +40,22 @@
     }
   }
 }
+.checkboxFilterCard {
+  .btn-secondary:hover {
+    .form-check-input {
+      background-color: $tertiary;
+    }
+  }
+  .form-check-input:disabled {
+    opacity: 1;
+  }
+}
+.checkbox-row {
+  background-color: white;
+  &:hover {
+    background-color: lighten($primary, 76%) !important;
+  }
+}
 .select_user__control--is-focused {
   border-color: $light-blue !important;
   box-shadow: $box-shadow-inset-primary !important;
@@ -111,6 +127,36 @@
       background-color: white;
       tr {
         background-color: white !important;
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        /* Firefox */
+        input[type="number"] {
+          -moz-appearance: textfield;
+          border: 1px solid $primary;
+        }
+        .dummy,
+        textarea,
+        input[type="text"],
+        input[type="number"] {
+          background-color: white;
+          text-align: center;
+          resize: none;
+          vertical-align: bottom;
+          padding: 0;
+          border: 1px solid $primary;
+          overflow: hidden;
+          color: #0a3761;
+          &:focus-visible {
+            outline: 0;
+          }
+          &:focus-within {
+            box-shadow: 0 0 0 2.5px rgb(46, 54, 80, 60%);
+          }
+        }
         &:hover {
           background-color: lighten($primary, 76%) !important;
         }
@@ -138,12 +184,12 @@
     &:focus,
     &:hover,
     &:active {
-      border-color: $gray-600;
-      filter: brightness(100%);
+      border-color: $gray-600 !important;
+      filter: brightness(100%) !important;
     }
     &:indeterminate,
     &:checked {
-      background-color: $primary;
+      background-color: $primary !important;
     }
   }
   .pagination .page-item {

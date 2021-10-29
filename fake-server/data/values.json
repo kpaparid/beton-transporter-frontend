@@ -1,0 +1,113 @@
+[
+   {
+      "id":"vehicle",
+      "values":[
+         "702",
+         "703",
+         "706",
+         "709",
+         "710",
+         "713",
+         "715",
+         "716",
+         "717",
+         "720",
+         "721",
+         "722",
+         "723",
+         "919"
+      ]
+   },
+   {
+      "id":"user",
+      "values":[
+         "Christoph Hoffman",
+         "Alexander Morasch",
+         "Andreas Schopf",
+         "Artur Schipp",
+         "Bodo Martin",
+         "Kyriakos Paparidis",
+         "Dimitrios Tsafas",
+         "Christian Schulte",
+         "Hans Järgen Voeckel",
+         "Heinrich Heinz Bitter",
+         "Järgen Pott",
+         "Jurij Kravcuk",
+         "Matthias Benscheidt",
+         "Marc Benscheidt",
+         "Nabeh Albaradan",
+         "Rainer Kettler",
+         "Roy Schuldt",
+         "Silke Viete Benscheidt",
+         "Uwe Schwill",
+         "Waldemar Kasemir",
+         "Waldemar Mergel",
+         "Willhelm Zander"
+      ]
+   },
+   {
+      "id":"driver",
+      "values":[
+         "Christopf Hoffman",
+         "Alexander Morasch",
+         "Andreas Schopf",
+         "Artur Schipp",
+         "Bodo Martin",
+         "Kyriakos Paparidis",
+         "Dimitrios Tsafas",
+         "Christian Schulte",
+         "Hans Järgen Voeckel",
+         "Heinrich Heinz Bitter",
+         "Järgen Pott",
+         "Jurij Kravcuk",
+         "Nabeh Albaradan",
+         "Rainer Kettler",
+         "Roy Schuldt",
+         "Uwe Schwill",
+         "Waldemar Kasemir",
+         "Waldemar Mergel",
+         "Willhelm Zander"
+      ]
+   },
+   {
+      "id":"dischargeType",
+      "values":[
+         "Kran/Bombe",
+         "Rutsche",
+         "Pumpe",
+         "Rohr",
+         "Radlader",
+         "Schulbkarre",
+         "Sonstiges"
+      ]
+   },
+   {
+      "id": "workPlant",
+      "values":[
+         "Dortmund Holcim",
+         "Ludenscheid Holcim",
+         "Balve Holcim",
+         "Plettenberg Holcim",
+         "Unna Holcim",
+         "Luenen Holcim",
+         "Radevormwald Holcim",
+         "Wuppertal Holcim",
+         "Herne Holcim",
+         "Sonstige Holcim",
+         "Iserlohn Elskes",
+         "Witten Elskes",
+         "Dortmund Elskes",
+         "Kamen Elskes",
+         "Werl Elskes",
+         "Sonstige Elskes",
+         "Soest Hellwegbeton",
+         "Sonstige Hellwegbeton",
+         "Sundern TB Westenfeld",
+         "Neheim TB Westenfeld",
+         "Sprockhoevel TER",
+         "Menden Herbrueger",
+         "Meschede TB Meschede",
+         "Sonstige"
+      ]
+   }
+]

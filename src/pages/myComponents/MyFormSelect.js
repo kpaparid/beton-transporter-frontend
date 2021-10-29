@@ -22,71 +22,77 @@ export const MyFormSelect = (props) => {
   }));
   return (
     <>
-      {!hidden && (
-        <Select
-          placeholder={selectedValue}
-          options={options}
-          value={selectedValue}
-          className="w-100"
-          onChange={handleChange}
-          components={{
-            IndicatorSeparator: () => null,
-          }}
-          styles={{
-            control: (base) => ({
-              ...base,
-              border: 0,
-              boxShadow: 0,
-              minHeight: 21,
-              transition: "none",
-              width: "100%",
-              backgroundColor: "inherit",
-            }),
-            valueContainer: (base) => ({
-              ...base,
-              padding: 0,
-              paddingLeft: 27,
-              justifyContent: "center",
-              width: 8 * (selectedValue + "").length + 100,
-            }),
-            singleValue: (base) => ({
-              ...base,
-              padding: 0,
-              paddingLeft: 5,
-              paddingRight: 5,
-              color: "#2E3650",
-            }),
-            placeholder: (base) => ({
-              ...base,
-              padding: 0,
-              paddingLeft: 5,
-              paddingRight: 5,
-              color: "#2E3650",
-            }),
-            dropdownIndicator: (base) => ({
-              ...base,
-              padding: 0,
-              transition: "none",
-              color: "#2E3650",
-            }),
+      {availableValues && !hidden && (
+        <div
+          className="dummy w-100 overflow-visible"
+          // onClick="event.stopPropagation()"
+        >
+          <Select
+            placeholder={selectedValue}
+            options={options}
+            value={selectedValue}
+            className="w-100"
+            onChange={handleChange}
+            isSearchable={false}
+            components={{
+              IndicatorSeparator: () => null,
+            }}
+            styles={{
+              control: (base) => ({
+                ...base,
+                border: 0,
+                boxShadow: 0,
+                minHeight: 21,
+                transition: "none",
+                width: "100%",
+                backgroundColor: "inherit",
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                padding: 0,
+                paddingLeft: 27,
+                justifyContent: "center",
+                width: 8 * (selectedValue + "").length + 100,
+              }),
+              singleValue: (base) => ({
+                ...base,
+                padding: 0,
+                paddingLeft: 5,
+                paddingRight: 5,
+                color: "#2E3650",
+              }),
+              placeholder: (base) => ({
+                ...base,
+                padding: 0,
+                paddingLeft: 5,
+                paddingRight: 5,
+                color: "#2E3650",
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                padding: 0,
+                transition: "none",
+                color: "#2E3650",
+              }),
 
-            indicatorSeparator: (base) => ({ ...base, margin: 3 }),
-            indicatorsContainer: (base) => ({ ...base, paddingRight: 7 }),
-            input: (base) => ({
-              ...base,
-              padding: 0,
-              margin: 0,
-              color: "#2E3650",
-            }),
-          }}
-          theme={(theme) => ({
-            ...theme,
-            colors: {
-              ...theme.colors,
-              primary: "black",
-            },
-          })}
-        ></Select>
+              indicatorSeparator: (base) => ({ ...base, margin: 3 }),
+              indicatorsContainer: (base) => ({ ...base, paddingRight: 7 }),
+              input: (base) => ({
+                ...base,
+                padding: 0,
+                margin: 0,
+                color: "#2E3650",
+              }),
+            }}
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: "black",
+              },
+            })}
+          ></Select>
+        </div>
       )}
     </>
   );

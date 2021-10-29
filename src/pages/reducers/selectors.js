@@ -37,6 +37,13 @@ export const useGridSelectors = ({
     () => labelsSelector.selectEntities,
     [labelsSelector]
   );
+  const selectLoading = useCallback(
+    (state) =>
+      tablesSelector.selectById(state, entityId)
+        ? tablesSelector.selectById(state, entityId).loading
+        : true,
+    [tablesSelector, entityId]
+  );
   const selectSelectedLabels = useCallback(
     (state) =>
       tablesSelector.selectById(state, entityId)
@@ -102,12 +109,16 @@ export const useGridSelectors = ({
       ),
     [selectShownLabels, selectAllRows, selectAllRowsById]
   );
+  const selectConstants = useCallback(
+    (state) => metaSelector.selectById(state, "constants") || [],
+    [metaSelector]
+  );
   const selectPaginationData = useCallback(
     (state) =>
       (tablesSelector.selectById(state, entityId) &&
         tablesSelector.selectById(state, entityId).pagination) ||
       [],
-    [tablesSelector]
+    [tablesSelector, entityId]
   );
 
   const selectChanges = useCallback(
@@ -137,10 +148,10 @@ export const useGridSelectors = ({
         [
           selectShownLabels,
           selectAllLabelsById,
-          selectAvailableValuesById,
+          selectConstants,
           selectChangesOverRows,
         ],
-        (labelsIds, allLabelsById, availableValuesById, shownValues) => {
+        (labelsIds, allLabelsById, constants, shownValues) => {
           const shownLabels = labelsIds.map((id) => allLabelsById[id]);
           return shownValues.map((row) => ({
             id: row.id,
@@ -160,12 +171,12 @@ export const useGridSelectors = ({
                     ...rest,
                   })),
                 };
-                if (props.type !== "select") return { [label.id]: props };
+                if (props.type !== "constant") return { [label.id]: props };
                 else
                   return {
                     [label.id]: {
                       ...props,
-                      availableValues: availableValuesById[label.id],
+                      availableValues: constants[label.idx],
                     },
                   };
               })
@@ -398,6 +409,7 @@ export const useGridSelectors = ({
     selectItemsFilter,
     selectPaginationData,
     selectSortedHeadersReactTable,
+    selectLoading,
   };
 };
 
@@ -409,7 +421,7 @@ export const useGridCallbacks = ({
     toggleEdit,
     saveChanges,
     changeDate,
-    addFilter,
+    fetchFiltered,
     toggleColumn,
     fetchEntityGrid,
     fetchPage,
@@ -489,43 +501,43 @@ export const useGridCallbacks = ({
   const onToggleCheckboxFilter = useCallback(
     (filter) => {
       dispatch(
-        addFilter({ id: entityId, filter: { ...filter, action: "toggle" } })
+        fetchFiltered({ entityId, filter: { ...filter, action: "toggle" } })
       );
     },
-    [dispatch, entityId, addFilter]
+    [dispatch, entityId, fetchFiltered]
   );
   const onToggleAllCheckboxFilter = useCallback(
     (filter) => {
       dispatch(
-        addFilter({
-          id: entityId,
+        fetchFiltered({
+          entityId,
           filter: { ...filter, action: "toggleAll" },
         })
       );
     },
-    [dispatch, entityId, addFilter]
+    [dispatch, entityId, fetchFiltered]
   );
   const onChangeRangeFilter = useCallback(
     (filter) => {
       dispatch(
-        addFilter({
-          id: entityId,
+        fetchFiltered({
+          entityId,
           filter: { ...filter, action: "between" },
         })
       );
     },
-    [dispatch, entityId, addFilter]
+    [dispatch, entityId, fetchFiltered]
   );
   const onResetFilter = useCallback(
     (filter) => {
       dispatch(
-        addFilter({
-          id: entityId,
+        fetchFiltered({
+          entityId,
           filter: { ...filter, action: "reset" },
         })
       );
     },
-    [dispatch, entityId, addFilter]
+    [dispatch, entityId, fetchFiltered]
   );
   const onToggleLabel = useCallback(
     (columnId) => {
@@ -542,7 +554,7 @@ export const useGridCallbacks = ({
         })
       );
     },
-    [dispatch, entityId, fetchEntityGrid]
+    [dispatch, entityId, fetchPage]
   );
 
   return {
@@ -585,6 +597,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectItemsFilter,
     selectNestedCheckboxFilter,
     selectPaginationData,
+    selectLoading,
   } = useGridSelectors({ selectors, entityId });
 
   const {
@@ -665,6 +678,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onToggleSort,
     onCellChange,
     massEdit,
+    selectLoading,
     pagination: {
       selectPaginationData,
       paginationEnabled: true,

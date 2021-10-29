@@ -34,11 +34,10 @@ export const NestedDropdown = memo(
             >
               <CustomDropdown
                 ref={{ ref: ref }}
-                id={"TourFilterNested"}
                 as={as}
-                variant="white"
+                variant="transparent"
                 disabled={disabled}
-                className="w-100 shadow-button-none dropdown-row revertio"
+                className="w-100 shadow-button-none dropdown-row"
                 value={
                   <div className="d-flex w-100">
                     <div className="d-flex flex-fill">{text}</div>
@@ -70,7 +69,7 @@ export const NestedDropdown = memo(
 export const CheckboxRow = React.memo(
   ({ checked = true, onChange, className = "", disableCheckBox, children }) => {
     return (
-      <div className={"d-flex align-items-center " + className}>
+      <div className={"checkbox-row d-flex align-items-center " + className}>
         {!disableCheckBox && (
           <Form.Check
             checked={checked}

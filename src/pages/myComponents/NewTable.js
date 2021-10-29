@@ -1,37 +1,21 @@
 import React, {
   memo,
-  forwardRef,
   useCallback,
   useEffect,
   useState,
   useMemo,
+  Suspense,
 } from "react";
 import _ from "lodash";
 import isEqual from "lodash.isequal";
-import { useTable, usePagination, useSortBy, useRowSelect } from "react-table";
 import { useSelector } from "react-redux";
 // import { hiddenColumnsReselect } from "./MySelectors";
-import {
-  Card,
-  Form,
-  Nav,
-  Pagination,
-  Table,
-} from "@themesberg/react-bootstrap";
-import Input from "./TextArea/MyNewInput";
-import "./MyForm.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSortDown,
-  faSortUp,
-  faAngleLeft,
-  faAngleRight,
-  faAngleDoubleRight,
-  faAngleDoubleLeft,
-} from "@fortawesome/free-solid-svg-icons";
-import LazyLoad from "react-lazyload";
+import { Form, Table } from "@themesberg/react-bootstrap";
+// import LazyLoad from "react-lazyload";
 import { ComponentPreLoader } from "../../components/ComponentPreLoader";
+// import { LazyLoad } from "react-observer-api";
 
+const Lazer = React.lazy(() => import("./LazyInput"));
 export const RTables2 = memo(
   ({
     size = 20,
@@ -45,25 +29,28 @@ export const RTables2 = memo(
     onSelectAllRows,
     selectSelectedRows,
     onToggleSort,
+    selectLoading,
   }) => {
     const labels = useMemo(() => columns.map((e) => e.accessor), [columns]);
     const renderCell = useCallback(
-      (cell, index, isSelected) => {
+      (id, cell, index, isEditable) => {
         return (
           <EditableCell
             value={cell}
-            editModeSelector={editModeSelector}
+            // editModeSelector={editModeSelector}
             updateMyData={updateMyData}
             index={index}
-            id={0}
-            isSelected={isSelected}
+            id={id}
+            isEditable={isEditable}
           ></EditableCell>
         );
       },
-      [editModeSelector, updateMyData]
+      [updateMyData]
     );
+
     return (
       <>
+        {/* <ComponentPreLoader show={loading} /> */}
         <Table
           responsive
           className="align-items-center table-flush align-items-center user-table"
@@ -83,6 +70,7 @@ export const RTables2 = memo(
             labels={labels}
             selectHiddenColumns={selectHiddenColumns}
             selectSelectedRows={selectSelectedRows}
+            editModeSelector={editModeSelector}
             onSelectRow={onSelectRow}
             renderCell={renderCell}
           />
@@ -101,31 +89,50 @@ const TableBody = React.memo(
     selectSelectedRows,
     renderCell,
     onSelectRow,
+    editModeSelector,
+    massEdit,
     // selectedRows,
   }) => {
     const hiddenColumns = useSelector(selectHiddenColumns);
     const display = useMemo(() => hiddenColumns, [hiddenColumns]);
-
     const selectedRows = useSelector(selectSelectedRows);
-    // const display = useMemo(() => hiddenColumns, [hiddenColumns]);
+    const editMode = useSelector(editModeSelector);
+
     return (
-      <tbody>
-        {data.map((row, index) => {
-          // prepareRow(row);
-          return (
-            <RenderRow
-              row={row}
-              labels={labels}
-              key={"row" + index}
-              index={index}
-              display={display}
-              renderCell={renderCell}
-              onSelectRow={onSelectRow}
-              isSelected={selectedRows.includes(row.id)}
-            ></RenderRow>
-          );
-        })}
-      </tbody>
+      <>
+        <tbody>
+          {data.map((row, index) => {
+            // prepareRow(row);
+            const isSelected = selectedRows.includes(row.id);
+            const editable = editMode && isSelected;
+            return (
+              <tr key={"row" + index}>
+                {!massEdit && (
+                  <td className="px-2 py-1">
+                    <div className="d-flex justify-content-center w-100">
+                      <div>
+                        <IndeterminateCheckbox
+                          onChange={() => onSelectRow(row.id)}
+                          isSelected={isSelected}
+                        ></IndeterminateCheckbox>
+                      </div>
+                    </div>
+                  </td>
+                )}
+                <RenderRow
+                  row={row}
+                  labels={labels}
+                  key={"row" + index}
+                  index={index}
+                  display={display}
+                  renderCell={renderCell}
+                  isEditable={editable}
+                ></RenderRow>
+              </tr>
+            );
+          })}
+        </tbody>
+      </>
     );
   },
   isEqual
@@ -136,91 +143,56 @@ const RenderRow = memo(
     row,
     labels,
     index,
-    massEdit,
     renderCell,
-    onSelectRow,
     display,
-    isSelected,
+    isEditable,
     // selectedRows,
   }) => {
-    const handleChange = useCallback(() => {
-      onSelectRow(row.id);
-    }, [row.id]);
-
-    return (
-      <tr key={"row" + index}>
-        {!massEdit && (
-          <td className="px-2 py-1">
-            <div className="d-flex justify-content-center w-100">
-              <div>
-                <IndeterminateCheckbox
-                  onChange={handleChange}
-                  isSelected={isSelected}
-                ></IndeterminateCheckbox>
-              </div>
-            </div>
-          </td>
-        )}
-        {labels.map((label) => (
-          <TableCell
-            isSelected={isSelected}
-            cell={row[label]}
-            index={index}
-            key={label + "-" + index}
-            display={display[label]}
-            renderCell={renderCell}
-          />
-        ))}
-      </tr>
-    );
+    return labels.map((label) => (
+      <TableCell
+        id={row.id}
+        isEditable={isEditable}
+        cell={row[label]}
+        index={index}
+        key={label + "-" + index}
+        display={display[label]}
+        renderCell={renderCell}
+      />
+    ));
   },
   isEqual
 );
 
-const TableCell = memo(({ cell, index, display, renderCell, isSelected }) => {
-  return (
-    <td
-      style={{
-        display: display,
-      }}
-      className="px-2 py-1"
-    >
-      <div className="d-flex justify-content-center w-100">
-        <LazyLoad
-          offset={300}
-          placeholder={
-            <ComponentPreLoader show logo={false}></ComponentPreLoader>
-          }
-        >
-          {renderCell(cell, index, isSelected)}
-        </LazyLoad>
-      </div>
-    </td>
-  );
-}, isEqual);
+const TableCell = memo(
+  ({ id, cell, index, display, renderCell, isEditable }) => {
+    return (
+      <td
+        style={{
+          display: display,
+        }}
+        className="px-2 py-1"
+      >
+        <div className="d-flex justify-content-center w-100">
+          {renderCell(id, cell, index, isEditable)}
+        </div>
+      </td>
+    );
+  },
+  isEqual
+);
 const EditableCell = React.memo(
   ({
-    value: {
-      value: initialValue = "error",
-      label,
-      idx,
-      id: cellId,
-      links,
-      format,
-      ...rest
-    },
-    index,
-    isSelected,
     id,
+    index,
+    isEditable,
     updateMyData,
-    editModeSelector,
+    value: { value: initialValue, label, idx, links, ...rest },
   }) => {
-    // console.log({ connections });
     const [value, setValue] = useState(initialValue);
     const handleUpdateData = useCallback(
       (v = value) => {
         console.log("UPDATING DATA");
-        updateMyData(index, id, v, label, idx, cellId, links);
+        updateMyData(index, v, label, id, links);
       },
       [value, initialValue]
     );
@@ -228,35 +200,87 @@ const EditableCell = React.memo(
     const onChange = useCallback((value, type) => {
       setValue(value);
       debouncedUpdate(value);
-
-      // if (type === "select" || type === "date") handleUpdateData(value);
     }, []);
-    const onBlur = useCallback(() => console.log("blur"), []);
-    // const onBlur = useCallback(() => handleUpdateData(), [handleUpdateData]);
-
-    const editMode = useSelector(editModeSelector);
     useEffect(() => {
       setValue(initialValue);
     }, [initialValue]);
-    const editable = useMemo(
-      () => isSelected && editMode,
-      [editMode, isSelected]
-    );
+
     return (
-      <Input
-        extendable
-        {...{
-          value,
-          onChange,
-          onBlur,
-          editable,
-          ...rest,
-        }}
-      />
+      <>
+        <div className={isEditable ? "d-none" : "d-block"}>{value}</div>
+        {isEditable && (
+          <Suspense
+            fallback={
+              <ComponentPreLoader show logo={false}></ComponentPreLoader>
+            }
+          >
+            <Lazer {...rest} value={value} onChange={onChange}></Lazer>
+          </Suspense>
+        )}
+      </>
     );
   },
   isEqual
 );
+// const EditableCell2 = React.memo(
+//   ({
+//     value: {
+//       value: initialValue = "error",
+//       label,
+//       idx,
+//       id: cellId,
+//       links,
+//       format,
+//       ...rest
+//     },
+//     index,
+//     isSelected,
+//     id,
+//     updateMyData,
+//     editModeSelector,
+//   }) => {
+//     // console.log({ connections });
+//     const [value, setValue] = useState(initialValue);
+//     const handleUpdateData = useCallback(
+//       (v = value) => {
+//         console.log("UPDATING DATA");
+//         updateMyData(index, id, v, label, idx, cellId, links);
+//       },
+//       [value, initialValue]
+//     );
+//     const debouncedUpdate = _.debounce(handleUpdateData, 300);
+//     const onChange = useCallback((value, type) => {
+//       setValue(value);
+//       debouncedUpdate(value);
+//     }, []);
+//     useEffect(() => {
+//       setValue(initialValue);
+//     }, [initialValue]);
+//     const onBlur = useCallback(() => console.log("blur"), []);
+
+//     const editMode = useSelector(editModeSelector);
+
+//     const editable = useMemo(
+//       () => isSelected && editMode,
+//       [editMode, isSelected]
+//     );
+//     return (
+//       <LazyLoad className="w-100" placeholder={<div>hi</div>}>
+//         <Input
+//           extendable
+//           {...{
+//             value,
+//             onChange,
+//             onBlur,
+//             editable,
+//             ...rest,
+//           }}
+//         />
+//       </LazyLoad>
+//     );
+//   },
+//   isEqual
+// );
 
 const TableHead = ({
   columns,

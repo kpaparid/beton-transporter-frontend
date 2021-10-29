@@ -50,7 +50,7 @@ export const ReactTable = memo(
     // updateMyData(index, id, v, label, idx, cellId);
 
     const updateMyData = useCallback(
-      (rowIndex, columnId, value, labelId, labelIdx, cellId, links) => {
+      (rowIndex, value, labelId, rowId, links) => {
         console.log("updating data", value);
         skipResetRef.current = true;
         const oldRow = cells[rowIndex];
@@ -71,7 +71,7 @@ export const ReactTable = memo(
               {}
             ),
           };
-          onCellChange({ rowId: cellId, changes: changesById });
+          onCellChange({ rowId, changes: changesById });
           const changesIds = Object.keys(changesById);
           const mappedChanges = changesIds.reduce(
             (a, id) => ({
@@ -97,7 +97,7 @@ export const ReactTable = memo(
     useEffect(() => {
       if (!isEqual(cells, data)) {
         skipResetRef.current = true;
-        console.log("new data", data, cells);
+        // console.log("new data", data, cells);
         setCells(data);
       }
     }, [data, cells]);
