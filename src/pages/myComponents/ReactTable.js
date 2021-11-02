@@ -71,7 +71,6 @@ export const ReactTable = memo(
               {}
             ),
           };
-          onCellChange({ rowId, changes: changesById });
           const changesIds = Object.keys(changesById);
           const mappedChanges = changesIds.reduce(
             (a, id) => ({
@@ -83,12 +82,16 @@ export const ReactTable = memo(
           const newRow = { ...oldRow, ...mappedChanges };
           setCells((old) =>
             old.map((row, index) => {
+              const c = row;
               if (rowIndex === index) {
+                const cc = newRow;
                 return newRow;
               }
               return row;
             })
           );
+
+          onCellChange({ rowId, changes: changesById });
         }
       },
       [cells]
@@ -100,7 +103,7 @@ export const ReactTable = memo(
         // console.log("new data", data, cells);
         setCells(data);
       }
-    }, [data, cells]);
+    }, [data]);
     useEffect(() => {
       if (!isEqual(headers, columns)) {
         setColumns(headers);

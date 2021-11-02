@@ -1,0 +1,227 @@
+import isequal from "lodash.isequal";
+import TimePicker from "@mui/lab/TimePicker";
+import React, { memo, useCallback, useEffect, useRef } from "react";
+import TextField from "@mui/material/TextField";
+import moment from "moment";
+import { IconButton } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowsAltH,
+  faCalendar,
+  faLongArrowAltLeft,
+  faLongArrowAltRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { CustomDropdown } from "../CustomDropdown";
+import { ButtonGroup } from "react-bootstrap";
+import WheelPicker from "react-wheelpicker";
+import { Button, Card } from "@themesberg/react-bootstrap";
+import Scrollbars from "react-custom-scrollbars";
+export const MyTimePicker = memo(
+  ({
+    value = "00:00",
+    onChange,
+    disabled = false,
+    portal = true,
+    withButton = false,
+  }) => {
+    const ref = useRef(null);
+
+    const handleInputChange = useCallback((e) => {
+      const v = e.target.value;
+      onChange && onChange(v);
+    }, []);
+
+    return (
+      <>
+        <div className="d-block w-100">
+          <div className="d-flex flex-nowrap w-100 align-items-center">
+            {/* <input type="time" value="hi"></input> */}
+            <CustomDropdown
+              id={"TourFilter"}
+              as={ButtonGroup}
+              disabled={disabled}
+              ref={{ ref: ref }}
+              toggleAs="custom"
+              className={!withButton ? "w-100" : null}
+              portal={portal}
+              value={
+                <input
+                  type="text"
+                  value={value}
+                  onChange={handleInputChange}
+                ></input>
+              }
+            >
+              <TimeSelector value={value} onChange={onChange}></TimeSelector>
+            </CustomDropdown>
+          </div>
+        </div>
+      </>
+    );
+  },
+  isequal
+);
+
+export const TimeSelectorRange = memo(
+  ({ gte = "00:00", lte = "23:59", onChange }) => {
+    return (
+      <Card
+        className="my-card"
+        // style={{ width: "250px" }}
+      >
+        <Card.Header>
+          <div className="d-flex flex-nowrap w-100 justify-content-around fw-bolder">
+            <div className="col-5   text-center">{gte}</div>
+
+            <div className="d-flex col-2 justify-content-center align-items-center">
+              <FontAwesomeIcon
+                icon={faLongArrowAltLeft}
+                style={{ left: "0.2px", position: "relative" }}
+              ></FontAwesomeIcon>
+              <FontAwesomeIcon
+                icon={faLongArrowAltRight}
+                style={{ right: "0.2px", position: "relative" }}
+              ></FontAwesomeIcon>
+            </div>
+            <div className="col-5  text-center">{lte}</div>
+          </div>
+        </Card.Header>
+        <Card.Body>
+          <div className="d-flex">
+            <div className="col-5  justify-content-center">
+              <TimeSelectorBody
+                value={gte}
+                onChange={onChange}
+                // buttonSize="100%"
+              />
+            </div>
+            <div className="col-2" />
+
+            <div className="col-5  justify-content-center">
+              <TimeSelectorBody
+                value={lte}
+                onChange={onChange}
+                // buttonSize="50%"
+              />
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+    );
+  },
+  isequal
+);
+
+export const TimeSelector = memo(({ value = "00:00", onChange }) => {
+  const splitted = value.split(":");
+  const hour = (splitted.length >= 2 && splitted[0]) || "00";
+  const minute = (splitted.length >= 2 && splitted[1]) || "00";
+
+  return (
+    <Card className="my-card" style={{ width: "250px" }}>
+      <Card.Header>
+        <div className="d-flex flex-nowrap w-100 justify-content-center fw-bolder">
+          <div>{hour}</div>
+          <div className="px-2">:</div>
+          <div>{minute}</div>
+        </div>
+      </Card.Header>
+      <Card.Body>
+        <TimeSelectorBody value={value} onChange={onChange}></TimeSelectorBody>
+      </Card.Body>
+    </Card>
+  );
+});
+const TimeSelectorBody = memo(
+  ({ value = "00:00", onChange, buttonSize = "50px" }) => {
+    const splitted = value.split(":");
+    const hour = (splitted.length >= 2 && splitted[0]) || "00";
+    const minute = (splitted.length >= 2 && splitted[1]) || "00";
+
+    const ref1 = useRef(null);
+    const ref2 = useRef(null);
+
+    const hours = Array(24).fill();
+    const minutes = Array(60).fill();
+    const handleClick = useCallback(
+      (e) => {
+        e.target.id === "hour"
+          ? onChange && onChange(("0" + e.target.name).slice(-2) + ":" + minute)
+          : onChange && onChange(hour + ":" + ("0" + e.target.name).slice(-2));
+      },
+      [hour, minute]
+    );
+
+    useEffect(() => {
+      const h1 = (parseInt(hour) - 1) * 50;
+      const h2 = (parseInt(minute) - 1) * 50;
+
+      ref1.current.scrollTop(h1);
+      ref2.current.scrollTop(h2);
+    }, [hour, minute]);
+    return (
+      <div className="d-flex flex-nowrap w-100 justify-content-around">
+        <div
+          id="col-hours"
+          className="d-flex flex-fill justify-content-center"
+          style={{
+            overflow: "hidden",
+          }}
+        >
+          <Scrollbars
+            autoHeight
+            autoHide
+            style={{ marginBottom: "-8px", width: buttonSize }}
+            ref={ref1}
+          >
+            {hours.map((e, index) => (
+              <div className="d-flex justify-content-center">
+                <Button
+                  id="hour"
+                  name={index}
+                  onClick={handleClick}
+                  variant={index === parseInt(hour) ? "primary" : "light"}
+                  className="text-center rounded-0"
+                  style={{ width: "100%", height: "50px" }}
+                >
+                  {("0" + index).slice(-2)}
+                </Button>
+              </div>
+            ))}
+          </Scrollbars>
+        </div>
+        <div
+          id="col-minutes"
+          className="d-flex flex-fill justify-content-center"
+          style={{
+            overflow: "hidden",
+          }}
+        >
+          <Scrollbars
+            autoHeight
+            autoHide
+            style={{ marginBottom: "-8px", width: "auto" }}
+            ref={ref2}
+          >
+            {minutes.map((e, index) => (
+              <div className="d-flex justify-content-center">
+                <Button
+                  id="minute"
+                  name={index}
+                  onClick={handleClick}
+                  variant={index === parseInt(minute) ? "primary" : "light"}
+                  className="text-center rounded-0"
+                  style={{ width: buttonSize, height: "50px" }}
+                >
+                  {("0" + index).slice(-2)}
+                </Button>
+              </div>
+            ))}
+          </Scrollbars>
+        </div>
+      </div>
+    );
+  },
+  isequal
+);
+export default MyTimePicker;

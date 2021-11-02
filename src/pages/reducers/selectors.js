@@ -90,25 +90,25 @@ export const useGridSelectors = ({
       false,
     [entityId, editModesSelector]
   );
-  const selectAvailableValuesById = useMemo(
-    () =>
-      createSelector(
-        [selectShownLabels, selectAllRows, selectAllRowsById],
-        (labels, rows, allRowsById) =>
-          labels
-            .map((id) => ({
-              [id]: [
-                ...new Set(
-                  rows
-                    .map((row) => allRowsById[row][id])
-                    .filter((v) => v !== undefined)
-                ),
-              ],
-            }))
-            .reduce((a, b) => ({ ...a, ...b }), {})
-      ),
-    [selectShownLabels, selectAllRows, selectAllRowsById]
-  );
+  // const selectAvailableValuesById = useMemo(
+  //   () =>
+  //     createSelector(
+  //       [selectShownLabels, selectAllRows, selectAllRowsById],
+  //       (labels, rows, allRowsById) =>
+  //         labels
+  //           .map((id) => ({
+  //             [id]: [
+  //               ...new Set(
+  //                 rows
+  //                   .map((row) => allRowsById[row][id])
+  //                   .filter((v) => v !== undefined)
+  //               ),
+  //             ],
+  //           }))
+  //           .reduce((a, b) => ({ ...a, ...b }), {})
+  //     ),
+  //   [selectShownLabels, selectAllRows, selectAllRowsById]
+  // );
   const selectConstants = useCallback(
     (state) => metaSelector.selectById(state, "constants") || [],
     [metaSelector]
@@ -184,13 +184,7 @@ export const useGridSelectors = ({
           }));
         }
       ),
-    [
-      selectShownLabels,
-      selectAllLabelsById,
-      selectAvailableValuesById,
-      selectChangesOverRows,
-      entityId,
-    ]
+    [selectShownLabels, selectAllLabelsById, selectChangesOverRows, entityId]
   );
 
   const selectShownHeadersReactTable = useMemo(
@@ -242,7 +236,7 @@ export const useGridSelectors = ({
   const selectLabelsModal = useMemo(
     () =>
       createSelector(
-        [selectAllLabelsById, selectShownLabels, selectAvailableValuesById],
+        [selectAllLabelsById, selectShownLabels, selectConstants],
         (labelsById, allLabelsId, availableValues) => {
           return allLabelsId.map((labelId) => {
             const {
@@ -276,7 +270,7 @@ export const useGridSelectors = ({
           });
         }
       ),
-    [selectAllLabelsById, selectShownLabels, selectAvailableValuesById]
+    [selectAllLabelsById, selectShownLabels, selectConstants]
   );
   const selectCheckedFilters = useCallback(
     (state) =>
@@ -295,8 +289,8 @@ export const useGridSelectors = ({
   const paramsSelector = useCallback((state, params) => params, []);
 
   const selectFilter = useCallback(
-    (state) => filtersSelector.selectEntities(state),
-    [filtersSelector]
+    (state) => tablesSelector.selectById(state, entityId).filter || {},
+    [tablesSelector, entityId]
   );
 
   // const selectNestedCheckboxFilter = useMemo(
@@ -320,7 +314,7 @@ export const useGridSelectors = ({
   const selectItemsFilter = createSelector(
     [
       selectShownLabels,
-      selectAvailableValuesById,
+      selectConstants,
       selectAllLabelsById,
       selectCheckedFilters,
       selectFilter,
@@ -328,7 +322,7 @@ export const useGridSelectors = ({
     ],
     (
       shownLabels,
-      availableValuesById,
+      constants,
       allLabelsById,
       checkedFilters,
       selectFilter,
@@ -338,27 +332,32 @@ export const useGridSelectors = ({
         const text = allLabelsById[label].text;
         const filterType = allLabelsById[label].filterType;
         const checked = checkedFilters.includes(label);
+        const idx = allLabelsById[label].idx;
         const data =
           filterType === "date"
             ? {
                 month: moment(date).format("MM"),
                 year: moment(date).format("YYYY"),
               }
+            : filterType === "time"
+            ? { gte: 5, lte: 40 }
             : filterType === "range"
-            ? { min: 5, max: 40 }
-            : filterType !== undefined
-            ? availableValuesById[label].map((v) => ({
-                text: v,
-                checked:
-                  selectFilter[label] && selectFilter[label].neq
-                    ? !selectFilter[label].neq.includes(v)
-                    : true,
-              }))
+            ? { gte: 5, lte: 40 }
+            : filterType === "checkbox"
+            ? (constants[idx] &&
+                constants[idx].map((v) => ({
+                  text: v,
+                  checked:
+                    selectFilter[label] && selectFilter[label].neq
+                      ? !selectFilter[label].neq.includes(v)
+                      : true,
+                }))) ||
+              []
             : {};
         const disabled =
           !filterType ||
-          !availableValuesById[label] ||
-          availableValuesById[label].length <= 1;
+          (filterType === "checkbox" &&
+            (!constants[idx] || constants[idx].length <= 1));
 
         const checkedAll =
           selectFilter[label] && selectFilter[label].neq
@@ -396,7 +395,7 @@ export const useGridSelectors = ({
     selectHiddenHeadersReactTable,
     selectShownHeadersReactTable,
     selectReactTableData,
-    selectAvailableValuesById,
+    selectConstants,
     selectEditMode,
     selectShownRows,
     selectShownLabels,
@@ -638,13 +637,14 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     ),
     [entityId, onChangeDate]
   );
-  const nestedFilterComponent = useMemo(
-    () => (
+  const nestedFilterComponent = useCallback(
+    (props) => (
       <FilterComponent
         onToggleCheckbox={onToggleCheckboxFilter}
         onToggleAllCheckbox={onToggleAllCheckboxFilter}
         onChangeRange={onChangeRangeFilter}
         onReset={onResetFilter}
+        {...props}
       ></FilterComponent>
     ),
     [
@@ -712,8 +712,6 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     modalProps,
     filterProps,
   };
-
   const titleProps = { title };
-
   return { tableProps, buttonGroupProps, titleProps };
 };

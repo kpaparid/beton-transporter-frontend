@@ -83,6 +83,8 @@ const TableButtons = forwardRef(
          className="btn-toolbar flex-wrap justify-content-end"
          variant="danger"
        > */}
+
+        {filterProps && <Filter {...filterProps}></Filter>}
         {(selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn
             disabled={editMode}
@@ -125,7 +127,6 @@ const TableButtons = forwardRef(
           ></MyBtn>
         )}
 
-        {filterProps && <Filter {...filterProps}></Filter>}
         {editMode && (
           <MyBtn
             variant="danger"

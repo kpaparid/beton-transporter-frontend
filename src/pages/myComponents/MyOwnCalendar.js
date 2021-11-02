@@ -43,13 +43,11 @@ export const DateSelectorDropdown = memo(
     Input,
   }) => {
     const ref = useRef(null);
-    // const [text, setText] = useState(value);
     const handleSelectorChange = useCallback((value) => {
       moment(value, "D/M/YYYY", true).isValid() && onChange(value);
     }, []);
     const handleInputChange = useCallback((e) => {
       const v = e.target.value;
-      // onChange && onChange(v.length === 2 || v.length === 5 ? v + "/" : v);
       onChange && onChange(v);
     }, []);
     const domInput = useCallback(
@@ -57,9 +55,12 @@ export const DateSelectorDropdown = memo(
         Input ? (
           <Input {...props} autoFocus></Input>
         ) : (
-          <div className="d-block w-100 text-center">
-            <TextareaAutosize {...props} style={inputStyle} />
-          </div>
+          <input
+            type="text"
+            className="text-center"
+            {...props}
+            style={inputStyle}
+          />
         ),
       [Input, inputStyle]
     );
@@ -442,7 +443,7 @@ export const MonthButton = (props) => {
     <>
       <div className="fluid-container p-1">
         <Button
-          className="w-100"
+          className="w-100 btn-month"
           variant={variant}
           onClick={onClick}
           onMouseDown={(e) => e.preventDefault()}
@@ -568,7 +569,7 @@ const MonthSelectorComponent = memo((props) => {
 
   const colorize = useCallback(
     (m) => {
-      return m === activeMonth ? "primary" : "light";
+      return m === activeMonth ? "primary" : "light ";
     },
     [activeMonth]
   );
@@ -579,16 +580,24 @@ const MonthSelectorComponent = memo((props) => {
     <>
       <Card
         border="light"
-        className="shadow-sm flex-fill"
+        className="shadow-sm flex-fill month-selector"
         style={{ width: "250px", minWidth: "250px" }}
       >
         <Card.Body>
           <div className="container-fluid d-flex p-0 mb-3 justify-content-between align-items-center">
-            <Button variant="primary" onClick={() => handlerYearChange(-1)}>
+            <Button
+              className="btn-arrow-left"
+              variant="primary"
+              onClick={() => handlerYearChange(-1)}
+            >
               <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
             </Button>
             <h5 className="text-center m-0">{year}</h5>
-            <Button variant="primary" onClick={() => handlerYearChange(1)}>
+            <Button
+              className="btn-arrow-right"
+              variant="primary"
+              onClick={() => handlerYearChange(1)}
+            >
               <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
             </Button>
           </div>

@@ -18,6 +18,7 @@ export const CustomDropdown = forwardRef(
       toggleAs = "default",
       toggleStyle = {},
       portal = true,
+      drop,
     },
     { ref, refList = [] }
   ) => {
@@ -42,6 +43,7 @@ export const CustomDropdown = forwardRef(
         show={!disabled && show}
         onToggle={handleToggle}
         disabled={disabled}
+        align="start"
       >
         <Dropdown.Toggle
           as={toggleAsComponent}
@@ -54,12 +56,22 @@ export const CustomDropdown = forwardRef(
         </Dropdown.Toggle>
         {portal ? (
           <Portal>
-            <Dropdown.Menu ref={ref} className={"m-0 p-0 " + menuClassName}>
+            <Dropdown.Menu
+              flip={false}
+              ref={ref}
+              className={"m-0 p-0 border border-0 " + menuClassName}
+            >
               {children}
             </Dropdown.Menu>
           </Portal>
         ) : (
-          <Dropdown.Menu ref={ref} className={"p-0 " + menuClassName}>
+          <Dropdown.Menu
+            popperConfig={{
+              modifiers: [{ name: "offset", options: { offset: [-250, 0] } }],
+            }}
+            ref={ref}
+            className={"p-0 border border-0 " + menuClassName}
+          >
             {children}
           </Dropdown.Menu>
         )}

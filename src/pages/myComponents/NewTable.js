@@ -191,10 +191,9 @@ const EditableCell = React.memo(
     const [value, setValue] = useState(initialValue);
     const handleUpdateData = useCallback(
       (v = value) => {
-        console.log("UPDATING DATA");
         updateMyData(index, v, label, id, links);
       },
-      [value, initialValue]
+      [value, index, label, id, links]
     );
     const debouncedUpdate = _.debounce(handleUpdateData, 300);
     const onChange = useCallback((value, type) => {

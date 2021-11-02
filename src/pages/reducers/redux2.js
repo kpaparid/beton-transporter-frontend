@@ -425,7 +425,7 @@ function createGenericSlice(sliceName) {
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
         const mapped = mapPromiseData(rest, entityId);
-
+        const c = data.map((e) => e.buildingSite);
         const { tables, rows, labels, editModes } = normalizeApi({
           data: mapped,
           meta: {

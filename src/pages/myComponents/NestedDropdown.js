@@ -1,9 +1,16 @@
 import React, { forwardRef, memo, useCallback } from "react";
-import { ButtonGroup, Dropdown, Form } from "@themesberg/react-bootstrap";
+import {
+  ButtonGroup,
+  Button,
+  Form,
+  Accordion,
+} from "@themesberg/react-bootstrap";
 import { CustomDropdown } from "./CustomDropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { isEqual } from "lodash";
+import { Card } from "react-bootstrap";
+import AccordionComponent from "../../components/AccordionComponent";
 
 export const NestedDropdown = memo(
   forwardRef(
@@ -24,44 +31,43 @@ export const NestedDropdown = memo(
           },
           index
         ) => {
-          return (
-            <CheckboxRow
-              key={"DropdownRow-" + id + "-" + index}
-              checked={checked}
-              onChange={() => onToggleItem(id)}
-              displayArrow={displayArrow}
-              disableCheckBox={disableCheckBox}
-            >
-              <CustomDropdown
-                ref={{ ref: ref }}
-                as={as}
-                variant="transparent"
-                disabled={disabled}
-                className="w-100 shadow-button-none dropdown-row"
-                value={
-                  <div className="d-flex w-100">
-                    <div className="d-flex flex-fill">{text}</div>
-                    {displayArrow && (
-                      <div className={`dropdown-arrow text-right`}>
-                        <FontAwesomeIcon
-                          icon={faAngleRight}
-                          className="dropdown-arrow ms-3"
-                        />
-                      </div>
-                    )}
-                  </div>
-                }
+          return {
+            id: index,
+            eventKey: "panel-" + index,
+            title: (
+              <CheckboxRow
+                key={"DropdownRow-" + id + "-" + index}
+                checked={checked}
+                onChange={() => onToggleItem(id)}
+                disableCheckBox={disableCheckBox}
               >
-                {/* <Dropdown.Item className="p-0"> */}
-                {React.cloneElement(component, { ...props })}
-                {/* {children} */}
-                {/* </Dropdown.Item> */}
-              </CustomDropdown>
-            </CheckboxRow>
-          );
+                <span className="h6 mb-0 fw-bold">{text}</span>
+              </CheckboxRow>
+            ),
+            description: !disabled && component(props),
+            disabled: disabled,
+          };
         }
       );
-      return items;
+      return (
+        <>
+          <Card variant="secondary">
+            <Card.Header className="p-0">
+              <Button
+                variant="secondary"
+                className="w-100 rounded-0 rounded-top "
+              >
+                Reset All
+              </Button>
+            </Card.Header>
+            <Card.Body className="p-0 rounded-0 d-flex justify-content-center">
+              <div>
+                <AccordionComponent data={items} style={{ width: "400px" }} />
+              </div>
+            </Card.Body>
+          </Card>
+        </>
+      );
     }
   ),
   isEqual

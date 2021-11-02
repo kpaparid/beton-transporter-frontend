@@ -1,5 +1,9 @@
 import React, { memo, useCallback, useMemo } from "react";
-import { faAngleDown, faFilter } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleDown,
+  faFilter,
+  faSlidersH,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonGroup } from "@themesberg/react-bootstrap";
 import { forwardRef, useRef } from "react";
@@ -119,14 +123,9 @@ export const DefaultFilter = memo(
         as={ButtonGroup}
         toggleClassName="primary-btn"
         toggleStyle={{ transition: "none" }}
-        menuClassName="py-1"
+        menuClassName="py-1 filter-dropdown"
         ref={{ ref: ref1, refList: [ref1, ref2] }}
-        value={
-          <>
-            {/* Filter */}
-            <FontAwesomeIcon icon={faFilter} />
-          </>
-        }
+        value={<FontAwesomeIcon icon={faSlidersH} />}
       >
         {items}
       </CustomDropdown>

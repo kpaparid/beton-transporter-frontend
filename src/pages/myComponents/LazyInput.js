@@ -4,6 +4,7 @@ import { DateSelectorDropdown } from "./MyOwnCalendar";
 // import { LazyLoad } from "react-observer-api";
 import TextareaAutosize from "react-textarea-autosize";
 import { isEqual } from "lodash";
+import TimePicker from "./TextArea/TimePicker";
 
 // const LazyInput = memo(
 //   ({ onChange, inputClassName = "", className = "", ...rest }) => {
@@ -78,15 +79,15 @@ export const LazyInput = memo(
         domRef.current.focus();
       }, []);
       switch (type) {
-        // case "date":
-        //   return (
-        // <DateSelectorDropdown
-        //   className={className}
-        //   onChange={handleDateChange}
-        //   {...rest}
-        //   inputStyle={{ maxWidth, minWidth }}
-        // />
-        //   );
+        case "date":
+          return (
+            <DateSelectorDropdown
+              className={className}
+              onChange={handleDateChange}
+              {...rest}
+              inputStyle={{ maxWidth, minWidth }}
+            />
+          );
         case "nonEditable":
           return (
             <div className={"d-block text-center disabled" + className}>
@@ -114,19 +115,27 @@ export const LazyInput = memo(
               style={{ width: maxWidth }}
             />
           );
-
-        // case "constant":
-        //   return (
-        //     <MyFormSelect
-        //       className={className}
-        //       onChange={handleSelectChange}
-        //       availableValues={availableValues}
-        //       {...rest}
-        //       maxWidth={maxWidth}
-        //       minWidth={minWidth}
-        //       labelIsDisabled
-        //     />
-        //   );
+        case "time":
+          return (
+            <TimePicker
+              className={inputClassName}
+              {...rest}
+              onChange={handleDateChange}
+              style={{ width: maxWidth }}
+            />
+          );
+        case "constant":
+          return (
+            <MyFormSelect
+              className={className}
+              onChange={handleSelectChange}
+              availableValues={availableValues}
+              {...rest}
+              maxWidth={maxWidth}
+              minWidth={minWidth}
+              labelIsDisabled
+            />
+          );
         default:
           return (
             <div

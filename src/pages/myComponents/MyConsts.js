@@ -30,6 +30,11 @@ import { Box } from "@material-ui/system";
 import { Portal } from "react-portal";
 import { loadToursPage } from "../../api/apiMappers";
 import { toDate } from "date-fns";
+import TimePicker from "@mui/lab/TimePicker";
+import MyTimePicker, {
+  TimeSelector,
+  TimeSelectorRange,
+} from "./TextArea/TimePicker";
 // dark 0
 // #485354  1
 // #037070  3
@@ -248,33 +253,32 @@ export const gridLabels = {
         id: "departure",
         text: "Departure",
         type: "time",
+        filterType: "time",
       },
       arrival: {
         nanoid: nanoid(),
         id: "arrival",
         text: "Arrival",
         type: "time",
+        filterType: "time",
       },
       kmDeparture: {
         nanoid: nanoid(),
         id: "kmDeparture",
         text: "Km at Departure",
         type: "bigNumber",
-        filterType: "range",
       },
       kmArrival: {
         nanoid: nanoid(),
         id: "kmArrival",
         text: "Km at Arrival",
         type: "bigNumber",
-        filterType: "range",
       },
       deliveryNr: {
         nanoid: nanoid(),
         id: "deliveryNr",
         text: "Delivery Nr",
         type: "bigText",
-        filterType: "checkbox",
       },
       driver: {
         nanoid: nanoid(),
@@ -295,12 +299,14 @@ export const gridLabels = {
         id: "dischargeBegin",
         text: "Discharge Begin",
         type: "time",
+        filterType: "time",
       },
       dischargeEnd: {
         nanoid: nanoid(),
         id: "dischargeEnd",
         text: "Discharge End",
         type: "time",
+        filterType: "time",
       },
       dischargeType: {
         nanoid: nanoid(),
@@ -314,6 +320,7 @@ export const gridLabels = {
         id: "waitTime",
         text: "Time Waiting",
         type: "number",
+        filterType: "range",
       },
       other: {
         nanoid: nanoid(),
@@ -782,6 +789,9 @@ const FilterComponent = memo((props) => {
   const handleChangeRangeSlider = useCallback((values) => {
     onChangeRange({ label, gte: values[0], lte: values[1] });
   }, []);
+  const handleChangeTimePicker = useCallback((values) => {
+    onChangeRange({ label, gte: values[0], lte: values[1] });
+  }, []);
   const debouncedChangeRangeSlider = debounce(handleChangeRangeSlider, 800);
   switch (type) {
     case "checkbox":
@@ -792,14 +802,16 @@ const FilterComponent = memo((props) => {
           onToggleOne={toggleOne}
         />
       );
+    case "time":
+      return <TimeSelectorRange></TimeSelectorRange>;
     case "range":
       return <MyRangeSlider onChange={debouncedChangeRangeSlider} />;
-    case "date":
-      return (
-        <DateSelector {...rest.data} disableMonthSwap onChange={dateChange} />
-      );
+    // case "date":
+    //   return (
+    //     <DateSelector {...rest.data} disableMonthSwap onChange={dateChange} />
+    //   );
     default:
-      break;
+      return <div>error</div>;
   }
 }, isEqual);
 function maxWidthByType(type) {

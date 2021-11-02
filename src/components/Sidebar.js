@@ -51,7 +51,7 @@ const Sidebar = (props = {}) => {
           >
             <span>
               <span className="sidebar-icon">
-                <FontAwesomeIcon icon={icon} />{" "}
+                <FontAwesomeIcon icon={icon} />
               </span>
               <span className="sidebar-text">{title}</span>
             </span>
@@ -300,7 +300,6 @@ const Sidebar = (props = {}) => {
                 <NavItem title="Toasts" link={Routes.Toasts.path} />
                 <NavItem title="Tooltips" link={Routes.Tooltips.path} />
               </CollapsableNavItem>
-              {/* <NavItem external title="Themesberg" link="https://themesberg.com" target="_blank" image={ThemesbergLogo} /> */}
             </Nav>
           </div>
         </SimpleBar>

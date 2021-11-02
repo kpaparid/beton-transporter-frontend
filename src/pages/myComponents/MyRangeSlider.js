@@ -25,12 +25,18 @@ ValueLabelComponent.propTypes = {
 };
 
 const RangeInput = styled(Input)(({ theme }) => ({
-  color: "#3a8589",
+  // color: "#3a8589",
   height: 3,
   padding: "13px 0px",
   textAlign: "center",
   "& .MuiInput-input": {
     textAlign: "center",
+  },
+  "&:not(.Mui-disabled):hover::before": {
+    borderColor: "#567ba0",
+  },
+  "&:not(.Mui-disabled)::after": {
+    borderColor: "#ff9751",
   },
   "& input[type=number]": {
     MozAppearance: "textfield",
@@ -42,15 +48,6 @@ const RangeInput = styled(Input)(({ theme }) => ({
   "& input[type=number]::-webkit-inner-spin-button": {
     WebkitAppearance: "none",
     margin: 0,
-  },
-  "& .MuiSlider-thumb": {
-    height: 27,
-    width: 27,
-    backgroundColor: "#fff",
-    border: "1px solid currentColor",
-    "&:hover": {
-      boxShadow: "0 0 0 8px rgba(58, 133, 137, 0.16)",
-    },
   },
 }));
 
@@ -64,9 +61,9 @@ const MySlider = styled(Slider)(({ theme }) => ({
     width: 27,
     backgroundColor: "#fff",
     border: "1px solid currentColor",
-    "&:hover": {
-      boxShadow: "0 0 0 8px rgba(58, 133, 137, 0.16)",
-    },
+    // "&:hover": {
+    //   boxShadow: "0 0 0 8px rgba(58, 133, 137, 0.16)",
+    // },
     "& .bar": {
       height: 9,
       width: 1,
@@ -101,8 +98,8 @@ ThumbComponent.propTypes = {
   children: PropTypes.node,
 };
 
-export const MyRangeSlider = React.memo(({ onChange }) => {
-  const [value, setValue] = React.useState([20, 50]);
+export const MyRangeSlider = React.memo(({ onChange, min = 0, max = 200 }) => {
+  const [value, setValue] = React.useState([min, max]);
 
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);
@@ -114,34 +111,33 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
       index === 0
         ? [event.target.value, value[1]]
         : [value[0], event.target.value];
-    setValue(newValue);
-    onChange(newValue);
+    if (newValue !== value) {
+      setValue(newValue);
+      onChange(newValue);
+    }
   };
 
-  // const handleBlur = () => {
-  //   if (value < 0) {
-  //     setValue([0]);
-  //   } else if (value > 100) {
-  //     setValue([0,100]);
-  //   }
-  // };
-
   return (
-    <Box sx={{ maxWidth: 300, minWidth: 240 }}>
-      <Card.Body>
+    <Card className=' my-card"'>
+      <Card.Body className="mui-slider">
         <div className="d-flex flex-wrap">
-          <div className="col-12">
+          <div
+            className="col-12"
+            style={{ paddingLeft: "1.9rem", paddingRight: "1.9rem" }}
+          >
             <MySlider
               components={{ Thumb: ThumbComponent }}
               getAriaLabel={(index) =>
                 index === 0 ? "Minimum price" : "Maximum price"
               }
+              min={min}
+              max={max}
               value={value}
               onChange={handleSliderChange}
               // valueLabelDisplay="on"
             />
           </div>
-          <div className="container p-0 d-flex justify-content-between">
+          <div className="container p-0 pt-3 d-flex justify-content-between">
             <div className="col-4">
               <RangeInput
                 value={value[0]}
@@ -149,10 +145,11 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
                 onChange={(e) => handleInputChange(e, 0)}
                 // disableUnderline
                 // onBlur={handleBlur}
+                className="text-center w-100"
                 inputProps={{
-                  step: 10,
-                  min: 0,
-                  max: 100,
+                  step: 1,
+                  min: min,
+                  max: max,
                   type: "number",
                   "aria-labelledby": "input-slider",
                 }}
@@ -164,11 +161,11 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
                 size="small"
                 onChange={(e) => handleInputChange(e, 1)}
                 // onBlur={handleBlur}
-                className="text-center"
+                className="text-center w-100"
                 inputProps={{
-                  step: 10,
-                  min: 0,
-                  max: 100,
+                  step: 1,
+                  min: min,
+                  max: max,
                   type: "number",
                   "aria-labelledby": "input-slider",
                 }}
@@ -177,6 +174,6 @@ export const MyRangeSlider = React.memo(({ onChange }) => {
           </div>
         </div>
       </Card.Body>
-    </Box>
+    </Card>
   );
 }, isEqual);
