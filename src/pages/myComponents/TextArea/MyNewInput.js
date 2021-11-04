@@ -3,7 +3,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import "../MyForm.css";
 import { imgInvalid, imgValid, validationType } from "../MyConsts";
 import { MyFormSelect } from "../MyFormSelect";
-import { DateSelectorDropdown } from "../MyOwnCalendar";
+import { DateSelectorDropdown } from "./DatePicker";
 import { calcInvalidation, calcValidation } from "../util/utilities";
 import { isEqual } from "lodash";
 // import LazyLoad from "react-lazyload";

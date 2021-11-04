@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
 import { Button } from "@themesberg/react-bootstrap";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
-import { primaryVariant } from "./MyConsts";
 
-import "./MyForm.css";
-import { editMode } from "./MySelectors";
+import "../MyForm.css";
 
 const defaultVariant = "primary";
 

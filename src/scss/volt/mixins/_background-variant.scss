@@ -2,22 +2,24 @@
 
 @mixin btn-variant($parent, $color) {
   #{$parent} {
-    @if $color == $danger {
-      background-color: $default !important;
-      border-color: $default !important;
+    @if $color == $inverse {
+      background-color: $color !important;
+      border-color: $color !important;
       &:hover {
-        background-color: $color !important;
-        border-color: $color !important;
+        background-color: $very-light-tertiary !important;
+        color: $dark;
+        border-color: $very-light-tertiary !important;
       }
       &:focus {
-        background-color: $color !important;
-        border-color: $color !important;
+        background-color: $very-light-tertiary !important;
+        border-color: $very-light-tertiary !important;
         box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
-          0 1px 1px rgb(46 54 80 / 8%), 0 0 0 0.08rem rgb($color, 50%);
+          0 1px 1px rgb(46 54 80 / 8%), 0 0 0 0.08rem rgb($light-tertiary, 50%);
       }
     } @else if $color == $primary {
       background-color: $color !important;
       &:hover {
+        color: white;
         background-color: lighten($color, 20%) !important;
         border-color: lighten($color, 20%) !important;
       }

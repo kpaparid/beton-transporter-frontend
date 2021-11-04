@@ -1,22 +1,17 @@
 import {
   faDownload,
   faEdit,
-  faEraser,
   faPlus,
-  faRecycle,
   faSave,
   faTrash,
   faWindowClose,
 } from "@fortawesome/free-solid-svg-icons";
 import React, { useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ButtonGroup } from "@themesberg/react-bootstrap";
 import { forwardRef, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ACTIONS } from "../reducers/redux";
-import AddRowModal from "./AddRowModal";
-import { BreakBtn, DownloadBtn, EditBtn, MyBtn, SaveBtn } from "./MyButtons";
-import { Filter } from "./Table/TableLabel";
+import { useSelector } from "react-redux";
+import { MyBtn } from "./MyButtons";
+import { Filter } from "./TableLabel";
 
 const TableButtons = forwardRef(
   (

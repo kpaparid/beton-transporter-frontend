@@ -11,7 +11,7 @@ import {
   faLongArrowAltLeft,
   faLongArrowAltRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { CustomDropdown } from "../CustomDropdown";
+import { CustomDropdown } from "../Filters/CustomDropdown";
 import { ButtonGroup } from "react-bootstrap";
 import WheelPicker from "react-wheelpicker";
 import { Button, Card } from "@themesberg/react-bootstrap";
@@ -35,7 +35,6 @@ export const MyTimePicker = memo(
       <>
         <div className="d-block w-100">
           <div className="d-flex flex-nowrap w-100 align-items-center">
-            {/* <input type="time" value="hi"></input> */}
             <CustomDropdown
               id={"TourFilter"}
               as={ButtonGroup}
@@ -45,11 +44,7 @@ export const MyTimePicker = memo(
               className={!withButton ? "w-100" : null}
               portal={portal}
               value={
-                <input
-                  type="text"
-                  value={value}
-                  onChange={handleInputChange}
-                ></input>
+                <input type="text" value={value} onChange={handleInputChange} />
               }
             >
               <TimeSelector value={value} onChange={onChange}></TimeSelector>
@@ -64,11 +59,11 @@ export const MyTimePicker = memo(
 
 export const TimeSelectorRange = memo(
   ({ gte = "00:00", lte = "23:59", onChange }) => {
+    const handleClick = useCallback((v) => {
+      onChange && onChange(v);
+    }, []);
     return (
-      <Card
-        className="my-card"
-        // style={{ width: "250px" }}
-      >
+      <Card className="my-card">
         <Card.Header>
           <div className="d-flex flex-nowrap w-100 justify-content-around fw-bolder">
             <div className="col-5   text-center">{gte}</div>
@@ -91,7 +86,7 @@ export const TimeSelectorRange = memo(
             <div className="col-5  justify-content-center">
               <TimeSelectorBody
                 value={gte}
-                onChange={onChange}
+                onChange={(v) => handleClick({ gte: v, lte })}
                 // buttonSize="100%"
               />
             </div>
@@ -100,7 +95,7 @@ export const TimeSelectorRange = memo(
             <div className="col-5  justify-content-center">
               <TimeSelectorBody
                 value={lte}
-                onChange={onChange}
+                onChange={(v) => handleClick({ gte, lte: v })}
                 // buttonSize="50%"
               />
             </div>
@@ -155,24 +150,29 @@ const TimeSelectorBody = memo(
     useEffect(() => {
       const h1 = (parseInt(hour) - 1) * 50;
       const h2 = (parseInt(minute) - 1) * 50;
-
       ref1.current.scrollTop(h1);
       ref2.current.scrollTop(h2);
     }, [hour, minute]);
     return (
       <div className="d-flex flex-nowrap w-100 justify-content-around">
-        <div
-          id="col-hours"
-          className="d-flex flex-fill justify-content-center"
-          style={{
-            overflow: "hidden",
-          }}
-        >
+        <div id="col-hours" className="d-flex flex-fill justify-content-center">
           <Scrollbars
             autoHeight
             autoHide
-            style={{ marginBottom: "-8px", width: buttonSize }}
+            style={{
+              marginBottom: "0px",
+              width: buttonSize,
+            }}
+            autoHeightMin={50}
+            autoHeightMax={200}
             ref={ref1}
+            renderTrackHorizontal={(props) => (
+              <div
+                {...props}
+                style={{ display: "none" }}
+                className="track-horizontal"
+              />
+            )}
           >
             {hours.map((e, index) => (
               <div className="d-flex justify-content-center">
@@ -193,15 +193,21 @@ const TimeSelectorBody = memo(
         <div
           id="col-minutes"
           className="d-flex flex-fill justify-content-center"
-          style={{
-            overflow: "hidden",
-          }}
         >
           <Scrollbars
             autoHeight
             autoHide
-            style={{ marginBottom: "-8px", width: "auto" }}
+            style={{ marginBottom: "0px", width: "auto" }}
             ref={ref2}
+            autoHeightMin={50}
+            autoHeightMax={200}
+            renderTrackHorizontal={(props) => (
+              <div
+                {...props}
+                style={{ display: "none" }}
+                className="track-horizontal"
+              />
+            )}
           >
             {minutes.map((e, index) => (
               <div className="d-flex justify-content-center">

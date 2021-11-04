@@ -16,11 +16,7 @@ import {
   GridCardComponent,
   GridTableComponent,
   Loader,
-} from "./myComponents/GridComponent";
-import { Button, Card } from "react-bootstrap";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { MyFormSelect } from "./myComponents/MyFormSelect";
-import { Box } from "@mui/system";
+} from "./myComponents/Table/GridComponent";
 import { OutlinedSelect } from "./myComponents/MuiSelect";
 import { createSelector } from "reselect";
 

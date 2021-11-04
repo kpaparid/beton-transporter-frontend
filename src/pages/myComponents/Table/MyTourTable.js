@@ -1,9 +1,9 @@
 import React, { memo, useRef, forwardRef } from "react";
-import { TableLabel } from "./Table/TableLabel";
+import { TableLabel } from "./TableLabel";
 
 import { Card } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
-import "./MyForm.css";
+import "../MyForm.css";
 import { ReactTable } from "./ReactTable";
 import LazyLoad from "react-lazyload";
 export const CardTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {

@@ -1,27 +1,12 @@
-import React, { memo, useCallback, useMemo, useEffect } from "react";
+import React, { memo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { Breadcrumb } from "@themesberg/react-bootstrap";
 
-import { CardTable } from "./myComponents/MyTourTable";
-
 import { isEqual } from "lodash";
-import {
-  useButtonGroupProps,
-  useFilterProps,
-  useLoadData,
-  // useTableLabelProps,
-  // useTableProps,
-} from "./myComponents/MyConsts";
-import { toursSlice, workHoursSlice } from "./reducers/redux2";
-import { useDispatch, useSelector } from "react-redux";
-import { createSelector } from "reselect";
-import {
-  GridCardComponent,
-  GridTableComponent,
-  Loader,
-} from "./myComponents/GridComponent";
-import moment from "moment";
+import { useLoadData } from "./myComponents/MyConsts";
+import { workHoursSlice } from "./reducers/redux2";
+import { GridTableComponent, Loader } from "./myComponents/Table/GridComponent";
 
 export const Tours = memo(() => {
   const { actions, selectors } = workHoursSlice;

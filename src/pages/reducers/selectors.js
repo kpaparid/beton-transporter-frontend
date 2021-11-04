@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import {
-  FilterComponent,
   getGridLabelFormat,
   getGridUrl,
   getGridWidgets,
@@ -13,8 +12,7 @@ import {
   TitleComponent,
   useTableMonthPicker,
 } from "../myComponents/MyConsts";
-import { MonthSelectorDropdown } from "../myComponents/MyOwnCalendar";
-import { Filter } from "../myComponents/Table/TableLabel";
+import FilterComponent from "../myComponents/Filters/FilterComponent";
 
 export const useGridSelectors = ({
   selectors: {
@@ -289,7 +287,7 @@ export const useGridSelectors = ({
   const paramsSelector = useCallback((state, params) => params, []);
 
   const selectFilter = useCallback(
-    (state) => tablesSelector.selectById(state, entityId).filter || {},
+    (state) => tablesSelector.selectById(state, entityId).filters || {},
     [tablesSelector, entityId]
   );
 
@@ -311,71 +309,88 @@ export const useGridSelectors = ({
       moment().format("MM/YYYY"),
     [entityId, tablesSelector]
   );
+
+  const selectConstantId = createSelector(
+    [selectConstants, paramsSelector],
+    (constants, { idx }) => constants[idx] || []
+  );
+  const selectLabelId = createSelector(
+    [selectAllLabelsById, paramsSelector],
+    (allLabelsById, { label }) => allLabelsById[label]
+  );
+  const selectFilterId = createSelector(
+    [selectFilter, paramsSelector],
+    (filterById, { idx }) => filterById[idx] || {}
+  );
+  const selectItemsNestedFilter = createSelector(
+    [selectConstantId, selectLabelId, selectFilterId, selectDate],
+    (
+      constantEntity,
+      { max, min, measurement, filterType },
+      { gte, lte, neq },
+      date
+    ) => {
+      switch (filterType) {
+        case "date": {
+          return {
+            month: gte || moment(date, "MM/YYY").format("MM"),
+            year: lte || moment(date, "MM/YYY").format("YYYY"),
+          };
+        }
+        case "range": {
+          return {
+            max,
+            min,
+            title: measurement,
+            gte,
+            lte,
+          };
+        }
+        case "time": {
+          return {
+            gte,
+            lte,
+          };
+        }
+        case "checkbox": {
+          const checkedAll = neq ? neq.length === 0 : true;
+          const rows =
+            (constantEntity &&
+              constantEntity.map((v) => ({
+                text: v,
+                checked: neq ? !neq.includes(v) : true,
+              }))) ||
+            [];
+          return { checkedAll, rows };
+        }
+        default:
+          return {};
+      }
+    }
+  );
   const selectItemsFilter = createSelector(
     [
       selectShownLabels,
       selectConstants,
       selectAllLabelsById,
       selectCheckedFilters,
-      selectFilter,
-      selectDate,
     ],
-    (
-      shownLabels,
-      constants,
-      allLabelsById,
-      checkedFilters,
-      selectFilter,
-      date
-    ) => {
+    (shownLabels, constants, allLabelsById, checkedFilters) => {
       return shownLabels.map((label) => {
         const text = allLabelsById[label].text;
         const filterType = allLabelsById[label].filterType;
         const checked = checkedFilters.includes(label);
         const idx = allLabelsById[label].idx;
-        const data =
-          filterType === "date"
-            ? {
-                month: moment(date).format("MM"),
-                year: moment(date).format("YYYY"),
-              }
-            : filterType === "time"
-            ? { gte: 5, lte: 40 }
-            : filterType === "range"
-            ? { gte: 5, lte: 40 }
-            : filterType === "checkbox"
-            ? (constants[idx] &&
-                constants[idx].map((v) => ({
-                  text: v,
-                  checked:
-                    selectFilter[label] && selectFilter[label].neq
-                      ? !selectFilter[label].neq.includes(v)
-                      : true,
-                }))) ||
-              []
-            : {};
         const disabled =
           !filterType ||
           (filterType === "checkbox" &&
             (!constants[idx] || constants[idx].length <= 1));
 
-        const checkedAll =
-          selectFilter[label] && selectFilter[label].neq
-            ? selectFilter[label].neq.length === 0
-            : true;
-
         const props = {
           type: filterType,
           label,
-          checkedAll,
-          data,
+          idx,
         };
-        // const props = !disabled && {
-        //   type: filterType,
-        //   label,
-        //   checkedAll,
-        //   data,
-        // };
         return {
           disabled,
           id: label,
@@ -409,6 +424,7 @@ export const useGridSelectors = ({
     selectPaginationData,
     selectSortedHeadersReactTable,
     selectLoading,
+    selectItemsNestedFilter,
   };
 };
 
@@ -538,6 +554,14 @@ export const useGridCallbacks = ({
     },
     [dispatch, entityId, fetchFiltered]
   );
+  const onResetAllFilters = useCallback(() => {
+    dispatch(
+      fetchFiltered({
+        entityId,
+        filter: { action: "resetAll" },
+      })
+    );
+  }, [dispatch, entityId, fetchFiltered]);
   const onToggleLabel = useCallback(
     (columnId) => {
       dispatch(toggleColumn({ id: entityId, columnId }));
@@ -572,6 +596,7 @@ export const useGridCallbacks = ({
     onToggleAllCheckboxFilter,
     onChangeRangeFilter,
     onToggleLabel,
+    onResetAllFilters,
     onResetFilter,
     onPageChange,
     onSelectRow: onSelectRowCallback,
@@ -597,6 +622,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectNestedCheckboxFilter,
     selectPaginationData,
     selectLoading,
+    selectItemsNestedFilter,
   } = useGridSelectors({ selectors, entityId });
 
   const {
@@ -616,6 +642,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onToggleAllCheckboxFilter,
     onChangeRangeFilter,
     onToggleLabel,
+    onResetAllFilters,
     onResetFilter,
     onPageChange,
     onToggleSort,
@@ -690,7 +717,9 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectItemsFilter,
     selectNestedCheckboxFilter,
     nestedFilterComponent,
+    selectItemsNestedFilter,
     onToggleLabel,
+    onResetAllFilters,
   };
   const modalProps = add && {
     selectLabelsModal,

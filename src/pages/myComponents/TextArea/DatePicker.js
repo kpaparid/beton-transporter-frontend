@@ -1,33 +1,18 @@
-import React, {
-  useEffect,
-  useState,
-  memo,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
-import {
-  Button,
-  Card,
-  Table,
-  Form,
-  ButtonGroup,
-} from "@themesberg/react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
-import moment from "moment";
-import { rotateArray, calcIndexedCalendarDays } from "./util/utilities";
 import {
   faArrowLeft,
   faArrowRight,
   faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import TextareaAutosize from "react-textarea-autosize";
+import { IconButton } from "@mui/material";
+import { Card, Form, Button } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
-import { CustomDropdown } from "./CustomDropdown";
-import { IconButton, TextField } from "@mui/material";
+import moment from "moment";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { ButtonGroup, Table } from "react-bootstrap";
+import { CustomDropdown } from "../Filters/CustomDropdown";
+import { calcIndexedCalendarDays, rotateArray } from "../util/utilities";
 
-import Cleave from "cleave.js/react";
 export const DateSelectorDropdown = memo(
   ({
     value,
@@ -139,8 +124,7 @@ export const DateSelector = memo((props) => {
     singleDate = false,
     onChange,
     disableMonthSwap = false,
-    // maxWidth,
-    // minWidth,
+    style,
     ...rest
   } = props;
   const [clickedId, setClickedId] = useState(
@@ -284,27 +268,13 @@ export const DateSelector = memo((props) => {
     const id = parseInt(event.target.id.replace("Btn", ""));
     !singleDate && clickedId.length === 1 && setHoveredId(id);
   }
-  // useEffect(() => {
-  //   const size = clickedId.length;
-  //   switch (size) {
-  //     case 0:
-  //       sendOutside();
-  //       break;
-  //     case 1:
-  //       singleDate && sendOutside(clickedId);
-  //       break;
-  //     case 2:
-  //       !singleDate && sendOutside(clickedId);
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }, [clickedId]);
 
-  return <DateSelectorComponent data={data}></DateSelectorComponent>;
+  return (
+    <DateSelectorComponent data={data} style={style}></DateSelectorComponent>
+  );
 }, isEqual);
 
-const DateSelectorComponent = memo((props) => {
+const DateSelectorComponent = memo(({ data, style }) => {
   const {
     handleClick,
     handleMouseOver,
@@ -313,24 +283,28 @@ const DateSelectorComponent = memo((props) => {
     newDate,
     headers,
     tableDays,
-    disableMonthSwap,
+    disableMonthSwap = false,
     handleIncrementMonth,
     handleDecrementMonth,
-    maxWidth = "300px",
-    minWidth = "20px",
-  } = props.data;
+  } = data;
 
   return (
     <>
       <Card
-        border="light"
-        className="shadow-sm flex-fill date-selector"
-        style={{ width: "300px", minWidth: "300px", cursor: "default" }}
+        className="shadow-sm flex-fill date-selector my-card"
+        style={{ cursor: "default", ...style }}
       >
-        <Card.Body className="px-3">
-          <div className="container-fluid d-flex py-3 px-1 justify-content-around align-items-center">
+        <Card.Header>
+          <div
+            className={
+              disableMonthSwap
+                ? "w-100 d-flex  justify-content-center"
+                : "w-100 d-flex  justify-content-between"
+            }
+          >
             {!disableMonthSwap && (
               <Button
+                variant="inverse"
                 onClick={handleDecrementMonth}
                 onMouseDown={(e) => e.preventDefault()}
                 size="sm"
@@ -341,6 +315,7 @@ const DateSelectorComponent = memo((props) => {
             <h5 className="text-center m-0">{newDate}</h5>
             {!disableMonthSwap && (
               <Button
+                variant="inverse"
                 onClick={handleIncrementMonth}
                 onMouseDown={(e) => e.preventDefault()}
                 size="sm"
@@ -349,11 +324,13 @@ const DateSelectorComponent = memo((props) => {
               </Button>
             )}
           </div>
+        </Card.Header>
+        <Card.Body className="px-3">
           <Table className="user-table align-items-center">
-            <thead className="thead-light rounded-bottom">
+            <thead className="rounded-bottom">
               <HeaderRow headers={headers} />
             </thead>
-            <tbody>
+            <tbody className="border-0">
               {tableDays.map((row, index) => {
                 return (
                   <tr className="p-0 align-items-center" key={row + index}>
@@ -392,11 +369,11 @@ const TableRow = (props) => {
           : day === toClick
           ? "primary"
           : toClick && from && day < toClick && day > from
-          ? "success"
+          ? "light-blue"
           : toHover && from && day >= toHover && day < from
           ? "danger"
           : toHover && from && day <= toHover && day > from
-          ? "danger"
+          ? "very-light-tertiary"
           : "light";
       return (
         <td className="border-0 p-1 justify-content-center" key={id}>
@@ -422,6 +399,7 @@ export const DayButton = (props) => {
           width: "30px",
           height: "30px",
           borderRadius: 0,
+          border: 0,
         }}
         size="sm"
         value={day}
@@ -437,32 +415,7 @@ export const DayButton = (props) => {
     </>
   );
 };
-export const MonthButton = (props) => {
-  const { value, onClick, variant } = props;
-  return (
-    <>
-      <div className="fluid-container p-1">
-        <Button
-          className="w-100 btn-month"
-          variant={variant}
-          onClick={onClick}
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {value}
-        </Button>
-      </div>
-    </>
-  );
-};
-export const CalendarButton = (props) => {
-  const { value } = props;
 
-  return (
-    <Button variant="white" style={{ padding: "0.25rem" }}>
-      <h6 className="m-0">{value}</h6>
-    </Button>
-  );
-};
 const HeaderRow = (props) => {
   const { headers, checked, handleAllClick, checkbox = false } = props;
   return (
@@ -489,136 +442,12 @@ const HeaderRow = (props) => {
     </tr>
   );
 };
-export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
-  return (
-    <>
-      <Dropdown>
-        <Dropdown.Toggle
-          // split
-          variant="transparent"
-          className="btn-title"
-          // style={{ backgroundColor: "#f5f8fb" }}
-        >
-          <h5>
-            {title} {moment(date, "MM/YYYY").format("MMMM YYYY")}
-          </h5>
-        </Dropdown.Toggle>
+export const CalendarButton = (props) => {
+  const { value } = props;
 
-        <Dropdown.Menu className="m-0 p-0">
-          <MonthSelector {...rest} date={date}></MonthSelector>
-        </Dropdown.Menu>
-      </Dropdown>
-    </>
+  return (
+    <Button variant="white" style={{ padding: "0.25rem" }}>
+      <h6 className="m-0">{value}</h6>
+    </Button>
   );
 };
-export const MonthSelector = (props) => {
-  const { date, onChange } = props;
-
-  // const newDate = moment(date, "MM/YYYY").format("YYYY");
-  const [year, setYear] = useState(moment(date, "MM/YYYY").format("YYYY"));
-  const [month, setMonth] = useState(moment(date, "MM/YYYY").format("MMM"));
-
-  useEffect(() => {
-    setYear(moment(date, "MM/YYYY").format("YYYY"));
-    setMonth(moment(date, "MM/YYYY").format("MMM"));
-  }, [date]);
-
-  function handlerMonthChange(m) {
-    console.log("new month", m);
-    const change = moment(m + "/" + year, "MMM/YYYY").format("MM/YYYY");
-    console.log(change);
-    onChange && onChange(change);
-  }
-  function handlerYearChange(y) {
-    onChange && y === 1
-      ? onChange(
-          moment(month + "/" + year, "MMM/YYYY")
-            .add(1, "years")
-            .format("MM/YYYY")
-        )
-      : onChange(
-          moment(month + "/" + year, "MMM/YYYY")
-            .subtract(1, "years")
-            .format("MM/YYYY")
-        );
-  }
-
-  const data = { handlerYearChange, handlerMonthChange, month, year };
-  return (
-    <>
-      <MonthSelectorComponent data={data}></MonthSelectorComponent>
-    </>
-  );
-};
-const MonthSelectorComponent = memo((props) => {
-  const {
-    handlerYearChange,
-    handlerMonthChange,
-    onFocus,
-    onBlur,
-    year,
-    month,
-  } = props.data;
-
-  const [activeMonth, setActiveMonth] = useState(month);
-  function handleClick(value) {
-    console.log("active before month", activeMonth);
-    console.log("active month", value);
-    setActiveMonth(value);
-  }
-
-  const colorize = useCallback(
-    (m) => {
-      return m === activeMonth ? "primary" : "light ";
-    },
-    [activeMonth]
-  );
-  useEffect(() => {
-    handlerMonthChange(activeMonth);
-  }, [activeMonth]);
-  return (
-    <>
-      <Card
-        border="light"
-        className="shadow-sm flex-fill month-selector"
-        style={{ width: "250px", minWidth: "250px" }}
-      >
-        <Card.Body>
-          <div className="container-fluid d-flex p-0 mb-3 justify-content-between align-items-center">
-            <Button
-              className="btn-arrow-left"
-              variant="primary"
-              onClick={() => handlerYearChange(-1)}
-            >
-              <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
-            </Button>
-            <h5 className="text-center m-0">{year}</h5>
-            <Button
-              className="btn-arrow-right"
-              variant="primary"
-              onClick={() => handlerYearChange(1)}
-            >
-              <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
-            </Button>
-          </div>
-          <div className="d-flex flex-wrap">
-            {moment.monthsShort().map((month, index) => {
-              return (
-                <div
-                  className="col-4 text-center text-nowrap"
-                  key={"month-Short" + index}
-                >
-                  <MonthButton
-                    value={month}
-                    onClick={() => handleClick(month)}
-                    variant={colorize(month)}
-                  ></MonthButton>
-                </div>
-              );
-            })}
-          </div>
-        </Card.Body>
-      </Card>
-    </>
-  );
-}, isEqual);

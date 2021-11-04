@@ -1,8 +1,8 @@
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { Card, Form, Modal } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
-import "./MyForm.css";
-import { MyBtn } from "./MyButtons";
+import "../MyForm.css";
+import { MyBtn } from "../MyButtons";
 import { TextField, ThemeProvider, Button, Grid } from "@mui/material";
 import {
   MuiCustomDatePicker,
@@ -11,7 +11,7 @@ import {
   inputComponentsTheme,
   MuiCustomTextField,
   MuiController,
-} from "./InputComponents";
+} from "../TextArea/InputComponents";
 
 import { useForm, Controller } from "react-hook-form";
 import moment from "moment";

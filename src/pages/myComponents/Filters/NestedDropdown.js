@@ -1,21 +1,21 @@
-import React, { forwardRef, memo, useCallback } from "react";
-import {
-  ButtonGroup,
-  Button,
-  Form,
-  Accordion,
-} from "@themesberg/react-bootstrap";
-import { CustomDropdown } from "./CustomDropdown";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import React, { forwardRef, memo } from "react";
+import { ButtonGroup, Button, Form } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import { Card } from "react-bootstrap";
-import AccordionComponent from "../../components/AccordionComponent";
+import AccordionComponent from "../../../components/AccordionComponent";
 
 export const NestedDropdown = memo(
   forwardRef(
     (
-      { data, children, component, onToggleItem, disableCheckBox = false },
+      {
+        data,
+        selectData,
+        children,
+        component,
+        onToggleItem,
+        resetAll,
+        disableCheckBox = false,
+      },
       ref
     ) => {
       const items = data.map(
@@ -44,18 +44,19 @@ export const NestedDropdown = memo(
                 <span className="h6 mb-0 fw-bold">{text}</span>
               </CheckboxRow>
             ),
-            description: !disabled && component(props),
+            description: !disabled && component({ ...props, selectData }),
             disabled: disabled,
           };
         }
       );
       return (
         <>
-          <Card variant="secondary">
-            <Card.Header className="p-0">
+          <Card className="my-card">
+            <Card.Header className="card-btn">
               <Button
                 variant="secondary"
                 className="w-100 rounded-0 rounded-top "
+                onClick={resetAll}
               >
                 Reset All
               </Button>
@@ -75,7 +76,7 @@ export const NestedDropdown = memo(
 export const CheckboxRow = React.memo(
   ({ checked = true, onChange, className = "", disableCheckBox, children }) => {
     return (
-      <div className={"checkbox-row d-flex align-items-center " + className}>
+      <div className={"d-flex align-items-center " + className}>
         {!disableCheckBox && (
           <Form.Check
             checked={checked}

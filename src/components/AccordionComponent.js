@@ -27,14 +27,16 @@ const AccordionComponent = memo((props) => {
     );
   };
 
-  return data.map((d) => (
+  return (
     <Accordion
       className={className}
       defaultActiveKey={defaultKey}
       style={style}
     >
-      <AccordionItem key={`accordion-${d.id}`} {...d} />
+      {data.map((d) => (
+        <AccordionItem key={`accordion-${d.id}`} {...d} />
+      ))}
     </Accordion>
-  ));
+  );
 }, isequal);
 export default AccordionComponent;

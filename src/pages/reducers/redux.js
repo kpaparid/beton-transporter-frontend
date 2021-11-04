@@ -1,7 +1,6 @@
 import { combineReducers, createStore } from "redux";
 import moment from "moment";
 import produce from "immer";
-import { tourDate } from "../myComponents/MySelectors";
 
 export const ACTIONS = {
   STATUS_CHANGE: "STATUS_CHANGE",

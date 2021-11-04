@@ -18,8 +18,8 @@ import {
   Pagination,
   Table,
 } from "@themesberg/react-bootstrap";
-import Input from "./TextArea/MyNewInput";
-import "./MyForm.css";
+import Input from "../TextArea/MyNewInput";
+import "../MyForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSortDown,
@@ -30,9 +30,8 @@ import {
   faAngleDoubleLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import LazyLoad from "react-lazyload";
-import { ComponentPreLoader } from "../../components/ComponentPreLoader";
+import { ComponentPreLoader } from "../../../components/ComponentPreLoader";
 import { RTables2 } from "./NewTable";
-import { nanoid } from "@reduxjs/toolkit";
 export const ReactTable = memo(
   forwardRef(({ children }, skipResetRef) => {
     const {

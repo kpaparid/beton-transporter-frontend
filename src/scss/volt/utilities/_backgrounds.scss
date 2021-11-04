@@ -3,8 +3,25 @@
 */
 .my-card {
   .card-header {
+    padding: 1rem;
+    > :first-child {
+      align-items: center !important;
+    }
     background-color: $secondary !important;
     color: white !important;
+    h5 {
+      color: white !important;
+      margin: 0;
+    }
+  }
+  .card-header.card-btn {
+    padding: 0rem;
+    > :first-child {
+      width: 100%;
+      padding: 1rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
   }
   .btn-primary {
     border: none !important;
@@ -29,6 +46,9 @@
   }
 }
 .date-selector {
+  thead {
+    background-color: $gray-500 !important;
+  }
   tbody {
     :first-child {
       td {
@@ -36,12 +56,13 @@
       }
     }
   }
-  .btn-primary {
-    &:hover {
-      background-color: $secondary !important;
-      border-color: $secondary !important;
-    }
-  }
+  // .btn-primary {
+  //   &:hover {
+  //     background-color: $secondary !important;
+  //     border-color: $secondary !important;
+  //     color: $white;
+  //   }
+  // }
   .btn-light {
     &:hover {
       background-color: lighten($tertiary, 15%) !important;
@@ -139,10 +160,11 @@
     }
   }
   .checkbox-row {
-    .dropdown-toggle {
-      color: white;
-      font-weight: 400;
-    }
+    border-bottom: $border;
+    width: 100%;
+    border-radius: 0;
+    padding: 0rem 2rem 0rem 2rem;
+
     &:hover {
       background-color: lighten($primary, 70%) !important;
     }
@@ -150,6 +172,7 @@
     &:focus-within,
     &:active {
       background-color: lighten($tertiary, 25%) !important;
+      box-shadow: none;
     }
     .form-check-input[type="checkbox"] {
       width: 18px;
@@ -204,8 +227,8 @@
     padding: 0.25rem;
   }
   > .card-body {
+    border: none !important;
     background-color: white;
-    border-radius: 0.5rem !important;
     padding-top: 0;
   }
   > .card-header {
@@ -258,7 +281,9 @@
   .table {
     tbody {
       background-color: white;
+      border: none;
       tr {
+        border-bottom: $border;
         background-color: white !important;
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -299,6 +324,9 @@
           padding-top: 10px !important;
           // padding-bottom: 10px !important;
         }
+      }
+      td {
+        border: none;
       }
     }
     thead {

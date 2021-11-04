@@ -8,17 +8,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonGroup } from "@themesberg/react-bootstrap";
 import { forwardRef, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ACTIONS } from "../../reducers/redux";
-import { DateSelector } from "../MyOwnCalendar";
-import { NestedDropdown } from "../NestedDropdown";
-import TableButtons from "../TableButtons";
-import { MyCheckboxFilter } from "../MyCheckbox";
+import { NestedDropdown } from "../Filters/NestedDropdown";
+import TableButtons from "./TableButtons";
 import "../MyForm.css";
-import { CustomDropdown } from "../CustomDropdown";
+import { CustomDropdown } from "../Filters/CustomDropdown";
 import { isEqual } from "lodash";
 
 import "../MyForm.css";
-import { getGridType, GRIDTYPE } from "../MyConsts";
 export const TableLabel = memo(
   forwardRef(
     (
@@ -99,7 +95,8 @@ export const DefaultFilter = memo(
       selectItemsFilter,
       onToggleLabel,
       nestedFilterComponent,
-      selectNestedCheckboxFilter,
+      selectItemsNestedFilter,
+      onResetAllFilters,
     } = props;
     // const f = (state) => selectNestedCheckboxFilter(state, "duration");
     // const c = useSelector(f);
@@ -116,6 +113,8 @@ export const DefaultFilter = memo(
         data={data}
         component={nestedFilterComponent}
         onToggleItem={onToggleLabel}
+        resetAll={onResetAllFilters}
+        selectData={selectItemsNestedFilter}
       />,
     ];
     return (

@@ -98,82 +98,97 @@ ThumbComponent.propTypes = {
   children: PropTypes.node,
 };
 
-export const MyRangeSlider = React.memo(({ onChange, min = 0, max = 200 }) => {
-  const [value, setValue] = React.useState([min, max]);
+export const MyRangeSlider = React.memo(
+  ({ onChange, min = 0, max = 200, gte = min, lte = max, title }) => {
+    const [value, setValue] = React.useState([gte, lte]);
 
-  const handleSliderChange = (event, newValue) => {
-    setValue(newValue);
-    onChange(newValue);
-  };
-
-  const handleInputChange = (event, index) => {
-    const newValue =
-      index === 0
-        ? [event.target.value, value[1]]
-        : [value[0], event.target.value];
-    if (newValue !== value) {
+    const handleSliderChange = (event, newValue) => {
       setValue(newValue);
       onChange(newValue);
-    }
-  };
+    };
 
-  return (
-    <Card className=' my-card"'>
-      <Card.Body className="mui-slider">
-        <div className="d-flex flex-wrap">
-          <div
-            className="col-12"
-            style={{ paddingLeft: "1.9rem", paddingRight: "1.9rem" }}
-          >
-            <MySlider
-              components={{ Thumb: ThumbComponent }}
-              getAriaLabel={(index) =>
-                index === 0 ? "Minimum price" : "Maximum price"
-              }
-              min={min}
-              max={max}
-              value={value}
-              onChange={handleSliderChange}
-              // valueLabelDisplay="on"
-            />
-          </div>
-          <div className="container p-0 pt-3 d-flex justify-content-between">
-            <div className="col-4">
-              <RangeInput
-                value={value[0]}
-                size="small"
-                onChange={(e) => handleInputChange(e, 0)}
-                // disableUnderline
-                // onBlur={handleBlur}
-                className="text-center w-100"
-                inputProps={{
-                  step: 1,
-                  min: min,
-                  max: max,
-                  type: "number",
-                  "aria-labelledby": "input-slider",
-                }}
+    const handleInputChange = (event) => {
+      const name = event.target.name;
+      const calcValue =
+        event.target.value > max
+          ? max
+          : event.target.value < min
+          ? min
+          : event.target.value;
+      const newValue =
+        name === "gte" ? [calcValue, value[1]] : [value[0], calcValue];
+      if (newValue !== value) {
+        setValue(newValue);
+        onChange(newValue);
+      }
+    };
+
+    return (
+      <Card className="my-card">
+        {title && (
+          <Card.Header>
+            <h5 className="w-100 text-align-center text-center">{title}</h5>
+          </Card.Header>
+        )}
+        <Card.Body className="mui-slider">
+          <div className="d-flex flex-wrap">
+            <div
+              className="col-12"
+              style={{ paddingLeft: "1.9rem", paddingRight: "1.9rem" }}
+            >
+              <MySlider
+                components={{ Thumb: ThumbComponent }}
+                getAriaLabel={(index) =>
+                  index === 0 ? "Minimum price" : "Maximum price"
+                }
+                min={min}
+                max={max}
+                value={value}
+                onChange={handleSliderChange}
+                // valueLabelDisplay="on"
               />
             </div>
-            <div className="col-4">
-              <RangeInput
-                value={value[1]}
-                size="small"
-                onChange={(e) => handleInputChange(e, 1)}
-                // onBlur={handleBlur}
-                className="text-center w-100"
-                inputProps={{
-                  step: 1,
-                  min: min,
-                  max: max,
-                  type: "number",
-                  "aria-labelledby": "input-slider",
-                }}
-              />
+            <div className="container p-0 pt-3 d-flex justify-content-between">
+              <div className="col-4">
+                <RangeInput
+                  value={value[0]}
+                  size="small"
+                  onChange={handleInputChange}
+                  name="gte"
+                  // disableUnderline
+                  // onBlur={handleBlur}
+                  className="text-center w-100"
+                  inputProps={{
+                    step: 1,
+                    min: min,
+                    max: max,
+                    type: "number",
+                    "aria-labelledby": "input-slider",
+                  }}
+                />
+              </div>
+              <div className="col-4">
+                <RangeInput
+                  value={value[1]}
+                  size="small"
+                  onChange={handleInputChange}
+                  // onBlur={handleBlur}
+                  className="text-center w-100"
+                  name="lte"
+                  inputProps={{
+                    step: 1,
+                    min: gte,
+                    max: lte,
+                    type: "number",
+                    "aria-labelledby": "input-slider",
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </Card.Body>
-    </Card>
-  );
-}, isEqual);
+        </Card.Body>
+      </Card>
+    );
+  },
+  isEqual
+);

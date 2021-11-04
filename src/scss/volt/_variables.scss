@@ -96,12 +96,16 @@ $colors: (
 // $gray-200: #f7fbfe;
 
 // $primary: #2d353c;
+
 $primary: #0a3761;
+$inverse: #0a3762;
 $secondary: #567ba0;
 $tertiary: #fe6600;
 $gray-500: #d7e3ef;
 $light-blue: #0771d0;
 $very-light-blue: #b2d4ff;
+$light-tertiary: lighten($tertiary, 25%);
+$very-light-tertiary: lighten($tertiary, 15%);
 // $secondary: #00acac;
 // $tertiary: #1b998b;
 $quaternary: #c96480;
@@ -125,7 +129,6 @@ $ct-series-colors: (
 // Mobile landing color scheme
 $primary-app: #ebf4f6;
 $secondary-app: #424aa0;
-
 $success: $green;
 $info: $blue;
 $warning: $yellow;
@@ -179,11 +182,16 @@ $theme-colors: ();
 $theme-colors: map-merge(
   (
     "primary": $primary,
+    "inverse": $inverse,
     "secondary": $secondary,
     "tertiary": $tertiary,
     "quaternary": $quaternary,
     "primary-app": $primary-app,
     "secondary-app": $secondary-app,
+    "very-light-blue": $very-light-blue,
+    "light-blue": $light-blue,
+    "light-tertiary": $light-tertiary,
+    "very-light-tertiary": $very-light-tertiary,
     "light": $light,
     "lighten": $lighten,
     "success": $success,

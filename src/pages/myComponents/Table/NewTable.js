@@ -12,10 +12,10 @@ import { useSelector } from "react-redux";
 // import { hiddenColumnsReselect } from "./MySelectors";
 import { Form, Table } from "@themesberg/react-bootstrap";
 // import LazyLoad from "react-lazyload";
-import { ComponentPreLoader } from "../../components/ComponentPreLoader";
+import { ComponentPreLoader } from "../../../components/ComponentPreLoader";
 // import { LazyLoad } from "react-observer-api";
 
-const Lazer = React.lazy(() => import("./LazyInput"));
+const Lazer = React.lazy(() => import("../TextArea/LazyInput"));
 export const RTables2 = memo(
   ({
     size = 20,

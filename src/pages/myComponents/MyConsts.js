@@ -1,40 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { isEqual } from "lodash.isequal";
-import _, { debounce } from "lodash";
+import _ from "lodash";
 import isequal from "lodash.isequal";
-import {
-  reactTableData,
-  visibleHeaders,
-  hiddenColumnsReselect,
-  editModeSelector,
-  nestedFilterTourData,
-  dateSelector,
-  modalLabelsReselect,
-  changesByIdSelector,
-  checkedIdSelector,
-} from "./MySelectors";
 
 import moment from "moment";
-import { createReduxStore2, reducer } from "../reducers/redux2";
-import { DateSelector, MonthSelectorDropdown } from "./MyOwnCalendar";
-import { MyCheckboxFilter } from "./MyCheckbox";
+import { createReduxStore2 } from "../reducers/redux2";
+import { MonthSelectorDropdown } from "./TextArea/MonthPicker";
 import { nanoid } from "@reduxjs/toolkit";
 import { Button } from "@themesberg/react-bootstrap";
-import {
-  BottomNavigationAction,
-  getFormLabelUtilityClasses,
-} from "@mui/material";
-import { MyRangeSlider } from "./MyRangeSlider";
-import { Box } from "@material-ui/system";
-import { Portal } from "react-portal";
 import { loadToursPage } from "../../api/apiMappers";
-import { toDate } from "date-fns";
-import TimePicker from "@mui/lab/TimePicker";
-import MyTimePicker, {
-  TimeSelector,
-  TimeSelectorRange,
-} from "./TextArea/TimePicker";
 // dark 0
 // #485354  1
 // #037070  3
@@ -247,6 +221,9 @@ export const gridLabels = {
         text: "Cbm",
         type: "number",
         filterType: "range",
+        min: 0,
+        max: 30,
+        measurement: "m³",
       },
       departure: {
         nanoid: nanoid(),
@@ -320,6 +297,9 @@ export const gridLabels = {
         id: "waitTime",
         text: "Time Waiting",
         type: "number",
+        min: 0,
+        max: 480,
+        measurement: "minutes",
         filterType: "range",
       },
       other: {
@@ -715,11 +695,7 @@ function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
   );
 }
 
-function useButtonGroupProps(statePath, stateOffset, actions, selectors) {
-  return {};
-}
-
-export const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
+const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
   const title = getGridTitle(entityId);
   const date = useSelector(selectDate);
   useEffect(() => {
@@ -737,83 +713,6 @@ export const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
     );
 }, isequal);
 
-function useFilterProps(statePath, stateOffset, actions) {
-  const { toggleColumn } = actions;
-  const dispatch = useDispatch();
-  const filterDataSelector = useCallback(
-    (state) => nestedFilterTourData(_.get(state, statePath)),
-    [statePath]
-  );
-  const nestedFilterComponent = useMemo(
-    () => <FilterComponent stateOffset={stateOffset}></FilterComponent>,
-    [stateOffset]
-  );
-  const onToggleFilterColumn = useCallback((id) => {
-    dispatch(toggleColumn({ id, stateOffset }));
-  }, []);
-  return {
-    filterDataSelector,
-    nestedFilterComponent,
-    onToggleFilterColumn,
-  };
-}
-
-const FilterComponent = memo((props) => {
-  const {
-    type,
-    label,
-    onToggleCheckbox,
-    onToggleAllCheckbox,
-    onChangeRange,
-    onReset,
-    ...rest
-  } = props;
-
-  const toggleOne = useCallback(
-    (value) => {
-      onToggleCheckbox({ label, value });
-    },
-    [label]
-  );
-  const toggleAll = useCallback(() => {
-    onToggleAllCheckbox({ label });
-  }, [label]);
-  const dateChange = useCallback(
-    (dates) => {
-      dates.length === 2 &&
-        onChangeRange({ label, gte: dates[0], lte: dates[1] });
-      dates.length === 0 && onReset({ label });
-    },
-    [label]
-  );
-  const handleChangeRangeSlider = useCallback((values) => {
-    onChangeRange({ label, gte: values[0], lte: values[1] });
-  }, []);
-  const handleChangeTimePicker = useCallback((values) => {
-    onChangeRange({ label, gte: values[0], lte: values[1] });
-  }, []);
-  const debouncedChangeRangeSlider = debounce(handleChangeRangeSlider, 800);
-  switch (type) {
-    case "checkbox":
-      return (
-        <MyCheckboxFilter
-          {...rest}
-          onToggleAll={toggleAll}
-          onToggleOne={toggleOne}
-        />
-      );
-    case "time":
-      return <TimeSelectorRange></TimeSelectorRange>;
-    case "range":
-      return <MyRangeSlider onChange={debouncedChangeRangeSlider} />;
-    // case "date":
-    //   return (
-    //     <DateSelector {...rest.data} disableMonthSwap onChange={dateChange} />
-    //   );
-    default:
-      return <div>error</div>;
-  }
-}, isEqual);
 function maxWidthByType(type) {
   return type === "date"
     ? "120px"
@@ -832,7 +731,7 @@ function maxWidthByType(type) {
     : "75px";
 }
 
-export const grids = {
+const grids = {
   tours: {
     title: "Tours",
     type: GRIDTYPE.TABLE,
@@ -881,13 +780,11 @@ export const grids = {
 };
 
 export {
+  grids,
+  TitleComponent,
   mapData,
   GRIDTYPE,
   useLoadData,
-  useButtonGroupProps,
-  useFilterProps,
-  // useTableProps,
-  FilterComponent,
   validationType,
   store,
   inputLabelsWidths,

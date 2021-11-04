@@ -1,4 +1,11 @@
-import React, { useCallback } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Form, Dropdown, Card } from "@themesberg/react-bootstrap";
 // import './nstyle.scss'
 import { Button } from "@themesberg/react-bootstrap";
@@ -6,121 +13,65 @@ import { Button } from "@themesberg/react-bootstrap";
 import "./MyForm.css";
 import { isEqual } from "lodash";
 import Scrollbars from "react-custom-scrollbars";
-import { FixedSizeList } from "react-window";
+import memoize from "memoize-one";
+import { FixedSizeList, areEqual } from "react-window";
+import _ from "lodash";
+import { useSelector } from "react-redux";
 function MyCheckboxContainer(props) {
   const {
     text,
-    checked,
     handler,
     variant = "transparent",
     checkboxVariant = "primary",
     hover = "",
     className = "",
+    height = "auto",
+    checked,
   } = props;
+  const ref = useRef(null);
 
   return (
-    <div className={"container-fluid p-0 m-0 " + className + " " + hover}>
-      <Button
-        variant={variant}
-        onClick={handler}
-        style={{ boxShadow: "0px 0px 0px" }}
-        className="w-100 border border-0 rounded-0 rounded-top"
-      >
-        <div className="container-fluid w-100 ps-3 pe-4 d-flex justify-content-between">
-          <div
-            className="text-start"
-            // onMouseLeave={(e) => (e.currentTarget.scrollLeft = 0)}
-          >
-            {text}
+    <Button
+      variant={variant}
+      onClick={handler}
+      className={className}
+      style={{ height }}
+    >
+      <div className="w-100 d-flex justify-content-between">
+        <div className="text-start">{text}</div>
+        <Form.Check className="ps-4 d-flex justify-content-between g-0 align-items-center">
+          <div className="align-items-center d-flex">
+            <Form.Check.Input
+              ref={ref}
+              type="checkbox"
+              variant={checkboxVariant}
+              disabled
+              checked={checked}
+            />
           </div>
-          <Form.Check className="ps-4 d-flex justify-content-between g-0 align-items-center">
-            <div className="align-items-center">
-              <Form.Check.Input
-                type="checkbox"
-                variant={checkboxVariant}
-                disabled
-                checked={checked}
-              />
-            </div>
-          </Form.Check>
-        </div>
-      </Button>
-    </div>
+        </Form.Check>
+      </div>
+    </Button>
   );
 }
+
 export const MyCheckboxFilter = React.memo(
-  ({ onToggleAll, onToggleOne, checkedAll = true, data }) => {
-    const Row = ({ index, style }) => (
-      <div style={style}>
-        {/* row {index} */}
-        <MyCheckboxContainer
-          key={"MyCheckboxContainer" + index}
-          text={data[index].text}
-          variant={"transparent"}
-          checked={data[index].checked}
-          handler={() => onToggleOne(data[index].text)}
-          hover="checkbox-row"
-        />
-      </div>
-    );
-    const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
-      const refSetter = useCallback((scrollbarsRef) => {
-        if (scrollbarsRef) {
-          forwardedRef(scrollbarsRef.view);
-        } else {
-          forwardedRef(null);
-        }
-      }, []);
-
-      return (
-        <Scrollbars
-          ref={refSetter}
-          style={{ ...style, overflow: "hidden" }}
-          onScroll={onScroll}
-        >
-          {children}
-        </Scrollbars>
-      );
-    };
-
-    const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
-      <CustomScrollbars {...props} forwardedRef={ref} />
-    ));
+  ({ onToggleAll, onToggleOne, height = "35px", checkedAll, rows }) => {
     return (
       <>
-        <Card className="checkboxFilterCard" variant="primary">
-          <Card.Header className="p-0 bg-secondary text-white">
+        <Card className="checkboxFilterCard my-card" variant="primary">
+          <Card.Header className="card-btn">
             <MyCheckboxContainer
               text={<div className="fw-bold text-start">Select All</div>}
-              handler={() => onToggleAll(data.map((e) => e.text))}
+              handler={onToggleAll}
               checked={checkedAll}
-              className="w-100"
+              className="checkbox-header"
               variant={"secondary"}
               checkboxVariant={"tertiary"}
-              // checked={true}
             />
           </Card.Header>
           <Card.Body className="p-0">
-            <FixedSizeList
-              outerElementType={CustomScrollbarsVirtualList}
-              className="List"
-              height={300}
-              itemCount={data.length}
-              itemSize={35}
-              width={"100%"}
-            >
-              {Row}
-            </FixedSizeList>
-            {/* {data.map((item, index) => (
-                <MyCheckboxContainer
-                  key={"MyCheckboxContainer" + index}
-                  text={item.text}
-                  variant={"transparent"}
-                  checked={item.checked}
-                  handler={() => onToggleOne(item.text)}
-                  hover="checkbox-row"
-                />
-              ))} */}
+            <List data={rows} onClick={onToggleOne}></List>
           </Card.Body>
         </Card>
       </>
@@ -128,3 +79,64 @@ export const MyCheckboxFilter = React.memo(
   },
   isEqual
 );
+const Row = memo(({ data, index, style }) => {
+  const { items, toggleItemActive, selectData } = data;
+  const item = items[index];
+  return (
+    <div style={style}>
+      <MyCheckboxContainer
+        key={"MyCheckboxContainer" + index}
+        text={item.text}
+        variant={"transparent"}
+        checked={item.checked}
+        handler={() => toggleItemActive(item.text, index)}
+        className="checkbox-row"
+        height={35}
+      />
+    </div>
+  );
+}, areEqual);
+
+const createItemData = memoize((items, toggleItemActive) => ({
+  items,
+  toggleItemActive,
+}));
+
+const List = memo(({ data, onClick }) => {
+  const itemData = createItemData(data, onClick);
+  return (
+    <FixedSizeList
+      outerElementType={CustomScrollbarsVirtualList}
+      className="List"
+      height={300}
+      itemCount={data.length}
+      itemData={itemData}
+      itemSize={35}
+      width={"100%"}
+    >
+      {Row}
+    </FixedSizeList>
+  );
+}, isEqual);
+const CustomScrollbars = memo(({ onScroll, forwardedRef, style, children }) => {
+  const refSetter = useCallback((scrollbarsRef) => {
+    if (scrollbarsRef) {
+      forwardedRef(scrollbarsRef.view);
+    } else {
+      forwardedRef(null);
+    }
+  }, []);
+  return (
+    <Scrollbars
+      ref={refSetter}
+      style={{ ...style, overflow: "hidden" }}
+      onScroll={onScroll}
+    >
+      {children}
+    </Scrollbars>
+  );
+}, isEqual);
+
+const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
+  <CustomScrollbars {...props} forwardedRef={ref} />
+));

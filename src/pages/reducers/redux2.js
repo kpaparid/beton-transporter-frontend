@@ -192,24 +192,29 @@ function createGenericSlice(sliceName) {
         .getSelectors()
         .selectById(state[sliceName].tables, entityId);
 
-      const { idx } = tablesAdapter
-        .getSelectors()
-        .selectById(state[sliceName].labels, label);
-      const newFilters = calcFilters(filters, {
-        label: idx,
-        value:
-          action === "toggleAll"
-            ? metaAdapter
-                .getSelectors()
-                .selectById(state[sliceName].meta, "constants") &&
-              metaAdapter
-                .getSelectors()
-                .selectById(state[sliceName].meta, "constants")[idx]
-            : value && [value],
-        gte,
-        lte,
-        action,
-      });
+      const idx =
+        label &&
+        tablesAdapter.getSelectors().selectById(state[sliceName].labels, label)
+          .idx;
+
+      const newFilters =
+        action === "resetAll"
+          ? null
+          : calcFilters(filters, {
+              label: idx,
+              value:
+                action === "toggleAll"
+                  ? metaAdapter
+                      .getSelectors()
+                      .selectById(state[sliceName].meta, "constants") &&
+                    metaAdapter
+                      .getSelectors()
+                      .selectById(state[sliceName].meta, "constants")[idx]
+                  : value && [value],
+              gte,
+              lte,
+              action,
+            });
       const filterLink = filtersToUrl(newFilters);
       const sortLink = sort
         ? "&_sort=" + sort.id + "&_order=" + sort.order
