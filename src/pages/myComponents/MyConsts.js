@@ -600,7 +600,7 @@ function mapData(data) {
   console.log(c);
   return c;
 }
-function useLoadData(tableName, actions) {
+function useLoadData(tableName, actions, meta) {
   const [stateAPIStatus, setAPIStatus] = useState("idle");
   const dispatch = useDispatch();
   useEffect(() => {
@@ -698,9 +698,7 @@ function loadWorkHoursPage({ fetchUsers, fetchEntityGrid }, dispatch) {
 const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
   const title = getGridTitle(entityId);
   const date = useSelector(selectDate);
-  useEffect(() => {
-    const k = date;
-  }, [date]);
+
   if (entityId === "workHours" || entityId === "tours") {
     return <MonthSelectorDropdown {...props} title={title} date={date} />;
   } else

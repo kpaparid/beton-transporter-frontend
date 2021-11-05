@@ -8,7 +8,7 @@ import { IconButton } from "@mui/material";
 import { Card, Form, Button } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import moment from "moment";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ButtonGroup, Table } from "react-bootstrap";
 import { CustomDropdown } from "../Filters/CustomDropdown";
 import { calcIndexedCalendarDays, rotateArray } from "../util/utilities";
@@ -115,8 +115,63 @@ export const DateSelectorDropdown = memo(
   isEqual
 );
 
-export const DateSelector = memo((props) => {
+// DateRangePicker;
+
+export const DateSelector = memo(
+  ({ singleDate, from, to, onChange, ...rest }) => {
+    const initialValue = useMemo(() => [from, to].filter((e) => e), [from, to]);
+    const [values, setValues] = useState(initialValue);
+    const [hoveredDay, setHoveredDay] = useState();
+    const handleChange = useCallback(
+      (value) => {
+        singleDate ? onChange(value[0]) : value.length !== 1 && onChange(value);
+      },
+      [singleDate]
+    );
+    const handleClick = useCallback(
+      (e) => {
+        const name = e.target.name;
+        const newValues = singleDate
+          ? [name]
+          : values.length === 0
+          ? [name]
+          : values.length === 1
+          ? [...values, name].sort()
+          : [];
+        setValues(newValues);
+        handleChange(newValues);
+      },
+      [values]
+    );
+    const handleMouseOver = useCallback((e) => {
+      const name = e.target.name;
+      setHoveredDay(name);
+    }, []);
+    const handleMouseLeave = useCallback((e) => {
+      setHoveredDay(null);
+    }, []);
+
+    useEffect(() => {
+      initialValue !== values && setValues(initialValue);
+    }, [initialValue]);
+    return (
+      <DateSelectorComponent
+        values={values}
+        hoveredDay={hoveredDay}
+        onClick={handleClick}
+        onMouseOver={handleMouseOver}
+        onMouseLeave={handleMouseLeave}
+        // singleDate={singleDate}
+        {...rest}
+      ></DateSelectorComponent>
+    );
+  },
+  isEqual
+);
+
+export const DateSelector2 = memo((props) => {
   const {
+    values = [],
     day = null,
     month = null,
     year = null,
@@ -127,10 +182,20 @@ export const DateSelector = memo((props) => {
     style,
     ...rest
   } = props;
+
   const [clickedId, setClickedId] = useState(
     date && moment(date, "DD/MM/YYYY", true).isValid()
       ? [moment(date, "DD/MM/YYYY").format("DD")]
       : []
+  );
+  useEffect(
+    () =>
+      setClickedId(
+        values
+          .filter((d) => (d ? true : false))
+          .map((d) => moment(d, "YYYY/MM/DD").format("DD"))
+      ),
+    [values]
   );
   const [hoveredId, setHoveredId] = useState();
   const labels = rotateArray(moment.weekdays(), 1);
@@ -270,119 +335,170 @@ export const DateSelector = memo((props) => {
   }
 
   return (
-    <DateSelectorComponent data={data} style={style}></DateSelectorComponent>
+    <DateSelectorComponent {...data} style={style}></DateSelectorComponent>
   );
 }, isEqual);
 
-const DateSelectorComponent = memo(({ data, style }) => {
-  const {
-    handleClick,
-    handleMouseOver,
-    clickedId,
-    hoveredId,
-    newDate,
-    headers,
-    tableDays,
+const DateSelectorComponent = memo(
+  ({
+    values,
+    hoveredDay,
+    onClick,
+    onMouseOver,
+    onMouseLeave,
+    singleDate = false,
     disableMonthSwap = false,
-    handleIncrementMonth,
-    handleDecrementMonth,
-  } = data;
+    style,
 
-  return (
-    <>
-      <Card
-        className="shadow-sm flex-fill date-selector my-card"
-        style={{ cursor: "default", ...style }}
-      >
-        <Card.Header>
-          <div
-            className={
-              disableMonthSwap
-                ? "w-100 d-flex  justify-content-center"
-                : "w-100 d-flex  justify-content-between"
-            }
-          >
-            {!disableMonthSwap && (
-              <Button
-                variant="inverse"
-                onClick={handleDecrementMonth}
-                onMouseDown={(e) => e.preventDefault()}
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
-              </Button>
-            )}
-            <h5 className="text-center m-0">{newDate}</h5>
-            {!disableMonthSwap && (
-              <Button
-                variant="inverse"
-                onClick={handleIncrementMonth}
-                onMouseDown={(e) => e.preventDefault()}
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
-              </Button>
-            )}
-          </div>
-        </Card.Header>
-        <Card.Body className="px-3">
-          <Table className="user-table align-items-center">
-            <thead className="rounded-bottom">
-              <HeaderRow headers={headers} />
-            </thead>
-            <tbody className="border-0">
-              {tableDays.map((row, index) => {
-                return (
-                  <tr className="p-0 align-items-center" key={row + index}>
-                    <TableRow
-                      data={row}
-                      index={index}
-                      onClick={handleClick}
-                      onMouseOver={handleMouseOver}
-                      clickedId={clickedId}
-                      hoveredId={hoveredId}
-                    ></TableRow>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-    </>
-  );
-}, isEqual);
+    year: initialYear = moment().format("YYYY"),
+    month: initialMonth = moment().format("M"),
+  }) => {
+    const [month, setMonth] = useState(initialMonth);
+    const [year, setYear] = useState(initialYear);
+    const labels = useMemo(() => rotateArray(moment.weekdays(), 1), []);
+    const headers = useMemo(
+      () => labels.map((day) => day.substr(0, 2) + "."),
+      [labels]
+    );
+    const title = moment(month, "MM").format("MMMM") + " " + year;
+    const tableDays = useMemo(
+      () => calcIndexedCalendarDays(month + "/" + year, labels),
+      [month, year, labels]
+    );
+    const handleIncreaseMonth = useCallback(
+      (e) => {
+        const newMonth = parseInt(month) + 1;
+        setMonth(newMonth === 13 ? 1 : newMonth);
+        newMonth === 13 && setYear((old) => parseInt(old) + 1);
+      },
+      [month]
+    );
+    const handleDecreaseMonth = useCallback(
+      (e) => {
+        const newMonth = parseInt(month) - 1;
+        setMonth(newMonth === 0 ? 12 : newMonth);
+        newMonth === 0 && setYear((old) => parseInt(old) - 1);
+      },
+      [month]
+    );
+    useEffect(() => {
+      setMonth(initialMonth);
+      setYear(initialYear);
+    }, [initialMonth, initialYear]);
+    return (
+      <>
+        <Card
+          className="shadow-sm flex-fill date-selector my-card"
+          style={{ cursor: "default", ...style }}
+        >
+          <Card.Header>
+            <div
+              className={
+                disableMonthSwap
+                  ? "w-100 d-flex  justify-content-center"
+                  : "w-100 d-flex  justify-content-between"
+              }
+            >
+              {!disableMonthSwap && (
+                <Button
+                  variant="inverse"
+                  onClick={handleDecreaseMonth}
+                  onMouseDown={(e) => e.preventDefault()}
+                  size="sm"
+                >
+                  <FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon>
+                </Button>
+              )}
+              <h5 className="text-center m-0">{title}</h5>
+              {!disableMonthSwap && (
+                <Button
+                  variant="inverse"
+                  onClick={handleIncreaseMonth}
+                  onMouseDown={(e) => e.preventDefault()}
+                  size="sm"
+                >
+                  <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
+                </Button>
+              )}
+            </div>
+          </Card.Header>
+          <Card.Body className="px-3">
+            <Table className="user-table align-items-center">
+              <thead className="rounded-bottom">
+                <HeaderRow headers={headers} />
+              </thead>
+              <tbody className="border-0">
+                {tableDays.map((row, index) => {
+                  return (
+                    <tr className="p-0 align-items-center" key={row + index}>
+                      <TableRow
+                        singleDate={singleDate}
+                        data={row}
+                        index={index}
+                        name={year + "/" + month}
+                        onClick={onClick}
+                        onMouseOver={onMouseOver}
+                        clickedId={values}
+                        hoveredDay={hoveredDay}
+                        onMouseLeave={onMouseLeave}
+                      ></TableRow>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  },
+  isEqual
+);
 
 const TableRow = (props) => {
-  const { data, onClick, onMouseOver, clickedId, hoveredId, index } = props;
-  return data.map((day, i) => {
-    if (day === " ")
+  const {
+    data,
+    onClick,
+    onMouseOver,
+    onMouseLeave,
+    clickedId = [],
+    hoveredDay,
+    index,
+    name = "",
+    singleDate,
+  } = props;
+
+  return data.map((e, i) => {
+    if (e === null)
       return <td className="border-0 p-1" key={"empty" + index * 7 + i}></td>;
     else {
-      const id = "Btn" + day;
-      const from = parseInt(clickedId[0]);
-      const toClick = parseInt(clickedId[1]);
-      const toHover = hoveredId;
+      const day = name + "/" + ("0" + e).substr(-2);
+      const key = "Btn" + e;
+      const from = clickedId[0];
+      const to = clickedId[1];
       const variant =
         day === from
           ? "primary"
-          : day === toClick
+          : day === to
           ? "primary"
-          : toClick && from && day < toClick && day > from
+          : to && from && day < to && day > from
           ? "light-blue"
-          : toHover && from && day >= toHover && day < from
-          ? "danger"
-          : toHover && from && day <= toHover && day > from
+          : hoveredDay === day
+          ? "very-light-tertiary"
+          : !singleDate && !to && from && day < hoveredDay && day > from
+          ? "very-light-tertiary"
+          : !singleDate && !to && from && day > hoveredDay && day < from
           ? "very-light-tertiary"
           : "light";
       return (
-        <td className="border-0 p-1 justify-content-center" key={id}>
+        <td className="border-0 p-1 justify-content-center" key={key}>
           <DayButton
-            id={id}
             variant={variant}
             onClick={onClick}
             onMouseOver={onMouseOver}
-            value={day}
+            onMouseLeave={onMouseLeave}
+            value={e}
+            name={name + "/" + ("0" + e).substr(-2)}
           />
         </td>
       );
@@ -390,25 +506,27 @@ const TableRow = (props) => {
   });
 };
 export const DayButton = (props) => {
-  const { value, variant, day, onClick, onMouseOver, id } = props;
+  const { value, variant, day, onClick, onMouseOver, onMouseLeave, name } =
+    props;
   return (
     <>
       <Button
-        disabled={day === " "}
         style={{
           width: "30px",
           height: "30px",
           borderRadius: 0,
           border: 0,
         }}
+        disabled={value === null}
+        name={name}
         size="sm"
         value={day}
-        id={id}
         variant={variant}
         onClick={onClick}
         onMouseDown={(e) => e.preventDefault()}
         onMouseOver={onMouseOver}
-        className="text-center p-0"
+        onMouseLeave={onMouseLeave}
+        className="text-center p-0 day-btn"
       >
         {value}
       </Button>

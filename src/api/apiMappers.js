@@ -42,16 +42,35 @@ export function calcFilters(oldFilters, { label, value, action, gte, lte }) {
       : { ...oldFilters, [label]: { gte, lte } }
     : { ...oldFilters, [label]: { neq: value && [...value], gte, lte } };
 }
-export function filtersToUrl(filters) {
+export function filtersToUrl(filters, initialFilters) {
   return filters
     ? Object.entries(filters).reduce((a, b) => {
+        const idx = b[0];
         const { neq, gte, lte } = b[1];
         const neqLink =
           neq && neq.length !== 0
-            ? neq.reduce((c, d) => c + "&" + b[0] + "_ne=" + d, "")
-            : "";
-        const gteLink = gte ? "&" + b[0] + "_gte=" + gte : "";
-        const lteLink = lte ? "&" + b[0] + "_lte=" + lte : "";
+            ? neq.reduce((c, d) => c + "&" + idx + "_ne=" + d, "")
+            : (initialFilters &&
+                initialFilters[idx] &&
+                initialFilters[idx].neq &&
+                initialFilters[idx].neq.length !== 0 &&
+                initialFilters[idx].neq.reduce(
+                  (c, d) => c + "&" + idx + "_ne=" + d,
+                  ""
+                )) ||
+              "";
+        const gteLink = gte
+          ? "&" + idx + "_gte=" + gte
+          : (initialFilters &&
+              initialFilters[idx] &&
+              "&" + idx + "_gte=" + initialFilters[idx].gte) ||
+            "";
+        const lteLink = lte
+          ? "&" + idx + "_lte=" + lte
+          : (initialFilters &&
+              initialFilters[idx] &&
+              "&" + idx + "_lte=" + initialFilters[idx].lte) ||
+            "";
         return a + neqLink + gteLink + lteLink;
       }, "")
     : "";
@@ -83,13 +102,18 @@ export function loadToursPage(
   { fetchEntityGrid, fetchMeta, changeDate },
   dispatch
 ) {
+  const date = moment().format("YYYY/MM");
+  const initialFilters = {
+    date: { gte: date + "/01", lte: date + "/31" },
+  };
   return dispatch(fetchMeta()).then(() =>
     dispatch(
       fetchEntityGrid({
         entityId: "tours",
         url: "tours",
+        initialFilters,
       })
-    ).then(() => dispatch(changeDate(moment().format("MM/YYYY"))))
+    ).then(() => dispatch(changeDate(date)))
   );
 }
 

@@ -17,7 +17,7 @@ export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
           // style={{ backgroundColor: "#f5f8fb" }}
         >
           <h5>
-            {title} {moment(date, "MM/YYYY").format("MMMM YYYY")}
+            {title} {moment(date, "YYYY/MM").format("MMMM YYYY")}
           </h5>
         </Dropdown.Toggle>
 
@@ -49,17 +49,17 @@ export const MonthSelector = (props) => {
   const { date, onChange } = props;
 
   // const newDate = moment(date, "MM/YYYY").format("YYYY");
-  const [year, setYear] = useState(moment(date, "MM/YYYY").format("YYYY"));
-  const [month, setMonth] = useState(moment(date, "MM/YYYY").format("MMM"));
+  const [year, setYear] = useState(moment(date, "YYYY/MM").format("YYYY"));
+  const [month, setMonth] = useState(moment(date, "YYYY/MM").format("MMM"));
 
   useEffect(() => {
-    setYear(moment(date, "MM/YYYY").format("YYYY"));
-    setMonth(moment(date, "MM/YYYY").format("MMM"));
+    setYear(moment(date, "YYYY/MM").format("YYYY"));
+    setMonth(moment(date, "YYYY/MM").format("MMM"));
   }, [date]);
 
   function handlerMonthChange(m) {
     console.log("new month", m);
-    const change = moment(m + "/" + year, "MMM/YYYY").format("MM/YYYY");
+    const change = moment(m + "/" + year, "MMM/YYYY").format("YYYY/MM");
     console.log(change);
     onChange && onChange(change);
   }
@@ -68,12 +68,12 @@ export const MonthSelector = (props) => {
       ? onChange(
           moment(month + "/" + year, "MMM/YYYY")
             .add(1, "years")
-            .format("MM/YYYY")
+            .format("YYYY/MM")
         )
       : onChange(
           moment(month + "/" + year, "MMM/YYYY")
             .subtract(1, "years")
-            .format("MM/YYYY")
+            .format("YYYY/MM")
         );
   }
 

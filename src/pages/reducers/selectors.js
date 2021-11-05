@@ -333,8 +333,10 @@ export const useGridSelectors = ({
       switch (filterType) {
         case "date": {
           return {
-            month: gte || moment(date, "MM/YYY").format("MM"),
-            year: lte || moment(date, "MM/YYY").format("YYYY"),
+            year: moment(date, "YYYY/MM").format("YYYY"),
+            month: moment(date, "YYYY/MM").format("MM"),
+            from: gte,
+            to: lte,
           };
         }
         case "range": {
@@ -502,6 +504,21 @@ export const useGridCallbacks = ({
     },
     [dispatch, changeDate]
   );
+  const onChangeCurrentDate = useCallback(
+    (date) => {
+      const initialFilters = {
+        date: { gte: date + "/01", lte: date + "/31" },
+      };
+      dispatch(
+        fetchEntityGrid({
+          entityId: "tours",
+          url: "tours",
+          initialFilters,
+        })
+      ).then(() => dispatch(changeDate(date)));
+    },
+    [dispatch, changeDate]
+  );
   const onChangeCurrentUser = useCallback(
     (value) => {
       dispatch(
@@ -592,6 +609,7 @@ export const useGridCallbacks = ({
     onAdd,
     onDelete,
     onChangeDate,
+    onChangeCurrentDate,
     onToggleCheckboxFilter,
     onToggleAllCheckboxFilter,
     onChangeRangeFilter,
@@ -638,6 +656,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onAdd,
     onDelete,
     onChangeDate,
+    onChangeCurrentDate,
     onToggleCheckboxFilter,
     onToggleAllCheckboxFilter,
     onChangeRangeFilter,
@@ -656,10 +675,8 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     () => (
       <TitleComponent
         entityId={entityId}
-        // title={"Title"}
-        // date={"02/2323"}
         selectDate={selectDate}
-        onChange={onChangeDate}
+        onChange={onChangeCurrentDate}
       />
     ),
     [entityId, onChangeDate]
@@ -672,7 +689,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
         onChangeRange={onChangeRangeFilter}
         onReset={onResetFilter}
         {...props}
-      ></FilterComponent>
+      />
     ),
     [
       onToggleCheckboxFilter,

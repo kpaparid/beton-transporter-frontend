@@ -195,13 +195,13 @@ export function validateNumber(number) {
 }
 
 const fillTopWhites = (arr, index) => {
-  if (arr[0] - (index + 1) > 0) return [" ", ...arr];
+  if (arr[0] - (index + 1) > 0) return [null, ...arr];
   return [...arr];
 };
 const fillBottomWhites = (n, arr) => {
   if (n === 0) return [...arr];
-  if (n === 1) return [...arr, " "];
-  if (n === 2) return [...arr, " ", " "];
+  if (n === 1) return [...arr, null];
+  if (n === 2) return [...arr, null, null];
   return [...arr];
 };
 export const fillWhites = (arr, index, numRows) => {
