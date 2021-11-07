@@ -5,10 +5,11 @@ import {
   getGridLabelProps,
   getGridLabels,
   getGridMeta,
+  getGridUrl,
   getGridWidgets,
-  gridLabels,
-} from "../pages/myComponents/MyConsts";
-
+  getGridPrimaryLabels,
+  getGridSecondaryLabels,
+} from "../pages/myComponents/util/labels";
 export function calcFilters(oldFilters, { label, value, action, gte, lte }) {
   return oldFilters && oldFilters[label]
     ? action === "toggle"
@@ -46,7 +47,19 @@ export function filtersToUrl(filters, initialFilters) {
   return filters
     ? Object.entries(filters).reduce((a, b) => {
         const idx = b[0];
-        const { neq, gte, lte } = b[1];
+        const { neq, gte, lte, eq } = b[1];
+        const eqLink =
+          eq && eq.length !== 0
+            ? eq.reduce((c, d) => c + "&" + idx + "=" + d, "")
+            : (initialFilters &&
+                initialFilters[idx] &&
+                initialFilters[idx].eq &&
+                initialFilters[idx].eq.length !== 0 &&
+                initialFilters[idx].eq.reduce(
+                  (c, d) => c + "&" + idx + "=" + d,
+                  ""
+                )) ||
+              "";
         const neqLink =
           neq && neq.length !== 0
             ? neq.reduce((c, d) => c + "&" + idx + "_ne=" + d, "")
@@ -71,7 +84,7 @@ export function filtersToUrl(filters, initialFilters) {
               initialFilters[idx] &&
               "&" + idx + "_lte=" + initialFilters[idx].lte) ||
             "";
-        return a + neqLink + gteLink + lteLink;
+        return a + eqLink + neqLink + gteLink + lteLink;
       }, "")
     : "";
 }
@@ -97,7 +110,6 @@ export function parseLinkHeader(linkHeader) {
   });
   return Object.fromEntries(linkHeadersMap);
 }
-
 export function loadToursPage(
   { fetchEntityGrid, fetchMeta, changeDate },
   dispatch
@@ -111,10 +123,63 @@ export function loadToursPage(
       fetchEntityGrid({
         entityId: "tours",
         url: "tours",
+        limit: getGridWidgets("tours").pageSize,
         initialFilters,
       })
     ).then(() => dispatch(changeDate(date)))
   );
+}
+export function loadWorkHoursPage(
+  { fetchMeta, fetchEntityGrid, changeDate },
+  dispatch
+) {
+  return dispatch(fetchMeta()).then(({ payload }) => {
+    const driver = payload.find((e) => e.id === "driver").values[0];
+    const date = moment().format("YYYY/MM");
+    const initialFilters = {
+      driver: { eq: [driver] },
+      date: { gte: date + "/01", lte: date + "/31" },
+    };
+
+    return dispatch(
+      fetchEntityGrid({
+        entityId: "workHours",
+        url: getGridUrl("workHours"),
+        limit: getGridWidgets("workHours").pageSize,
+        initialFilters: initialFilters,
+      })
+    ).then(() => dispatch(changeDate(date)));
+    // .then(() =>
+    //   dispatch(
+    //     fetchEntityGrid({
+    //       entityId: "absent",
+    //       url: getGridUrl("absent"),
+    //       limit: getGridWidgets("absent").pageSize,
+    //       initialFilters: initialFilters,
+    //     })
+    //   )
+    // );
+    // .then(() =>
+    //   dispatch(
+    //     fetchEntityGrid({
+    //       entityId: "vacations",
+    //       url: "users/" + payload.users[0].id + "/" + getGridUrl("vacations"),
+    //     })
+    //   )
+    // )
+    // .then(() =>
+    //   dispatch(
+    //     fetchEntityGrid({
+    //       entityId: "workHoursBank",
+    //       url:
+    //         "users/" +
+    //         payload.users[0].id +
+    //         "/" +
+    //         getGridUrl("workHoursBank"),
+    //     })
+    //   )
+    // );
+  });
 }
 
 export function normalizeRows(data, nanoidLabelsTable) {
@@ -160,32 +225,58 @@ export function normalizeApi({ data, meta }) {
     editModes,
   };
 }
-export function getTable(mObject, labelsByTableId, meta) {
-  return Object.keys(mObject).map((tableId) => {
-    const tableRowsIds = mObject[tableId].map(({ id }) => id);
-    const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
-    const nanoids = labelsByTableId[tableId].reduce(
-      (a, b) => ({ ...a, [b.idx]: b.id }),
-      {}
-    );
-    return {
-      id: tableId,
-      labels: tableLabelIds,
-      rows: tableRowsIds,
-      selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
-      selectedLabels: tableLabelIds,
-      nanoids: nanoids,
-      ...meta,
-    };
-  });
+export function getConnections(m) {
+  const tableIds = Object.keys(m);
+  return tableIds
+    .map((tableId) => {
+      return {
+        [tableId]: m[tableId].map(({ id, ...rest }) => {
+          const labels = Object.keys(rest).filter((l) =>
+            getGridPrimaryLabels(tableId).includes(l)
+          );
+          const secondaryLabels = getGridSecondaryLabels(tableId)
+            .filter(
+              (s) =>
+                getGridLabels[s] &&
+                getGridLabels[s].dependencies &&
+                getGridLabels.dependencies
+                  .map((d) => labels.includes(d))
+                  .reduce((a, b) => a && b, true)
+            )
+            .reduce((a, b) => {
+              const calcValue = getGridLabels[b].fn;
+              const dependantValues = getGridLabels[b].dependencies.map(
+                (label) => rest[label]
+              );
+              return { ...a, [b]: calcValue(dependantValues) };
+            }, {});
+          return {
+            id,
+            ...labels.reduce((a, b) => ({ ...a, [b]: rest[b] }), {}),
+            ...secondaryLabels,
+          };
+        }),
+      };
+    })
+    .reduce((a, b) => ({ ...a, ...b }), {});
 }
-
+export function getNanoidLabelsTable(mObject) {
+  const tableIds = Object.keys(mObject);
+  return tableIds
+    .map((tableId) => ({
+      [tableId]: Object.keys(getGridLabels(tableId)).reduce(
+        (a, b) => ({ ...a, [b]: getGridLabels(tableId)[b].nanoid }),
+        {}
+      ),
+    }))
+    .reduce((a, b) => ({ ...a, ...b }), {});
+}
 export function getLabelsByTableId(tableIds, nanoidsByLabelIdByTableId) {
   return tableIds
     .map((tableId) => ({
       [tableId]: Object.keys(nanoidsByLabelIdByTableId[tableId]).reduce(
         (a, b) => {
-          return gridLabels[tableId].labels[b]
+          return getGridLabels(tableId)[b]
             ? [
                 ...a,
                 {
@@ -210,50 +301,6 @@ export function getLabelsByTableId(tableIds, nanoidsByLabelIdByTableId) {
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
 }
-export function getConnections(m) {
-  const tableIds = Object.keys(m);
-  return tableIds
-    .map((tableId) => {
-      return {
-        [tableId]: m[tableId].map(({ id, ...rest }) => {
-          const labels = Object.keys(rest);
-          const secondaryLabels = (gridLabels[tableId].secondaryLabels || [])
-            .filter(
-              (s) =>
-                gridLabels[tableId].labels[s] &&
-                gridLabels[tableId].labels[s].dependencies &&
-                gridLabels[tableId].labels[s].dependencies
-                  .map((d) => labels.includes(d))
-                  .reduce((a, b) => a && b, true)
-            )
-            .reduce((a, b) => {
-              const calcValue = gridLabels[tableId].labels[b].format;
-              const dependantValues = gridLabels[tableId].labels[
-                b
-              ].dependencies.map((label) => rest[label]);
-              return { ...a, [b]: calcValue(dependantValues) };
-            }, {});
-          return {
-            id,
-            ...rest,
-            ...secondaryLabels,
-          };
-        }),
-      };
-    })
-    .reduce((a, b) => ({ ...a, ...b }), {});
-}
-export function getNanoidLabelsTable(mObject) {
-  const tableIds = Object.keys(mObject);
-  return tableIds
-    .map((tableId) => ({
-      [tableId]: Object.keys(getGridLabels(tableId)).reduce(
-        (a, b) => ({ ...a, [b]: getGridLabels(tableId)[b].nanoid }),
-        {}
-      ),
-    }))
-    .reduce((a, b) => ({ ...a, ...b }), {});
-}
 export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
   const tableIds = Object.keys(mObject);
   return tableIds
@@ -274,6 +321,25 @@ export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
 }
+export function getTable(mObject, labelsByTableId, meta) {
+  return Object.keys(mObject).map((tableId) => {
+    const tableRowsIds = mObject[tableId].map(({ id }) => id);
+    const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
+    const nanoids = labelsByTableId[tableId].reduce(
+      (a, b) => ({ ...a, [b.idx]: b.id }),
+      {}
+    );
+    return {
+      id: tableId,
+      labels: tableLabelIds,
+      rows: tableRowsIds,
+      selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
+      selectedLabels: tableLabelIds,
+      nanoids: nanoids,
+      ...meta,
+    };
+  });
+}
 export function mapPromiseData(data, entityId) {
   return entityId === "vacations"
     ? {
@@ -288,7 +354,7 @@ export function mapPromiseData(data, entityId) {
         vacationsOverview: data["vacations"].overview,
       }
     : entityId === "workHours"
-    ? { workHours: data.workHours }
+    ? { workHours: Object.values(data) }
     : entityId === "tours"
     ? { tours: Object.values(data) }
     : data;

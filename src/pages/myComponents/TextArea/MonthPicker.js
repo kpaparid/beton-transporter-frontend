@@ -57,25 +57,31 @@ export const MonthSelector = (props) => {
     setMonth(moment(date, "YYYY/MM").format("MMM"));
   }, [date]);
 
-  function handlerMonthChange(m) {
-    console.log("new month", m);
-    const change = moment(m + "/" + year, "MMM/YYYY").format("YYYY/MM");
-    console.log(change);
-    onChange && onChange(change);
-  }
-  function handlerYearChange(y) {
-    onChange && y === 1
-      ? onChange(
-          moment(month + "/" + year, "MMM/YYYY")
-            .add(1, "years")
-            .format("YYYY/MM")
-        )
-      : onChange(
-          moment(month + "/" + year, "MMM/YYYY")
-            .subtract(1, "years")
-            .format("YYYY/MM")
-        );
-  }
+  const handlerMonthChange = useCallback(
+    (m) => {
+      console.log("new month", m);
+      const change = moment(m + "/" + year, "MMM/YYYY").format("YYYY/MM");
+      console.log(change);
+      onChange && onChange(change);
+    },
+    [year, onChange]
+  );
+  const handlerYearChange = useCallback(
+    (y) => {
+      onChange && y === 1
+        ? onChange(
+            moment(month + "/" + year, "MMM/YYYY")
+              .add(1, "years")
+              .format("YYYY/MM")
+          )
+        : onChange(
+            moment(month + "/" + year, "MMM/YYYY")
+              .subtract(1, "years")
+              .format("YYYY/MM")
+          );
+    },
+    [month, year, onChange]
+  );
 
   const data = { handlerYearChange, handlerMonthChange, month, year };
   return (
@@ -85,21 +91,16 @@ export const MonthSelector = (props) => {
   );
 };
 const MonthSelectorComponent = memo((props) => {
-  const {
-    handlerYearChange,
-    handlerMonthChange,
-    onFocus,
-    onBlur,
-    year,
-    month,
-  } = props.data;
+  const { handlerYearChange, handlerMonthChange, year, month } = props.data;
 
   const [activeMonth, setActiveMonth] = useState(month);
-  function handleClick(value) {
-    console.log("active before month", activeMonth);
-    console.log("active month", value);
-    setActiveMonth(value);
-  }
+  const handleClick = useCallback(
+    (value) => {
+      setActiveMonth(value);
+      handlerMonthChange(value);
+    },
+    [handlerMonthChange]
+  );
 
   const colorize = useCallback(
     (m) => {
@@ -107,9 +108,6 @@ const MonthSelectorComponent = memo((props) => {
     },
     [activeMonth]
   );
-  useEffect(() => {
-    handlerMonthChange(activeMonth);
-  }, [activeMonth]);
   return (
     <>
       <Card

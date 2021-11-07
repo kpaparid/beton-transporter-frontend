@@ -4,16 +4,17 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import {
-  getGridLabelFormat,
-  getGridUrl,
-  getGridWidgets,
-  gridLabels,
   maxWidthByType,
   TitleComponent,
   useTableMonthPicker,
 } from "../myComponents/MyConsts";
 import FilterComponent from "../myComponents/Filters/FilterComponent";
-
+import {
+  getGridLabelFormat,
+  getGridUrl,
+  getGridWidgets,
+  gridLabels,
+} from "../myComponents/util/labels";
 export const useGridSelectors = ({
   selectors: {
     metaSelector,
@@ -52,6 +53,7 @@ export const useGridSelectors = ({
   const selectSelectedRowsExist = useCallback(
     (state) =>
       tablesSelector.selectById(state, entityId) &&
+      tablesSelector.selectById(state, entityId).selectedRows &&
       tablesSelector.selectById(state, entityId).selectedRows.length > 0,
     [tablesSelector, entityId]
   );
@@ -79,7 +81,7 @@ export const useGridSelectors = ({
   );
   const selectAllRows = useCallback(
     (state) => rowsSelector.selectIds(state, entityId) || [],
-    []
+    [entityId, rowsSelector]
   );
   const selectEditMode = useCallback(
     (state) =>
@@ -182,7 +184,13 @@ export const useGridSelectors = ({
           }));
         }
       ),
-    [selectShownLabels, selectAllLabelsById, selectChangesOverRows, entityId]
+    [
+      selectShownLabels,
+      selectAllLabelsById,
+      selectChangesOverRows,
+      selectConstants,
+      entityId,
+    ]
   );
 
   const selectShownHeadersReactTable = useMemo(
@@ -217,7 +225,7 @@ export const useGridSelectors = ({
           );
         }
       ),
-    []
+    [selectShownLabels, selectSelectedLabels]
   );
   const selectHiddenHeadersReactTable2 = useMemo(
     () =>
@@ -229,7 +237,7 @@ export const useGridSelectors = ({
           ).map((id) => id);
         }
       ),
-    []
+    [selectShownLabels, selectSelectedLabels]
   );
   const selectLabelsModal = useMemo(
     () =>
@@ -307,7 +315,7 @@ export const useGridSelectors = ({
       (metaSelector.selectById(state, "date") &&
         metaSelector.selectById(state, "date").value) ||
       moment().format("MM/YYYY"),
-    [entityId, tablesSelector]
+    [metaSelector]
   );
 
   const selectConstantId = createSelector(
@@ -465,11 +473,11 @@ export const useGridCallbacks = ({
     (rowId) => {
       dispatch(onSelectRow({ id: entityId, rowId }));
     },
-    [dispatch, entityId, setSelectedRows]
+    [dispatch, entityId, onSelectRow]
   );
   const onSelectAllRowsCallback = useCallback(() => {
     dispatch(toggleAllChecked(entityId));
-  }, [dispatch, entityId]);
+  }, [dispatch, entityId, toggleAllChecked]);
   const onToggleSort = useCallback(
     (labelId) => {
       dispatch(fetchSortedEntityGrid({ entityId, labelId }));
@@ -511,13 +519,13 @@ export const useGridCallbacks = ({
       };
       dispatch(
         fetchEntityGrid({
-          entityId: "tours",
-          url: "tours",
+          entityId,
+          url: getGridUrl(entityId),
           initialFilters,
         })
       ).then(() => dispatch(changeDate(date)));
     },
-    [dispatch, changeDate]
+    [dispatch, changeDate, entityId, fetchEntityGrid]
   );
   const onChangeCurrentUser = useCallback(
     (value) => {
@@ -528,7 +536,7 @@ export const useGridCallbacks = ({
         })
       );
     },
-    [dispatch, changeDate]
+    [dispatch, fetchEntityGrid, entityId]
   );
   const onToggleCheckboxFilter = useCallback(
     (filter) => {
@@ -583,7 +591,7 @@ export const useGridCallbacks = ({
     (columnId) => {
       dispatch(toggleColumn({ id: entityId, columnId }));
     },
-    [entityId]
+    [entityId, toggleColumn, dispatch]
   );
   const onPageChange = useCallback(
     (page) => {
@@ -679,7 +687,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
         onChange={onChangeCurrentDate}
       />
     ),
-    [entityId, onChangeDate]
+    [entityId, onChangeCurrentDate, selectDate]
   );
   const nestedFilterComponent = useCallback(
     (props) => (

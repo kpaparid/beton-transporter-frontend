@@ -41,8 +41,7 @@ export const Tours = memo(() => {
           <Breadcrumb.Item>
             <FontAwesomeIcon icon={faHome} />
           </Breadcrumb.Item>
-          <Breadcrumb.Item>faHome</Breadcrumb.Item>
-          <Breadcrumb.Item active>Touren</Breadcrumb.Item>
+          <Breadcrumb.Item active>Tours</Breadcrumb.Item>
         </Breadcrumb>
       </div>
 
