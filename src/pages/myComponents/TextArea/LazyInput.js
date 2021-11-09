@@ -102,6 +102,7 @@ export const LazyInput = memo(
               className={"d-block text-center w-100" + className}
             >
               <input
+                autofocus="false"
                 className={"text-center"}
                 type={type === "number" ? "number" : "text"}
                 {...rest}
@@ -109,13 +110,6 @@ export const LazyInput = memo(
                 ref={domRef}
                 style={{ width: maxWidth }}
               />
-              {/* <TextareaAutosize
-                className={inputClassName}
-                {...rest}
-                onChange={handleTextAreaChange}
-                ref={domRef}
-                style={{ width: "100%", maxWidth, minWidth }}
-              /> */}
             </div>
           );
       }

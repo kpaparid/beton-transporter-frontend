@@ -45,6 +45,7 @@ export const DateSelectorDropdown = memo(
             className="text-center"
             {...props}
             style={inputStyle}
+            autofocus="false"
           />
         ),
       [Input, inputStyle]

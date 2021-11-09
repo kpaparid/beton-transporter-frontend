@@ -1,0 +1,116 @@
+[
+  {
+    "id": "61889ff07cfa7af7b98de6c9",
+    "driver": "Christopf Hoffman",
+    "taken": 7,
+    "rest": 0
+  },
+  {
+    "id": "61889ff0c19068686c2bd7d3",
+    "driver": "Alexander Morasch",
+    "taken": 14,
+    "rest": 29
+  },
+  {
+    "id": "61889ff0758514e7ea98b4b0",
+    "driver": "Andreas Schopf",
+    "taken": 28,
+    "rest": 29
+  },
+  {
+    "id": "61889ff0ab3b96df7c6d4394",
+    "driver": "Artur Schipp",
+    "taken": 3,
+    "rest": 18
+  },
+  {
+    "id": "61889ff0d124d7431b975980",
+    "driver": "Bodo Martin",
+    "taken": 3,
+    "rest": 30
+  },
+  {
+    "id": "61889ff00a76445bfa1c7c1e",
+    "driver": "Kyriakos Paparidis",
+    "taken": 15,
+    "rest": 8
+  },
+  {
+    "id": "61889ff072d10769d5e5daa1",
+    "driver": "Dimitrios Tsafas",
+    "taken": 9,
+    "rest": 19
+  },
+  {
+    "id": "61889ff0e7537e1f11502f50",
+    "driver": "Hans Järgen Voeckel",
+    "taken": 19,
+    "rest": 14
+  },
+  {
+    "id": "61889ff08a43f8f87530e3d4",
+    "driver": "Christian Schulte",
+    "taken": 18,
+    "rest": 23
+  },
+  {
+    "id": "61889ff0b3bf3fbc31d3c986",
+    "driver": "Heinrich Heinz Bitter",
+    "taken": 19,
+    "rest": 15
+  },
+  {
+    "id": "61889ff001201d7bc4d878af",
+    "driver": "Järgen Pott",
+    "taken": 20,
+    "rest": 23
+  },
+  {
+    "id": "61889ff00ce10af833c5a098",
+    "driver": "Jurij Kravcuk",
+    "taken": 17,
+    "rest": 19
+  },
+  {
+    "id": "61889ff0857b0149353cb7cc",
+    "driver": "Nabeh Albaradan",
+    "taken": 18,
+    "rest": 27
+  },
+  {
+    "id": "61889ff0ba92b2c6808176f6",
+    "driver": "Rainer Kettler",
+    "taken": 25,
+    "rest": 2
+  },
+  {
+    "id": "61889ff07616010d9fed538c",
+    "driver": "Roy Schuldt",
+    "taken": 22,
+    "rest": 30
+  },
+  {
+    "id": "61889ff0565ec93e5b93ae11",
+    "driver": "Uwe Schwill",
+    "taken": 12,
+    "rest": 0
+  },
+  {
+    "id": "61889ff0953eddc3e8949bcc",
+    "driver": "Waldemar Kasemir",
+    "taken": 0,
+    "rest": 23
+  },
+  {
+    "id": "61889ff0b995565c25009134",
+    "driver": "Waldemar Mergel",
+    "taken": 28,
+    "rest": 23
+  },
+  {
+    "id": "61889ff0c61698a848535796",
+    "driver": "Willhelm Zander",
+    "taken": 15,
+    "rest": 11
+  }
+]

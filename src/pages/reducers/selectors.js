@@ -203,8 +203,8 @@ export const useGridSelectors = ({
             accessor: id,
             // labelId: id,
             // labelIdx: allLabelsById[id],
-            sortType: (a, b) =>
-              a.values[id].value > b.values[id].value ? 1 : -1,
+            // sortType: (a, b) =>
+            //   a.values[id].value > b.values[id].value ? 1 : -1,
           }));
         }
       ),
@@ -286,9 +286,17 @@ export const useGridSelectors = ({
     [entityId, tablesSelector]
   );
   const selectSortedHeadersReactTable = useCallback(
-    (state) =>
-      tablesSelector.selectById(state, entityId) &&
-      tablesSelector.selectById(state, entityId).sort,
+    (state) => {
+      const sort =
+        tablesSelector.selectById(state, entityId) &&
+        tablesSelector.selectById(state, entityId).sort;
+      const id =
+        sort &&
+        tablesSelector.selectById(state, entityId) &&
+        tablesSelector.selectById(state, entityId).nanoids &&
+        tablesSelector.selectById(state, entityId).nanoids[sort.id];
+      return { id, order: sort && sort.order };
+    },
     [entityId, tablesSelector]
   );
 
@@ -453,6 +461,7 @@ export const useGridCallbacks = ({
     onSelectRow,
     toggleAllChecked,
     fetchSortedEntityGrid,
+    addMeta,
   },
   entityId,
   dispatch,
@@ -506,12 +515,7 @@ export const useGridCallbacks = ({
   const onDelete = useCallback(() => {
     console.log("on Delete");
   }, []);
-  const onChangeDate = useCallback(
-    (value) => {
-      dispatch(changeDate(value));
-    },
-    [dispatch, changeDate]
-  );
+
   const onChangeCurrentDate = useCallback(
     (date) => {
       const initialFilters = {
@@ -521,22 +525,29 @@ export const useGridCallbacks = ({
         fetchEntityGrid({
           entityId,
           url: getGridUrl(entityId),
+          limit: getGridWidgets(entityId).pageSize,
           initialFilters,
         })
-      ).then(() => dispatch(changeDate(date)));
+      ).then(() => dispatch(addMeta([{ id: "date", value: date }])));
     },
     [dispatch, changeDate, entityId, fetchEntityGrid]
   );
   const onChangeCurrentUser = useCallback(
     (value) => {
+      const initialFilters = {
+        user: { eq: [value] },
+      };
       dispatch(
         fetchEntityGrid({
           entityId,
-          url: "users/" + value + "/" + getGridUrl(entityId) + ".json",
+          url: getGridUrl(entityId),
+          limit: getGridWidgets(entityId).pageSize,
+          initialFilters,
         })
       );
+      // .then(() => dispatch(changeDate(date)));
     },
-    [dispatch, fetchEntityGrid, entityId]
+    [dispatch, changeDate, entityId, fetchEntityGrid]
   );
   const onToggleCheckboxFilter = useCallback(
     (filter) => {
@@ -616,7 +627,7 @@ export const useGridCallbacks = ({
     onDownload,
     onAdd,
     onDelete,
-    onChangeDate,
+    addMeta,
     onChangeCurrentDate,
     onToggleCheckboxFilter,
     onToggleAllCheckboxFilter,
@@ -663,8 +674,9 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onDownload,
     onAdd,
     onDelete,
-    onChangeDate,
+    addMeta,
     onChangeCurrentDate,
+    onChangeCurrentUser,
     onToggleCheckboxFilter,
     onToggleAllCheckboxFilter,
     onChangeRangeFilter,
@@ -726,18 +738,21 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectData: selectReactTableData,
     onSelectRow,
     onSelectAllRows,
+    selectPaginationData,
     setSelectedRows,
     onToggleSort,
     onCellChange,
     massEdit,
+    size: pageSize,
     selectLoading,
     pagination: {
       selectPaginationData,
-      paginationEnabled: true,
-      counterEnabled: true,
+      paginationEnabled: pagination,
+      counterEnabled: counter,
       onPageChange,
     },
   };
+  const outsideProps = { onChangeCurrentUser };
   const filterProps = filter && {
     selectItemsFilter,
     selectNestedCheckboxFilter,
@@ -767,5 +782,5 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     filterProps,
   };
   const titleProps = { title };
-  return { tableProps, buttonGroupProps, titleProps };
+  return { outsideProps, tableProps, buttonGroupProps, titleProps };
 };

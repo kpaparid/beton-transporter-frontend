@@ -13,12 +13,18 @@ import { useSelector } from "react-redux";
 import { Form, Table } from "@themesberg/react-bootstrap";
 // import LazyLoad from "react-lazyload";
 import { ComponentPreLoader } from "../../../components/ComponentPreLoader";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCaretDown,
+  faCaretUp,
+  faSortDown,
+  faSortUp,
+} from "@fortawesome/free-solid-svg-icons";
 // import { LazyLoad } from "react-observer-api";
 
 const Lazer = React.lazy(() => import("../TextArea/LazyInput"));
 export const RTables2 = memo(
   ({
-    size = 20,
     data,
     columns,
     selectHiddenColumns,
@@ -29,7 +35,8 @@ export const RTables2 = memo(
     onSelectAllRows,
     selectSelectedRows,
     onToggleSort,
-    selectLoading,
+    selectSortedColumn,
+    selectPaginationData,
   }) => {
     const labels = useMemo(() => columns.map((e) => e.accessor), [columns]);
     const renderCell = useCallback(
@@ -62,7 +69,8 @@ export const RTables2 = memo(
             onSelectAllRows={onSelectAllRows}
             selectSelectedRows={selectSelectedRows}
             onToggleSort={onToggleSort}
-            size={size}
+            selectSortedColumn={selectSortedColumn}
+            selectPaginationData={selectPaginationData}
           ></TableHead>
           <TableBody
             massEdit={massEdit}
@@ -108,16 +116,10 @@ const TableBody = React.memo(
             return (
               <tr key={"row" + index}>
                 {!massEdit && (
-                  <td className="px-2 py-1">
-                    <div className="d-flex justify-content-center w-100">
-                      <div>
-                        <IndeterminateCheckbox
-                          onChange={() => onSelectRow(row.id)}
-                          isSelected={isSelected}
-                        ></IndeterminateCheckbox>
-                      </div>
-                    </div>
-                  </td>
+                  <IndeterminateCheckbox
+                    onChange={() => onSelectRow(row.id)}
+                    isSelected={isSelected}
+                  />
                 )}
                 <RenderRow
                   row={row}
@@ -186,7 +188,7 @@ const EditableCell = React.memo(
     index,
     isEditable,
     updateMyData,
-    value: { value: initialValue, label, idx, links, ...rest },
+    value: { value: initialValue, label, idx, links, measurement, ...rest },
   }) => {
     const [value, setValue] = useState(initialValue);
     const handleUpdateData = useCallback(
@@ -206,7 +208,9 @@ const EditableCell = React.memo(
 
     return (
       <>
-        <div className={isEditable ? "d-none" : "d-block"}>{value}</div>
+        <div className={isEditable ? "d-none" : "d-block"}>
+          {value + (measurement ? " " + measurement : "")}
+        </div>
         {isEditable && (
           <Suspense
             fallback={
@@ -221,66 +225,6 @@ const EditableCell = React.memo(
   },
   isEqual
 );
-// const EditableCell2 = React.memo(
-//   ({
-//     value: {
-//       value: initialValue = "error",
-//       label,
-//       idx,
-//       id: cellId,
-//       links,
-//       format,
-//       ...rest
-//     },
-//     index,
-//     isSelected,
-//     id,
-//     updateMyData,
-//     editModeSelector,
-//   }) => {
-//     // console.log({ connections });
-//     const [value, setValue] = useState(initialValue);
-//     const handleUpdateData = useCallback(
-//       (v = value) => {
-//         console.log("UPDATING DATA");
-//         updateMyData(index, id, v, label, idx, cellId, links);
-//       },
-//       [value, initialValue]
-//     );
-//     const debouncedUpdate = _.debounce(handleUpdateData, 300);
-//     const onChange = useCallback((value, type) => {
-//       setValue(value);
-//       debouncedUpdate(value);
-//     }, []);
-//     useEffect(() => {
-//       setValue(initialValue);
-//     }, [initialValue]);
-//     const onBlur = useCallback(() => console.log("blur"), []);
-
-//     const editMode = useSelector(editModeSelector);
-
-//     const editable = useMemo(
-//       () => isSelected && editMode,
-//       [editMode, isSelected]
-//     );
-//     return (
-//       <LazyLoad className="w-100" placeholder={<div>hi</div>}>
-//         <Input
-//           extendable
-//           {...{
-//             value,
-//             onChange,
-//             onBlur,
-//             editable,
-//             ...rest,
-//           }}
-//         />
-//       </LazyLoad>
-//     );
-//   },
-//   isEqual
-// );
-
 const TableHead = ({
   columns,
   selectHiddenColumns,
@@ -288,13 +232,15 @@ const TableHead = ({
   massEdit,
   onSelectAllRows,
   selectSelectedRows,
-  size,
   onToggleSort,
+  selectPaginationData,
 }) => {
+  const { rowsCount } = useSelector(selectPaginationData);
   const hiddenColumns = useSelector(selectHiddenColumns);
   const selectedRows = useSelector(selectSelectedRows);
+  const sortedColumn = useSelector(selectSortedColumn);
   const state =
-    size === selectedRows.length
+    parseInt(rowsCount) === selectedRows.length
       ? "checked"
       : selectedRows.length === 0
       ? "unchecked"
@@ -303,19 +249,12 @@ const TableHead = ({
     <thead>
       <tr className="text-center" key={"th-0"}>
         {!massEdit && (
-          <th className="border-0">
-            <div>
-              <span>
-                <IndeterminateCheckbox
-                  state={state}
-                  onChange={onSelectAllRows}
-                ></IndeterminateCheckbox>
-              </span>
-            </div>
-          </th>
+          <IndeterminateCheckbox state={state} onChange={onSelectAllRows} />
         )}
         {columns.map(({ Header, accessor }, index) => {
           const display = hiddenColumns[accessor];
+          const sorted = sortedColumn && accessor === sortedColumn.id;
+          const order = sorted && sortedColumn.order;
           return (
             <TableColumn
               key={accessor}
@@ -323,6 +262,8 @@ const TableHead = ({
               accessor={accessor}
               display={display}
               onToggleSort={onToggleSort}
+              sorted={sorted}
+              order={order}
               // sortedComponent={sortedComponent}
             />
           );
@@ -334,20 +275,29 @@ const TableHead = ({
 const TableColumn = ({
   column,
   accessor,
-  sortedComponent,
+  sorted = false,
+  order,
+  sortedComponent = sorted ? (
+    <span className="sort-arrow ms-2" style={{ width: "15px", height: "15px" }}>
+      <FontAwesomeIcon
+        className="w-100 h-100"
+        icon={order === "desc" ? faCaretDown : faCaretUp}
+      />
+    </span>
+  ) : (
+    <></>
+  ),
   display,
   onToggleSort,
 }) => {
+  const handleClick = useCallback(
+    (e) => onToggleSort(accessor),
+    [onToggleSort, accessor]
+  );
   return (
-    <th
-      onClick={() => onToggleSort(accessor)}
-      className="border-0"
-      style={{
-        display,
-      }}
-    >
+    <th onClick={handleClick} className="border-0 sortable" style={{ display }}>
       <div>
-        <span>
+        <span className="d-flex flex-nowrap justify-content-center align-items-center">
           {column}
           {sortedComponent}
         </span>
@@ -364,12 +314,20 @@ const IndeterminateCheckbox = memo(
       resolvedRef.current.indeterminate = state === "indeterminate";
     }, [resolvedRef, state]);
     return (
-      <Form.Check
-        ref={resolvedRef}
-        checked={isSelected || state === "checked" || state === "indeterminate"}
-        {...rest}
-        className="checkbox"
-      />
+      <td className="px-3 py-1" style={{ maxWidth: "50px" }}>
+        <div className="d-flex justify-content-center w-100">
+          <div>
+            <Form.Check
+              ref={resolvedRef}
+              checked={
+                isSelected || state === "checked" || state === "indeterminate"
+              }
+              {...rest}
+              className="checkbox"
+            />
+          </div>
+        </div>
+      </td>
     );
   }
 );

@@ -12,6 +12,8 @@ import {
   filtersToUrl,
   normalizeApi,
   parsePagination,
+  calcSort,
+  sortToUrl,
 } from "../../api/apiMappers";
 
 const myInitialState = {};
@@ -111,7 +113,7 @@ function createGenericSlice(sliceName) {
   const fetchEntityGrid = createAsyncThunk(
     "data/fetchEntityGrid",
     async (
-      { entityId, url, page = "1", limit = "20", initialFilters },
+      { entityId, url, page = "1", limit = "20", initialFilters, initialSort },
       thunkAPI
     ) => {
       const state = thunkAPI.getState();
@@ -121,26 +123,39 @@ function createGenericSlice(sliceName) {
           .selectById(state[sliceName].tables, entityId).initialFilters,
         ...initialFilters,
       };
-
       const filterLink = filtersToUrl(newInitialFilters);
+      const sortLink = sortToUrl(initialSort);
+
       const finalUrl =
-        API + url + "?" + filterLink + "&_page=" + page + "&_limit=" + limit;
+        API +
+        url +
+        "?" +
+        filterLink +
+        "&_page=" +
+        page +
+        "&_limit=" +
+        limit +
+        sortLink;
+
       return await fetch(finalUrl)
         .then((res) =>
           res.json().then((data) => {
             return {
               data,
-              pagination: parsePagination({ res, page, limit }),
               entityId,
               initialFilters: newInitialFilters,
               url,
+              initialSort,
+              pagination: parsePagination({ res, page, limit }),
             };
           })
         )
         .catch((e) => ({
           data: [],
           entityId,
+          initialFilters: newInitialFilters,
           url,
+          initialSort,
           pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
         }));
     }
@@ -154,6 +169,7 @@ function createGenericSlice(sliceName) {
         url,
         filters,
         initialFilters,
+        initialSort,
         pagination: { limit },
       } = tablesAdapter
         .getSelectors()
@@ -162,9 +178,8 @@ function createGenericSlice(sliceName) {
         { ...initialFilters, ...filters },
         initialFilters
       );
-      const sortLink = sort
-        ? "&_sort=" + sort.id + "&_order=" + sort.order
-        : "";
+
+      const sortLink = sortToUrl(sort, initialSort);
       const finalUrl =
         API +
         url +
@@ -209,6 +224,7 @@ function createGenericSlice(sliceName) {
         sort,
         url,
         initialFilters,
+        initialSort,
         pagination: { limit, page },
       } = tablesAdapter
         .getSelectors()
@@ -240,9 +256,7 @@ function createGenericSlice(sliceName) {
         { ...initialFilters, ...newFilters },
         initialFilters
       );
-      const sortLink = sort
-        ? "&_sort=" + sort.id + "&_order=" + sort.order
-        : "";
+      const sortLink = sortToUrl(sort, initialSort);
       const finalUrl =
         API +
         url +
@@ -255,17 +269,28 @@ function createGenericSlice(sliceName) {
         sortLink;
 
       return await fetch(finalUrl).then((res) =>
-        res.json().then((data) => {
-          return {
-            data,
+        res
+          .json()
+          .then((data) => {
+            return {
+              data,
+              entityId,
+              filters: newFilters,
+              initialFilters,
+              pagination: parsePagination({ res, page, limit }),
+              url,
+              sort,
+            };
+          })
+          .catch((e) => ({
+            data: [],
             entityId,
-            filters: newFilters,
             initialFilters,
-            pagination: parsePagination({ res, page, limit }),
+            filters: newFilters,
             url,
             sort,
-          };
-        })
+            pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
+          }))
       );
     }
   );
@@ -279,6 +304,7 @@ function createGenericSlice(sliceName) {
         sort,
         url,
         initialFilters,
+        initialSort,
         pagination: { limit, page },
       } = tablesAdapter
         .getSelectors()
@@ -291,14 +317,9 @@ function createGenericSlice(sliceName) {
       const { idx } = tablesAdapter
         .getSelectors()
         .selectById(state[sliceName].labels, labelId);
-      const order =
-        sort && sort.id === idx ? (sort.order === "desc" ? "" : "desc") : "asc";
-      const sortLink =
-        order === ""
-          ? ""
-          : order === "asc"
-          ? "&_sort=" + idx
-          : "&_sort=" + idx + "&_order=" + order;
+      const c = calcSort(sort, idx);
+      const sortLink = sortToUrl(c, initialSort);
+      const { id, order } = c;
       const finalUrl =
         API +
         url +
@@ -317,13 +338,25 @@ function createGenericSlice(sliceName) {
               entityId,
               filters,
               initialFilters,
+              initialSort,
               pagination: parsePagination({ res, page, limit }),
               url,
-              sort: order !== "" && { id: idx, order },
+              sort: order && { id, order },
             };
           })
         )
-        .catch((e) => ({ data: { [entityId]: [] }, entityId, url }));
+        .catch((e) => ({
+          data: [],
+          entityId,
+          initialFilters,
+          initialSort,
+          filters,
+          url,
+          pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
+          sort:
+            order !== "" &&
+            (order !== "initial" ? { id: idx, order } : { ...initialSort }),
+        }));
     }
   );
   const postRows = createAsyncThunk("data/postRows", async (id, thunkAPI) => {
@@ -442,11 +475,8 @@ function createGenericSlice(sliceName) {
         tablesAdapter.upsertOne(state.tables, { id, changes: [] });
       },
 
-      changeDate: (state, action) => {
-        metaAdapter.upsertOne(state.meta, {
-          id: "date",
-          value: action.payload,
-        });
+      addMeta: (state, action) => {
+        metaAdapter.upsertMany(state.meta, action.payload);
       },
     },
     extraReducers: {
@@ -467,33 +497,19 @@ function createGenericSlice(sliceName) {
         tablesAdapter.upsertOne(state.tables, { id: entityId, loading: true });
       },
       [fetchEntityGrid.fulfilled](state, { payload }) {
-        const {
-          data,
-          pagination,
-          entityId,
-          url,
-          sort,
-          filters,
-          initialFilters,
-        } = payload;
+        const { data, entityId, ...meta } = payload;
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
         const mapped = mapPromiseData(rest, entityId);
         const { tables, rows, labels, editModes } = normalizeApi({
           data: mapped,
-          meta: {
-            url,
-            pagination,
-            sort,
-            filters,
-            initialFilters,
-            loading: false,
-          },
+          meta: { ...meta, loading: false },
         });
-        tablesAdapter.setAll(state.tables, tables);
-        rowsAdapter.setAll(state.rows, rows);
-        labelsAdapter.setAll(state.labels, labels);
-        editModesAdapter.setAll(state.editModes, editModes);
+
+        tablesAdapter.upsertMany(state.tables, tables);
+        rowsAdapter.upsertMany(state.rows, rows);
+        labelsAdapter.upsertMany(state.labels, labels);
+        editModesAdapter.upsertMany(state.editModes, editModes);
         state.loading = false;
       },
       [postRows.fulfilled](state, { meta: { arg } }) {

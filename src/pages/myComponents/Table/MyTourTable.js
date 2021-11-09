@@ -6,10 +6,10 @@ import { isEqual } from "lodash";
 import "../MyForm.css";
 import { ReactTable } from "./ReactTable";
 import LazyLoad from "react-lazyload";
-export const CardTable = memo(({ tableProps, stateAPIStatus, ...rest }) => {
+export const CardTable = memo(({ tableProps, ...rest }) => {
   const skipResetRef = useRef(false);
   return (
-    <Card className="card-dark">
+    <Card className="card-dark h-100">
       <Card.Header className="border-0">
         <TableLabel ref={skipResetRef} {...rest}></TableLabel>
       </Card.Header>

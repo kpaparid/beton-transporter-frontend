@@ -39,7 +39,7 @@ export const ReactTable = memo(
       selectShownColumns,
       onCellChange,
       pagination,
-      // counter,
+      counter,
       ...rest
     } = children;
     const data = useSelector(selectData);
@@ -461,88 +461,89 @@ const PaginationItem = ({ page, gotoPage, active = false }) => {
     </Pagination.Item>
   );
 };
-const TableFooter = React.memo((props) => {
-  const {
+const TableFooter = React.memo(
+  ({
     paginationEnabled = true,
     counterEnabled = true,
     currentPageSize = 0,
     onPageChange,
     selectPaginationData,
-  } = props;
-  const {
-    rowsCount: maxRows,
-    page: pageIndex,
-    pagesCount,
-  } = useSelector(selectPaginationData);
-  return (
-    <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-      {paginationEnabled && currentPageSize < maxRows && (
-        <Nav>
-          <Pagination className="mb-2 mb-lg-0">
-            <Pagination.Prev
-              onClick={() => onPageChange(1)}
-              disabled={parseInt(pageIndex) === 1}
-            >
-              <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
-            </Pagination.Prev>
-            <Pagination.Prev
-              onClick={() => onPageChange(parseInt(pageIndex) - 1)}
-              disabled={parseInt(pageIndex) === 1}
-            >
-              <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
-            </Pagination.Prev>
-            {[...Array(pagesCount > 5 ? 5 : pagesCount)].map((_, index) => {
-              const itemProps = {
-                page:
-                  pagesCount < 3
-                    ? parseInt(pageIndex) - 2 + index
-                    : pagesCount <= parseInt(pageIndex) + 1
-                    ? pagesCount - 4 + index
-                    : pageIndex > 3
-                    ? parseInt(pageIndex) - 2 + index
-                    : index + 1,
-                gotoPage: onPageChange,
-                active:
-                  pagesCount < 3
-                    ? pageIndex - 2 + index === parseInt(pageIndex)
-                    : pagesCount <= parseInt(pageIndex) + 1
-                    ? pagesCount - 4 + index === parseInt(pageIndex)
-                    : pageIndex > 3
-                    ? pageIndex - 2 + index === parseInt(pageIndex)
-                    : index + 1 === parseInt(pageIndex),
-              };
-              return (
-                <PaginationItem
-                  {...itemProps}
-                  key={"pagination-item-" + index}
-                />
-              );
-            })}
-            <Pagination.Next
-              onClick={() => onPageChange(parseInt(pageIndex) + 1)}
-              disabled={parseInt(pageIndex) === pagesCount}
-            >
-              <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
-            </Pagination.Next>
-            <Pagination.Next
-              onClick={() => onPageChange(pagesCount)}
-              disabled={parseInt(pageIndex) === pagesCount}
-            >
-              <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
-            </Pagination.Next>
-            <></>
-          </Pagination>
-        </Nav>
-      )}
+  }) => {
+    const {
+      rowsCount: maxRows,
+      page: pageIndex,
+      pagesCount,
+    } = useSelector(selectPaginationData);
+    return (
+      <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
+        {paginationEnabled && currentPageSize < maxRows && (
+          <Nav>
+            <Pagination className="mb-2 mb-lg-0">
+              <Pagination.Prev
+                onClick={() => onPageChange(1)}
+                disabled={parseInt(pageIndex) === 1}
+              >
+                <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
+              </Pagination.Prev>
+              <Pagination.Prev
+                onClick={() => onPageChange(parseInt(pageIndex) - 1)}
+                disabled={parseInt(pageIndex) === 1}
+              >
+                <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
+              </Pagination.Prev>
+              {[...Array(pagesCount > 5 ? 5 : pagesCount)].map((_, index) => {
+                const itemProps = {
+                  page:
+                    pagesCount <= 3
+                      ? index + 1
+                      : pagesCount <= parseInt(pageIndex) + 1
+                      ? pagesCount - 4 + index
+                      : pageIndex > 3
+                      ? parseInt(pageIndex) - 2 + index
+                      : index + 1,
+                  gotoPage: onPageChange,
+                  active:
+                    pagesCount <= 3
+                      ? parseInt(pageIndex) === index + 1
+                      : pagesCount <= parseInt(pageIndex) + 1
+                      ? pagesCount - 4 + index === parseInt(pageIndex)
+                      : parseInt(pageIndex) > 3
+                      ? parseInt(pageIndex) - 2 + index === parseInt(pageIndex)
+                      : index + 1 === parseInt(pageIndex),
+                };
+                return (
+                  <PaginationItem
+                    {...itemProps}
+                    key={"pagination-item-" + index}
+                  />
+                );
+              })}
+              <Pagination.Next
+                onClick={() => onPageChange(parseInt(pageIndex) + 1)}
+                disabled={parseInt(pageIndex) === pagesCount}
+              >
+                <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
+              </Pagination.Next>
+              <Pagination.Next
+                onClick={() => onPageChange(pagesCount)}
+                disabled={parseInt(pageIndex) === pagesCount}
+              >
+                <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
+              </Pagination.Next>
+              <></>
+            </Pagination>
+          </Nav>
+        )}
 
-      {counterEnabled && (
-        <small className="fw-bold">
-          Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
-        </small>
-      )}
-    </Card.Footer>
-  );
-});
+        {counterEnabled && (
+          <small className="fw-bold">
+            Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
+          </small>
+        )}
+      </Card.Footer>
+    );
+  }
+);
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {

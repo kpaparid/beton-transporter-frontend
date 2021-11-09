@@ -8,7 +8,7 @@ export const OutlinedSelect = memo(({ onChange, value, values }) => {
 
   function handleChange(e) {
     setSelectedValue(e);
-    onChange(e);
+    onChange(e.value);
   }
 
   return (

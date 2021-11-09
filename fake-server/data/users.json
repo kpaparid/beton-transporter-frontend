@@ -8,10 +8,7 @@
 		"birthDate": "12/12/1965",
         "idNumber": "456",
         "hireDate": "01/01/2019",
-        "vacationsDays": {"2021": 30, "2020":30, "2019":30},
-        "vacationsDaysLeft": 5
-
-		
+        "vacationsDays": {"2021": 30, "2020":30, "2019":30}
     },
 	{
         "id":"user2",
@@ -22,8 +19,6 @@
 		"birthDate": "22/22/1965",
         "idNumber": "3456",
         "hireDate": "01/01/2019",
-        "vacationsDays": {"2021": 29, "2020":30, "2019":30},
-        "vacationsDaysLeft": 5
-
+        "vacationsDays": {"2021": 29, "2020":30, "2019":30}
     }
 	]

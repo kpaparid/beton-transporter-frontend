@@ -7,18 +7,15 @@ import { useGridTableProps } from "../../reducers/selectors";
 import { Card } from "@themesberg/react-bootstrap";
 import { ComponentPreLoader } from "../../../components/ComponentPreLoader";
 
-export const GridTableComponent = memo(
-  ({ stateAPIStatus, actions, selectors, entityId }) => {
-    const props = useGridTableProps({
-      actions,
-      selectors,
-      entityId,
-    });
+export const GridTableComponent = memo(({ actions, selectors, entityId }) => {
+  const props = useGridTableProps({
+    actions,
+    selectors,
+    entityId,
+  });
 
-    return <CardTable stateAPIStatus={stateAPIStatus} {...props} />;
-  },
-  isequal
-);
+  return <CardTable {...props} />;
+}, isequal);
 export const Loader = memo(
   ({
     stateAPIStatus = "loading",
@@ -40,12 +37,9 @@ export const Loader = memo(
       case "loading":
         return fallbackLoading;
       case "success":
-        // return fallbackLoading;
         return children;
-      // return <div>hi</div>;
       case "error":
         return fallbackError;
-
       default:
         return <div>loading</div>;
     }

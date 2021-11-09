@@ -143,7 +143,7 @@ function useLoadData(tableName, actions, meta) {
     setAPIStatus("loading");
     switch (tableName) {
       case "workHoursTable":
-        loadWorkHoursPage(actions, dispatch).then(() =>
+        loadWorkHoursPage(actions, dispatch, meta).then(() =>
           setAPIStatus("success")
         );
         break;
@@ -153,7 +153,7 @@ function useLoadData(tableName, actions, meta) {
       default:
         break;
     }
-  }, [dispatch]);
+  }, [dispatch, meta, tableName, actions]);
 
   return stateAPIStatus;
 }

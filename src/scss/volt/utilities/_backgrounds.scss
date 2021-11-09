@@ -228,12 +228,12 @@
   }
   > .card-body {
     border: none !important;
-    background-color: white;
+    background-color: transparent;
     padding-top: 0;
   }
   > .card-header {
     padding: 0.25rem;
-    background-color: $white !important;
+    background-color: transparent;
     color: black !important;
 
     .btn-title {
@@ -248,7 +248,7 @@
       }
       &:hover {
         :first-child {
-          color: $tertiary !important;
+          color: $very-light-tertiary !important;
         }
       }
       &:focus:active {
@@ -270,7 +270,7 @@
         height: 45px;
         box-shadow: none;
         &:hover {
-          color: $tertiary !important;
+          color: $very-light-tertiary !important;
         }
         &:focus {
           transform: scale(1.2);
@@ -331,16 +331,27 @@
     }
     thead {
       background-color: $gray-500;
-      th :first-child:hover {
-        color: $tertiary !important;
+      th.sortable {
+        .sort-arrow {
+          color: $tertiary;
+          width: "15px";
+          height: "15px";
+          .svg {
+            transform: scale(1.2);
+          }
+        }
+        &:hover {
+          .sort-arrow {
+            color: $dark !important;
+          }
+          cursor: pointer;
+          color: $dark !important;
+          background-color: $light-tertiary !important;
+        }
       }
     }
   }
-  thead .form-check-input[type="checkbox"] {
-    border-color: $gray-600;
-  }
-
-  .table .form-check-input[type="checkbox"] {
+  tbody .form-check-input[type="checkbox"] {
     background-color: white;
     &:focus,
     &:hover,
@@ -353,17 +364,45 @@
       background-color: $primary !important;
     }
   }
+  thead .form-check-input[type="checkbox"] {
+    background-color: white;
+    border-color: $gray-600 !important;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: $dark !important;
+    }
+    &:indeterminate,
+    &:checked {
+      background-color: $primary !important;
+    }
+  }
   .pagination .page-item {
     .page-link {
       border: $border;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
       &:hover {
-        background-color: $gray-400 !important;
+        background-color: $light-tertiary !important;
+        border-color: $light-tertiary !important;
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba($tertiary, 0.55) !important;
+        }
       }
     }
     &.active .page-link {
       background-color: $primary !important;
+      border-color: $primary;
       &:hover {
         background-color: $primary !important;
+        border-color: $primary !important;
+      }
+      &:focus {
+        box-shadow: 0 0 0 0.2rem $primary !important;
       }
     }
   }

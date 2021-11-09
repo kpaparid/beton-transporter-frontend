@@ -12,6 +12,8 @@ import { forwardRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { MyBtn } from "./MyButtons";
 import { Filter } from "./TableLabel";
+import AddRowModal from "./AddRowModal";
+// import AddRowModal from "./AddRowModal";
 
 const TableButtons = forwardRef(
   (
@@ -74,11 +76,6 @@ const TableButtons = forwardRef(
     }, [selectedRowsExist, editMode]);
     return (
       <div className="d-flex flex-nowrap button-group">
-        {/* <ButtonGroup
-         className="btn-toolbar flex-wrap justify-content-end"
-         variant="danger"
-       > */}
-
         {filterProps && <Filter {...filterProps}></Filter>}
         {(selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn
@@ -94,12 +91,6 @@ const TableButtons = forwardRef(
             value={<FontAwesomeIcon icon={faTrash} />}
           ></MyBtn>
         )}
-        {/* <AddRowModal
-          labels={modalLabels}
-          title={titleModal}
-          onClose={handleCloseAddRow}
-          show={showModalDefault}
-        /> */}
 
         {download && (
           <MyBtn
@@ -115,12 +106,7 @@ const TableButtons = forwardRef(
             value={<FontAwesomeIcon icon={faSave} />}
           />
         )}
-        {modalProps && (
-          <MyBtn
-            value={<FontAwesomeIcon icon={faPlus} />}
-            onClick={handleAddRow}
-          ></MyBtn>
-        )}
+        {modalProps && <AddRowModal {...modalProps} />}
 
         {editMode && (
           <MyBtn

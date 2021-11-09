@@ -1,11 +1,14 @@
 import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
+import { PAGINATION } from "./types";
 
-const toDateFormat = (date) => moment(date, "YYYY-MM-DD").format("DD/MM/YYYY");
-const dateToDay = (date) => moment(date[0], "DD/MM/YYYY").format("dddd");
+const toDateFormat = (date) => moment(date, "YYYY/MM/DD").format("DD.MM.YYYY");
+const dateToMonth = (date) => moment(date, "YYYY/MM").format("MMMM");
+
+const dateToDay = (date) => moment(date[0], "YYYY/MM/DD").format("dddd");
 const calcDaysDifference = (arr) => {
-  const t1 = moment(arr[0], "DD/MM/YYYY");
-  const t2 = moment(arr[1], "DD/MM/YYYY");
+  const t1 = moment(arr[0], "YYYY/MM/DD");
+  const t2 = moment(arr[1], "YYYY/MM/DD");
   return t2.diff(t1, "days");
 };
 const calcMinuteDifference = (arr) => {
@@ -52,9 +55,10 @@ const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
-      pagination: true,
+      sort: true,
+      pagination: PAGINATION.SERVER,
       counter: true,
-      pageSize: 40,
+      pageSize: 20,
     },
     title: "Tours",
     primaryLabels: [
@@ -222,9 +226,10 @@ const gridLabels = {
       delete: true,
       massEdit: false,
       download: true,
-      pagination: true,
+      pagination: PAGINATION.SERVER,
       counter: true,
-      pageSize: 35,
+      pageSize: 40,
+      sort: true,
     },
     title: "Workhours",
     primaryLabels: ["date", "begin", "end", "pause"],
@@ -238,6 +243,7 @@ const gridLabels = {
         type: "date",
         filterType: "date",
         connections: ["day"],
+        format: toDateFormat,
       },
       day: {
         nanoid: nanoid(),
@@ -294,6 +300,7 @@ const gridLabels = {
       pagination: true,
       counter: false,
       pageSize: 6,
+      sort: true,
     },
     title: "Workhours Bank",
     primaryLabels: ["month", "hours"],
@@ -305,6 +312,7 @@ const gridLabels = {
         id: "month",
         text: "Month",
         type: "text",
+        format: dateToMonth,
       },
       hours: {
         nanoid: nanoid(),
@@ -327,6 +335,7 @@ const gridLabels = {
       pagination: true,
       counter: false,
       pageSize: 5,
+      sort: true,
     },
     title: "Absent",
     primaryLabels: ["from", "to", "reason"],
@@ -339,6 +348,7 @@ const gridLabels = {
         text: "from",
         type: "date",
         connections: ["days"],
+        format: toDateFormat,
       },
       to: {
         nanoid: nanoid(),
@@ -346,6 +356,7 @@ const gridLabels = {
         text: "to",
         type: "date",
         connections: ["days"],
+        format: toDateFormat,
       },
       days: {
         nanoid: nanoid(),
@@ -353,7 +364,7 @@ const gridLabels = {
         text: "Days",
         type: "number",
         dependencies: ["from", "to"],
-        format: calcDaysDifference,
+        fn: calcDaysDifference,
       },
       reason: {
         nanoid: nanoid(),
@@ -374,6 +385,7 @@ const gridLabels = {
       pagination: false,
       counter: false,
       pageSize: 5,
+      sort: false,
     },
     title: "Vacations",
     primaryLabels: ["taken", "rest"],
@@ -399,19 +411,20 @@ const gridLabels = {
     },
   },
   vacationsOverview: {
+    url: "vacations-overview",
     widgets: {
       filter: false,
       add: true,
       download: true,
       remove: true,
       massEdit: false,
-      pagination: true,
-      counter: false,
+      pagination: PAGINATION.INTERNAL,
+      counter: true,
       pageSize: 5,
+      sort: true,
     },
     title: "Vacations Overview",
     footer: ["Total", "", "SUM"],
-    size: 5,
     primaryLabels: ["from", "to"],
     secondaryLabels: ["days"],
     editable: ["from", "to"],
@@ -423,6 +436,7 @@ const gridLabels = {
         text: "From",
         type: "date",
         connections: ["days"],
+        format: toDateFormat,
       },
       to: {
         nanoid: nanoid(),
@@ -430,6 +444,7 @@ const gridLabels = {
         text: "To",
         type: "date",
         connections: ["days"],
+        format: toDateFormat,
       },
       days: {
         nanoid: nanoid(),
@@ -437,7 +452,7 @@ const gridLabels = {
         text: "Days",
         type: "text",
         dependencies: ["from", "to"],
-        format: calcDaysDifference,
+        fn: calcDaysDifference,
       },
     },
   },
