@@ -220,12 +220,7 @@ export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
       [tableId]: mObject[tableId].map(({ id, ...rest }) => {
         const d = Object.keys(rest)
           .map((idx) => ({
-            [nanoidsByLabelIdByTableId[tableId][idx]]: getGridLabelFormat(
-              tableId,
-              idx
-            )
-              ? getGridLabelFormat(tableId, idx)(rest[idx])
-              : rest[idx],
+            [nanoidsByLabelIdByTableId[tableId][idx]]: rest[idx],
           }))
           .reduce((a, b) => ({ ...a, ...b }), {});
         return { id, ...d };

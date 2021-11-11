@@ -1,7 +1,7 @@
 import { memo } from "react";
 import isequal from "lodash.isequal";
 
-import { CardTable } from "./MyTourTable";
+import { EntityTable } from "./MyTourTable";
 import _ from "lodash";
 import { useGridTableProps } from "../../reducers/selectors";
 import { Card } from "@themesberg/react-bootstrap";
@@ -14,7 +14,7 @@ export const GridTableComponent = memo(({ actions, selectors, entityId }) => {
     entityId,
   });
 
-  return <CardTable {...props} />;
+  return <EntityTable {...props} />;
 }, isequal);
 export const Loader = memo(
   ({

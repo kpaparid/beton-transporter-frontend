@@ -174,24 +174,6 @@ const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
     );
 }, isequal);
 
-function maxWidthByType(type) {
-  return type === "date"
-    ? "120px"
-    : type === "number"
-    ? "60px"
-    : type === "day"
-    ? "100px"
-    : type === "time"
-    ? "75px"
-    : type === "bigText"
-    ? "250px"
-    : type === "bigNumber"
-    ? "250px"
-    : type === "constant"
-    ? "200px"
-    : "75px";
-}
-
 const grids = {
   tours: {
     title: "Tours",
@@ -258,5 +240,4 @@ export {
   darkblue,
   green,
   primaryVariant,
-  maxWidthByType,
 };

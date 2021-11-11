@@ -1,12 +1,41 @@
-import React, { memo, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { isEqual } from "lodash";
-import { Button, Modal } from "@themesberg/react-bootstrap";
+import {
+  Button,
+  Card,
+  Form,
+  InputGroup,
+  Modal,
+} from "@themesberg/react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-
+import { useSelector } from "react-redux";
+import { MyFormSelect } from "../MyFormSelect";
+const Lazer = React.lazy(() => import("../TextArea/LazyInput"));
 const AddRowModal = memo(({ selectLabelsModal, title }) => {
+  const labels = useSelector(selectLabelsModal);
   const [showDefault, setShowDefault] = useState(false);
   const handleClose = () => setShowDefault(false);
+  const renderInput = useCallback(
+    ({ type, ...rest }) => {
+      switch (type) {
+        case "constant":
+          return (
+            <MyFormSelect
+              className="form-control"
+              justifyContent="start"
+              {...rest}
+            ></MyFormSelect>
+          );
+
+        default:
+          return <Form.Control type="text" {...rest} />;
+      }
+    },
+
+    []
+  );
+
   return (
     <>
       <Button
@@ -16,24 +45,30 @@ const AddRowModal = memo(({ selectLabelsModal, title }) => {
       >
         <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
       </Button>
-      <Modal as={Modal.Dialog} centered show={showDefault} onHide={handleClose}>
+      <Modal
+        as={Modal.Dialog}
+        size="lg"
+        centered
+        show={showDefault}
+        onHide={handleClose}
+      >
         <Modal.Header>
           <Modal.Title className="h6">{title}</Modal.Title>
           <Button variant="close" aria-label="Close" onClick={handleClose} />
         </Modal.Header>
         <Modal.Body>
-          <p>
-            With less than a month to go before the European Union enacts new
-            consumer privacy laws for its citizens, companies around the world
-            are updating their terms of service agreements to comply.
-          </p>
-          <p>
-            The European Union’s General Data Protection Regulation (G.D.P.R.)
-            goes into effect on May 25 and is meant to ensure a common set of
-            data rights in the European Union. It requires organizations to
-            notify users as soon as possible of high-risk data breaches that
-            could personally affect them.
-          </p>
+          <Card className="card-">
+            <Card.Body>
+              <Form className="d-flex flex-wrap justify-content-around">
+                {labels.map((e) => (
+                  <Form.Group className="mb-3 col-5">
+                    <Form.Label>{e.text}</Form.Label>
+                    <InputGroup>{renderInput(e)}</InputGroup>
+                  </Form.Group>
+                ))}
+              </Form>
+            </Card.Body>
+          </Card>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

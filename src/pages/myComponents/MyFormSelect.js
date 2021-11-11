@@ -5,7 +5,16 @@ import Select from "react-select";
 import { red } from "./MyConsts";
 
 export const MyFormSelect = (props) => {
-  const { availableValues, value, onChange, hidden = false } = props;
+  const {
+    availableValues,
+    value,
+    onChange,
+    hidden = false,
+    maxWidth,
+    minWidth,
+    className = "",
+    justifyContent = "center",
+  } = props;
   const [selectedValue, setSelectedValue] = useState(value);
 
   useEffect(() => {
@@ -24,7 +33,11 @@ export const MyFormSelect = (props) => {
     <>
       {availableValues && !hidden && (
         <div
-          className="dummy w-100 overflow-visible"
+          className={"dummy w-100 overflow-visible " + className}
+          style={{
+            maxWidth,
+            minWidth,
+          }}
           // onClick="event.stopPropagation()"
         >
           <Select
@@ -50,8 +63,8 @@ export const MyFormSelect = (props) => {
               valueContainer: (base) => ({
                 ...base,
                 padding: 0,
-                paddingLeft: 27,
-                justifyContent: "center",
+                paddingLeft: justifyContent === "center" ? 27 : 0,
+                justifyContent,
                 width: 8 * (selectedValue + "").length + 100,
               }),
               singleValue: (base) => ({

@@ -6,35 +6,31 @@ import {
   faTrash,
   faWindowClose,
 } from "@fortawesome/free-solid-svg-icons";
-import React, { useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { forwardRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { MyBtn } from "./MyButtons";
-import { Filter } from "./TableLabel";
+import { Filter } from "./TableHeader";
 import AddRowModal from "./AddRowModal";
-// import AddRowModal from "./AddRowModal";
 
-const TableButtons = forwardRef(
-  (
-    {
-      selectSelectedRowsExist,
-      selectChangesExist,
-      selectEditMode,
-      onAdd,
-      onDelete,
-      onDownload,
-      onClose,
-      onSave,
-      onToggleEdit,
-      forceClose,
-      modalProps,
-      filterProps,
-      download,
-      remove,
-    },
-    ref
-  ) => {
+const TableButtons = memo(
+  ({
+    selectSelectedRowsExist,
+    selectChangesExist,
+    selectEditMode,
+    onAdd,
+    onDelete,
+    onDownload,
+    onClose,
+    onSave,
+    onToggleEdit,
+    forceClose,
+    modalProps,
+    filterProps,
+    download,
+    remove,
+  }) => {
     const editMode = useSelector(selectEditMode);
     const selectedRowsExist = useSelector(selectSelectedRowsExist);
     const changesExist = useSelector(selectChangesExist);
@@ -49,14 +45,10 @@ const TableButtons = forwardRef(
       onToggleEdit();
     }, [onToggleEdit]);
     const handleEditDisable = useCallback(() => {
-      ref.current = true;
-      console.log("handleEditDisable", ref.current);
       onToggleEdit();
       clearChanges();
     }, [onToggleEdit, clearChanges]);
     const handleSave = useCallback(() => {
-      ref.current = true;
-      console.log("handleSave", ref.current);
       onSave();
     }, [onSave]);
     const handleDownload = useCallback(() => {
@@ -68,12 +60,10 @@ const TableButtons = forwardRef(
 
     useEffect(() => {
       if (editMode && !selectedRowsExist) {
-        ref.current = true;
-        console.log("handleEditDisable", ref.current);
         onToggleEdit();
         // clearChanges();
       }
-    }, [selectedRowsExist, editMode]);
+    }, [selectedRowsExist, editMode, onToggleEdit]);
     return (
       <div className="d-flex flex-nowrap button-group">
         {filterProps && <Filter {...filterProps}></Filter>}

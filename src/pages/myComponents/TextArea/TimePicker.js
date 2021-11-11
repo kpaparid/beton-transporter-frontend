@@ -59,9 +59,12 @@ export const MyTimePicker = memo(
 
 export const TimeSelectorRange = memo(
   ({ gte = "00:00", lte = "23:59", onChange }) => {
-    const handleClick = useCallback((v) => {
-      onChange && onChange(v);
-    }, []);
+    const handleClick = useCallback(
+      (v) => {
+        onChange && onChange(v);
+      },
+      [onChange]
+    );
     return (
       <Card className="my-card">
         <Card.Header>
@@ -144,7 +147,7 @@ const TimeSelectorBody = memo(
           ? onChange && onChange(("0" + e.target.name).slice(-2) + ":" + minute)
           : onChange && onChange(hour + ":" + ("0" + e.target.name).slice(-2));
       },
-      [hour, minute]
+      [hour, minute, onChange]
     );
 
     useEffect(() => {

@@ -5,6 +5,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { isEqual } from "lodash";
 import TimePicker from "./TimePicker";
 import { DateSelectorDropdown } from "./DatePicker";
+import moment from "moment";
 
 export const LazyInput = memo(
   forwardRef(
@@ -13,11 +14,13 @@ export const LazyInput = memo(
         onChange,
         type,
         availableValues,
+        disableMonthSwap,
         inputClassName = "",
         className = "",
         modal = false,
         minWidth,
         maxWidth,
+        value,
         ...rest
       },
       ref
@@ -25,39 +28,34 @@ export const LazyInput = memo(
       const backupRef = useRef(null);
       const domRef = ref ? ref : backupRef;
 
-      const handleTextAreaChange = useCallback((e) => {
-        onChange && onChange(e.target.value, "text");
-      }, []);
-      const handleDateChange = useCallback((value) => {
-        onChange && onChange(value, "date");
-      }, []);
-      const handleSelectChange = useCallback((value) => {
-        onChange && onChange(value, "select");
-      }, []);
+      const handleTextAreaChange = useCallback(
+        (e) => {
+          onChange && onChange(e.target.value, "text");
+        },
+        [onChange]
+      );
+      const handleDateChange = useCallback(
+        (value) => {
+          onChange && onChange(value, "date");
+        },
+        [onChange]
+      );
+      const handleDefaultChange = useCallback(
+        (value) => {
+          onChange && onChange(value, "text");
+        },
+        [onChange]
+      );
       const handleOutsideClick = useCallback(() => {
         domRef.current.focus();
-      }, []);
+      }, [domRef]);
+
       switch (type) {
-        case "date":
-          return (
-            <DateSelectorDropdown
-              className={className}
-              onChange={handleDateChange}
-              {...rest}
-              inputStyle={{ maxWidth, minWidth }}
-            />
-          );
-        case "nonEditable":
-          return (
-            <div className={"d-block text-center disabled" + className}>
-              {rest.value}
-            </div>
-          );
         case "bigText":
           return (
             <TextareaAutosize
               className={inputClassName}
-              {...rest}
+              value={value}
               onChange={handleTextAreaChange}
               ref={domRef}
               style={{ width: maxWidth }}
@@ -68,7 +66,7 @@ export const LazyInput = memo(
           return (
             <TextareaAutosize
               className={inputClassName}
-              {...rest}
+              value={value}
               onChange={handleTextAreaChange}
               ref={domRef}
               style={{ width: maxWidth }}
@@ -78,8 +76,8 @@ export const LazyInput = memo(
           return (
             <TimePicker
               className={inputClassName}
-              {...rest}
-              onChange={handleDateChange}
+              value={value}
+              onChange={handleDefaultChange}
               style={{ width: maxWidth }}
             />
           );
@@ -87,13 +85,31 @@ export const LazyInput = memo(
           return (
             <MyFormSelect
               className={className}
-              onChange={handleSelectChange}
+              onChange={handleDefaultChange}
               availableValues={availableValues}
-              {...rest}
+              value={value}
               maxWidth={maxWidth}
               minWidth={minWidth}
               labelIsDisabled
             />
+          );
+        case "date":
+          const v = moment(value, "DD.MM.YYYY").format("YYYY/MM/DD");
+          return (
+            <DateSelectorDropdown
+              singleDate={true}
+              className={className}
+              onChange={handleDateChange}
+              format="DD.MM.YYYY"
+              disableMonthSwap={disableMonthSwap}
+              value={v}
+            />
+          );
+        case "nonEditable":
+          return (
+            <div className={"d-block text-center disabled" + className}>
+              {value}
+            </div>
           );
         default:
           return (
@@ -102,13 +118,15 @@ export const LazyInput = memo(
               className={"d-block text-center w-100" + className}
             >
               <input
-                autofocus="false"
                 className={"text-center"}
                 type={type === "number" ? "number" : "text"}
-                {...rest}
+                // {...rest}
+
+                value={value}
                 onChange={handleTextAreaChange}
                 ref={domRef}
                 style={{ width: maxWidth }}
+                autoFocus={false}
               />
             </div>
           );

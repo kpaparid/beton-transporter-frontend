@@ -3,17 +3,14 @@ import moment from "moment";
 import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
-import {
-  maxWidthByType,
-  TitleComponent,
-  useTableMonthPicker,
-} from "../myComponents/MyConsts";
+import { TitleComponent } from "../myComponents/MyConsts";
 import FilterComponent from "../myComponents/Filters/FilterComponent";
 import {
+  getGridLabelFn,
   getGridLabelFormat,
   getGridUrl,
   getGridWidgets,
-  gridLabels,
+  maxWidthByType,
 } from "../myComponents/util/labels";
 export const useGridSelectors = ({
   selectors: {
@@ -90,25 +87,6 @@ export const useGridSelectors = ({
       false,
     [entityId, editModesSelector]
   );
-  // const selectAvailableValuesById = useMemo(
-  //   () =>
-  //     createSelector(
-  //       [selectShownLabels, selectAllRows, selectAllRowsById],
-  //       (labels, rows, allRowsById) =>
-  //         labels
-  //           .map((id) => ({
-  //             [id]: [
-  //               ...new Set(
-  //                 rows
-  //                   .map((row) => allRowsById[row][id])
-  //                   .filter((v) => v !== undefined)
-  //               ),
-  //             ],
-  //           }))
-  //           .reduce((a, b) => ({ ...a, ...b }), {})
-  //     ),
-  //   [selectShownLabels, selectAllRows, selectAllRowsById]
-  // );
   const selectConstants = useCallback(
     (state) => metaSelector.selectById(state, "constants") || [],
     [metaSelector]
@@ -142,6 +120,46 @@ export const useGridSelectors = ({
       ),
     [selectShownRows, selectAllRowsById, selectChanges]
   );
+  const selectShownHeadersReactTable = useMemo(
+    () =>
+      createSelector(
+        [selectShownLabels, selectAllLabelsById, selectAllLabelsById],
+        (labels, allLabelsById, constants) => {
+          return labels.map((l) => {
+            const { text, id, idx, type, measurement, links } =
+              allLabelsById[l];
+
+            const props = {
+              Header: text,
+              id,
+              idx,
+              type,
+              measurement: measurement,
+              minWidth: "10px",
+              maxWidth: maxWidthByType(type),
+              links:
+                links &&
+                links.map(({ connectionIdx, ...rest }) => ({
+                  format: getGridLabelFn(entityId, connectionIdx),
+                  ...rest,
+                })),
+            };
+            if (type === "date")
+              return {
+                ...props,
+                disableMonthSwap: true,
+              };
+            else if (type !== "constant") return props;
+            else
+              return {
+                ...props,
+                availableValues: constants[idx],
+              };
+          });
+        }
+      ),
+    [selectShownLabels, selectAllLabelsById, entityId]
+  );
   const selectReactTableData = useMemo(
     () =>
       createSelector(
@@ -157,28 +175,43 @@ export const useGridSelectors = ({
             id: row.id,
             ...shownLabels
               .map((label) => {
-                const props = {
-                  id: row.id,
-                  idx: label.idx,
-                  value: row[label.id],
-                  label: label.id,
-                  type: label.type,
-                  measurement: label.measurement,
-                  minWidth: "10px",
-                  maxWidth: maxWidthByType(label.type),
-                  links: label.links.map(({ connectionIdx, ...rest }) => ({
-                    format: getGridLabelFormat(entityId, connectionIdx),
-                    ...rest,
-                  })),
+                // const props = {
+                //   id: row.id,
+                //   idx: label.idx,
+                //   value: getGridLabelFormat(entityId, label.idx)
+                //     ? getGridLabelFormat(entityId, label.idx)(row[label.id])
+                //     : row[label.id],
+                //   label: label.id,
+                //   type: label.type,
+                //   measurement: label.measurement,
+                //   minWidth: "10px",
+                //   maxWidth: maxWidthByType(label.type),
+                //   links: label.links.map(({ connectionIdx, ...rest }) => ({
+                //     format: getGridLabelFn(entityId, connectionIdx),
+                //     ...rest,
+                //   })),
+                // };
+
+                // if (props.type === "date")
+                //   return {
+                //     [label.id]: {
+                //       ...props,
+                //       disableMonthSwap: true,
+                //     },
+                //   };
+                // else if (props.type !== "constant") return { [label.id]: props };
+                // else
+                //   return {
+                //     [label.id]: {
+                //       ...props,
+                //       availableValues: constants[label.idx],
+                //     },
+                //   };
+                return {
+                  [label.id]: getGridLabelFormat(entityId, label.idx)
+                    ? getGridLabelFormat(entityId, label.idx)(row[label.id])
+                    : row[label.id],
                 };
-                if (props.type !== "constant") return { [label.id]: props };
-                else
-                  return {
-                    [label.id]: {
-                      ...props,
-                      availableValues: constants[label.idx],
-                    },
-                  };
               })
               .reduce((a, b) => ({ ...a, ...b }), {}),
           }));
@@ -193,24 +226,6 @@ export const useGridSelectors = ({
     ]
   );
 
-  const selectShownHeadersReactTable = useMemo(
-    () =>
-      createSelector(
-        [selectShownLabels, selectAllLabelsById],
-        (labels, allLabelsById) => {
-          return labels.map((id) => ({
-            Header: allLabelsById[id].text,
-            accessor: id,
-            // labelId: id,
-            // labelIdx: allLabelsById[id],
-            // sortType: (a, b) =>
-            //   a.values[id].value > b.values[id].value ? 1 : -1,
-          }));
-        }
-      ),
-    [selectShownLabels, selectAllLabelsById]
-  );
-
   const selectHiddenHeadersReactTable = useMemo(
     () =>
       createSelector(
@@ -223,18 +238,6 @@ export const useGridSelectors = ({
             }),
             {}
           );
-        }
-      ),
-    [selectShownLabels, selectSelectedLabels]
-  );
-  const selectHiddenHeadersReactTable2 = useMemo(
-    () =>
-      createSelector(
-        [selectShownLabels, selectSelectedLabels],
-        (labels, selectedLabels) => {
-          return (
-            labels.filter((id) => !selectedLabels.includes(id)) || []
-          ).map((id) => id);
         }
       ),
     [selectShownLabels, selectSelectedLabels]
@@ -266,12 +269,15 @@ export const useGridSelectors = ({
               page,
               required,
               priority,
+              // maxWidth: maxWidthByType(type),
+              placeholder: type === "date" ? moment().format("DD.MM.YYYY") : "",
+              // getGridL,
             };
-            console.log({ select: labelsById[labelId] });
-            return type === "select"
-              ? { ...props, availableValues: availableValues[id] }
+
+            return type === "constant"
+              ? { ...props, availableValues: availableValues[idx] }
               : type === "date"
-              ? { ...props, portal: false, withButton: true }
+              ? { ...props, portal: false, withButton: false }
               : props;
           });
         }
@@ -729,6 +735,9 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     pageSize,
     counter,
   } = getGridWidgets(entityId);
+  const addRowProps = {
+    onSubmit: "",
+  };
   const tableProps = {
     selectSelectedRows,
     editModeSelector: selectEditMode,
@@ -743,6 +752,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onToggleSort,
     onCellChange,
     massEdit,
+    addRowProps,
     size: pageSize,
     selectLoading,
     pagination: {

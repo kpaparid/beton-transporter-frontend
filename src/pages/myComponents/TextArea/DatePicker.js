@@ -24,31 +24,41 @@ export const DateSelectorDropdown = memo(
     portal = true,
     withButton = false,
     onBlur,
-    // inputProps,
+    inputProps,
     Input,
+    format = "YYYY/MM/DD",
+    singleDate = false,
+    disableMonthSwap = false,
   }) => {
     const ref = useRef(null);
     const handleSelectorChange = useCallback((value) => {
-      moment(value, "D/M/YYYY", true).isValid() && onChange(value);
+      onChange && onChange(value);
     }, []);
     const handleInputChange = useCallback((e) => {
       const v = e.target.value;
       onChange && onChange(v);
     }, []);
     const domInput = useCallback(
-      (props) =>
-        Input ? (
-          <Input {...props} autoFocus></Input>
+      ({ value, ...rest }) => {
+        const v = moment(value, "YYYY/MM/DD", true).isValid
+          ? moment(value, "YYYY/MM/DD").format(format)
+          : value;
+        return Input ? (
+          <Input {...rest} value={v}></Input>
         ) : (
-          <input
-            type="text"
-            className="text-center"
-            {...props}
-            style={inputStyle}
-            autofocus="false"
-          />
-        ),
-      [Input, inputStyle]
+          <div className="d-flex w-100 justify-content-center">
+            <input
+              type="text"
+              className="text-center"
+              {...rest}
+              value={v}
+              style={inputStyle}
+              autoFocus={false}
+            />
+          </div>
+        );
+      },
+      [Input, inputStyle, format]
     );
 
     const toggleComponent = useCallback(
@@ -66,7 +76,7 @@ export const DateSelectorDropdown = memo(
             </IconButton>
           </div>
         ) : (
-          domInput({ ...props, autoFocus: true })
+          domInput({ ...props, autoFocus: false })
         ),
       [domInput]
     );
@@ -80,7 +90,7 @@ export const DateSelectorDropdown = memo(
                 {domInput({
                   value: value,
                   onChange: handleInputChange,
-                  onBlur: onBlur,
+                  // onBlur: onBlur,
                 })}
               </div>
             )}
@@ -98,14 +108,16 @@ export const DateSelectorDropdown = memo(
                 onChange: handleInputChange,
                 onBlur: onBlur,
                 withButton: withButton,
+                ...inputProps,
               })}
             >
               <DateSelector
-                singleDate
+                singleDate={singleDate}
                 onChange={handleSelectorChange}
-                date={value}
+                values={singleDate ? [value] : value}
                 maxWidth={maxWidth}
                 minWidth={minWidth}
+                disableMonthSwap={disableMonthSwap}
               />
             </CustomDropdown>
           </div>
@@ -116,8 +128,6 @@ export const DateSelectorDropdown = memo(
   isEqual
 );
 
-// DateRangePicker;
-
 export const DateSelector = memo(
   ({ singleDate, from, to, onChange, ...rest }) => {
     const initialValue = useMemo(() => [from, to].filter((e) => e), [from, to]);
@@ -127,7 +137,7 @@ export const DateSelector = memo(
       (value) => {
         singleDate ? onChange(value[0]) : value.length !== 1 && onChange(value);
       },
-      [singleDate]
+      [singleDate, onChange]
     );
     const handleClick = useCallback(
       (e) => {
@@ -142,7 +152,7 @@ export const DateSelector = memo(
         setValues(newValues);
         handleChange(newValues);
       },
-      [values]
+      [values, handleChange, singleDate]
     );
     const handleMouseOver = useCallback((e) => {
       const name = e.target.name;
@@ -153,7 +163,7 @@ export const DateSelector = memo(
     }, []);
 
     useEffect(() => {
-      initialValue !== values && setValues(initialValue);
+      setValues(initialValue);
     }, [initialValue]);
     return (
       <DateSelectorComponent
@@ -162,183 +172,13 @@ export const DateSelector = memo(
         onClick={handleClick}
         onMouseOver={handleMouseOver}
         onMouseLeave={handleMouseLeave}
-        // singleDate={singleDate}
+        singleDate={singleDate}
         {...rest}
       ></DateSelectorComponent>
     );
   },
   isEqual
 );
-
-export const DateSelector2 = memo((props) => {
-  const {
-    values = [],
-    day = null,
-    month = null,
-    year = null,
-    date = null,
-    singleDate = false,
-    onChange,
-    disableMonthSwap = false,
-    style,
-    ...rest
-  } = props;
-
-  const [clickedId, setClickedId] = useState(
-    date && moment(date, "DD/MM/YYYY", true).isValid()
-      ? [moment(date, "DD/MM/YYYY").format("DD")]
-      : []
-  );
-  useEffect(
-    () =>
-      setClickedId(
-        values
-          .filter((d) => (d ? true : false))
-          .map((d) => moment(d, "YYYY/MM/DD").format("DD"))
-      ),
-    [values]
-  );
-  const [hoveredId, setHoveredId] = useState();
-  const labels = rotateArray(moment.weekdays(), 1);
-  const headers = labels.map((day) => day.substr(0, 2) + ".");
-  const [tableDays, setTableDays] = useState([]);
-  const [monthYear, setMonthYear] = useState(
-    date && moment(date, "DD/MM/YYYY", true).isValid()
-      ? [moment(date, "DD/MM/YYYY").format("MMMM YYYY")]
-      : date && moment(date, "MM/YYYY", true).isValid()
-      ? [moment(date, "MM/YYYY").format("MMMM YYYY")]
-      : month && year && moment(month + "/" + year, "MM/YYYY", true).isValid()
-      ? [moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY")]
-      : [moment().format("MMMM YYYY")]
-  );
-  useEffect(() => {
-    day && Array.isArray(day) && setClickedId(day);
-    day && !Array.isArray(day) && setClickedId([day]);
-  }, [day]);
-  useEffect(() => {
-    month &&
-      year &&
-      setMonthYear(moment(month + "/" + year, "MM/YYYY").format("MMMM YYYY"));
-  }, [month, year]);
-  useEffect(() => {
-    if (date !== null) {
-      const newDate = !Array.isArray(date)
-        ? moment(date, "DD/MM/YYYY", true).isValid()
-          ? moment(date, "DD/MM/YYYY").format("MMMM YYYY")
-          : monthYear
-        : moment(date[0], "DD/MM/YYYY", true).isValid()
-        ? moment(date[0], "DD/MM/YYYY").format("MMMM YYYY")
-        : moment(date[1], "DD/MM/YYYY", true).isValid()
-        ? moment(date[1], "DD/MM/YYYY").format("MMMM YYYY")
-        : monthYear;
-      setMonthYear(newDate);
-      const newClickedId = !Array.isArray(date)
-        ? moment(date, "DD/MM/YYYY", true).isValid()
-          ? [moment(date, "DD/MM/YYYY").format("DD")]
-          : []
-        : moment(date[0], "DD/MM/YYYY", true).isValid()
-        ? [moment(date[0], "DD/MM/YYYY").format("DD")]
-        : moment(date[1], "DD/MM/YYYY", true).isValid()
-        ? [moment(date[1], "DD/MM/YYYY").format("DD")]
-        : [];
-      setClickedId(newClickedId);
-    }
-  }, [date]);
-  useEffect(() => {
-    monthYear &&
-      monthYear.length !== 0 &&
-      setTableDays(
-        calcIndexedCalendarDays(
-          moment(monthYear, "MMMM YYYY").format("MM/YYYY"),
-          labels
-        )
-      );
-  }, [monthYear]);
-
-  const data = {
-    handleClick,
-    handleMouseOver,
-    clickedId,
-    hoveredId,
-    newDate: monthYear,
-    headers,
-    tableDays,
-    disableMonthSwap,
-    handleIncrementMonth,
-    handleDecrementMonth,
-    ...rest,
-  };
-
-  function sendOutside(days, mY = monthYear) {
-    console.log("sending outside", days, mY);
-    const change =
-      days && mY
-        ? days.map((day) =>
-            moment(
-              day + "/" + moment(mY, "MMMM YYYY").format("MM/YYYY"),
-              "D/MM/YYYY"
-            ).format("DD/MM/YYYY")
-          )
-        : [];
-    onChange && change.length === 1 ? onChange(change[0]) : onChange(change);
-  }
-
-  function handleIncrementMonth() {
-    const newMonthYear = moment(monthYear, "MMMM YYYY")
-      .add(1, "months")
-      .format("MMMM YYYY");
-    setMonthYear(newMonthYear);
-    sendOutside(clickedId, newMonthYear);
-  }
-
-  function handleDecrementMonth() {
-    const newMonthYear = moment(monthYear, "MMMM YYYY")
-      .subtract(1, "months")
-      .format("MMMM YYYY");
-    setMonthYear(newMonthYear);
-    sendOutside(clickedId, newMonthYear);
-  }
-  function handleClick(event) {
-    const id = parseInt(event.target.id.replace("Btn", ""));
-    if (singleDate && clickedId.length === 1) {
-      setClickedId([id]);
-      singleDate && sendOutside([id]);
-    } else if (!singleDate && clickedId.length === 2) {
-      setClickedId([]);
-      setHoveredId();
-      sendOutside();
-    } else if (!singleDate && clickedId.length === 1 && clickedId[0] === id) {
-      setClickedId([]);
-      setHoveredId();
-      sendOutside();
-    } else {
-      const newClicked = [...clickedId, id].sort((a, b) => a - b);
-      setClickedId(newClicked);
-      switch (newClicked.length) {
-        case 0:
-          sendOutside();
-          break;
-        case 1:
-          singleDate && sendOutside(newClicked);
-          break;
-        case 2:
-          !singleDate && sendOutside(newClicked);
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  function handleMouseOver(event) {
-    const id = parseInt(event.target.id.replace("Btn", ""));
-    !singleDate && clickedId.length === 1 && setHoveredId(id);
-  }
-
-  return (
-    <DateSelectorComponent {...data} style={style}></DateSelectorComponent>
-  );
-}, isEqual);
 
 const DateSelectorComponent = memo(
   ({

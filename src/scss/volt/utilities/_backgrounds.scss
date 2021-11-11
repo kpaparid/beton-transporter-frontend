@@ -230,6 +230,34 @@
     border: none !important;
     background-color: transparent;
     padding-top: 0;
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+      border: 1px solid $primary;
+    }
+    .dummy,
+    textarea,
+    input[type="text"],
+    input[type="number"] {
+      background-color: white;
+      text-align: center;
+      resize: none;
+      vertical-align: bottom;
+      padding: 0;
+      border: 1px solid $primary;
+      overflow: hidden;
+      color: #0a3761;
+      &:focus-visible {
+        outline: 0;
+      }
+      &:focus-within {
+        box-shadow: 0 0 0 2.5px rgb(46, 54, 80, 60%);
+      }
+    }
   }
   > .card-header {
     padding: 0.25rem;
@@ -285,36 +313,6 @@
       tr {
         border-bottom: $border;
         background-color: white !important;
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-
-        /* Firefox */
-        input[type="number"] {
-          -moz-appearance: textfield;
-          border: 1px solid $primary;
-        }
-        .dummy,
-        textarea,
-        input[type="text"],
-        input[type="number"] {
-          background-color: white;
-          text-align: center;
-          resize: none;
-          vertical-align: bottom;
-          padding: 0;
-          border: 1px solid $primary;
-          overflow: hidden;
-          color: #0a3761;
-          &:focus-visible {
-            outline: 0;
-          }
-          &:focus-within {
-            box-shadow: 0 0 0 2.5px rgb(46, 54, 80, 60%);
-          }
-        }
         &:hover {
           background-color: lighten($primary, 76%) !important;
         }
@@ -322,7 +320,6 @@
       :first-child {
         td {
           padding-top: 10px !important;
-          // padding-bottom: 10px !important;
         }
       }
       td {

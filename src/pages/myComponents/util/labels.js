@@ -5,7 +5,9 @@ import { PAGINATION } from "./types";
 const toDateFormat = (date) => moment(date, "YYYY/MM/DD").format("DD.MM.YYYY");
 const dateToMonth = (date) => moment(date, "YYYY/MM").format("MMMM");
 
-const dateToDay = (date) => moment(date[0], "YYYY/MM/DD").format("dddd");
+const dateToDay = (date) => {
+  return moment(date[0], "YYYY/MM/DD").format("dddd");
+};
 const calcDaysDifference = (arr) => {
   const t1 = moment(arr[0], "YYYY/MM/DD");
   const t2 = moment(arr[1], "YYYY/MM/DD");
@@ -27,6 +29,8 @@ export const getGridSecondaryLabels = (entityId) =>
   gridLabels[entityId].secondaryLabels || [];
 export const getGridLabelFormat = (entityId, labelIdx) =>
   getGridLabels(entityId)[labelIdx].format;
+export const getGridLabelFn = (entityId, labelIdx) =>
+  getGridLabels(entityId)[labelIdx].fn;
 export const getGridLabelLinks = (entityId, labelIdx) =>
   (getGridLabels(entityId)[labelIdx].connections || []).map((c) => ({
     connection: c,
@@ -249,7 +253,7 @@ const gridLabels = {
         nanoid: nanoid(),
         id: "day",
         text: "Day",
-        type: "text",
+        type: "nonEditable",
         filterType: "checkbox",
         dependencies: ["date"],
         fn: dateToDay,
@@ -273,7 +277,7 @@ const gridLabels = {
         nanoid: nanoid(),
         id: "duration",
         text: "Duration",
-        type: "number",
+        type: "nonEditable",
         measurement: "min",
         dependencies: ["begin", "end"],
         fn: calcMinuteDifference,
@@ -457,3 +461,20 @@ const gridLabels = {
     },
   },
 };
+export function maxWidthByType(type) {
+  return type === "date"
+    ? "120px"
+    : type === "number"
+    ? "60px"
+    : type === "day"
+    ? "100px"
+    : type === "time"
+    ? "75px"
+    : type === "bigText"
+    ? "250px"
+    : type === "bigNumber"
+    ? "250px"
+    : type === "constant"
+    ? "200px"
+    : "75px";
+}

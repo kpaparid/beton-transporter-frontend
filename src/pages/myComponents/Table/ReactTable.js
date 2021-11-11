@@ -31,7 +31,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import LazyLoad from "react-lazyload";
 import { ComponentPreLoader } from "../../../components/ComponentPreLoader";
-import { RTables2 } from "./NewTable";
+import { RTables2 } from "./EntityTable";
 export const ReactTable = memo(
   forwardRef(({ children }, skipResetRef) => {
     const {
@@ -44,16 +44,11 @@ export const ReactTable = memo(
     } = children;
     const data = useSelector(selectData);
     const headers = useSelector(selectShownColumns);
-    const [cells, setCells] = useState(data);
     const [columns, setColumns] = useState(headers);
-    // updateMyData(index, id, v, label, idx, cellId);
 
     const updateMyData = useCallback(
-      (rowIndex, value, labelId, rowId, links) => {
-        console.log("updating data", value);
-        skipResetRef.current = true;
-        const oldRow = cells[rowIndex];
-
+      ({ value, labelId, rowId, links, row }) => {
+        const oldRow = row;
         if (oldRow[labelId].value !== value) {
           console.log("yikes", value, oldRow[labelId].value);
           const changesById = {
@@ -62,56 +57,66 @@ export const ReactTable = memo(
               (a, { connection, dependencies, format }) => ({
                 ...a,
                 [connection]: format(
-                  dependencies.map((d) =>
-                    d === labelId ? value : oldRow[d].value
-                  )
+                  dependencies.map((d) => {
+                    return d === labelId ? value : oldRow[d].value;
+                  })
                 ),
               }),
               {}
             ),
           };
-          const changesIds = Object.keys(changesById);
-          const mappedChanges = changesIds.reduce(
-            (a, id) => ({
-              ...a,
-              [id]: { ...oldRow[id], value: changesById[id] },
-            }),
-            { ...oldRow }
-          );
-          const newRow = { ...oldRow, ...mappedChanges };
-          setCells((old) =>
-            old.map((row, index) => {
-              const c = row;
-              if (rowIndex === index) {
-                const cc = newRow;
-                return newRow;
-              }
-              return row;
-            })
-          );
-
           onCellChange({ rowId, changes: changesById });
         }
       },
-      [cells]
+      [onCellChange]
     );
 
-    useEffect(() => {
-      if (!isEqual(cells, data)) {
-        skipResetRef.current = true;
-        // console.log("new data", data, cells);
-        setCells(data);
+    const updateMyData2 = (rowIndex, value, labelId, rowId, links) => {
+      console.log("updating data", value);
+      const oldRow = data[rowIndex];
+
+      if (oldRow[labelId].value !== value) {
+        console.log("yikes", value, oldRow[labelId].value);
+        const changesById = {
+          [labelId]: value,
+          ...links.reduce(
+            (a, { connection, dependencies, format }) => ({
+              ...a,
+              [connection]: format(
+                dependencies.map((d) => {
+                  return d === labelId ? value : oldRow[d].value;
+                })
+              ),
+            }),
+            {}
+          ),
+        };
+        // const changesIds = Object.keys(changesById);
+        // const mappedChanges = changesIds.reduce(
+        //   (a, id) => ({
+        //     ...a,
+        //     [id]: { ...oldRow[id], value: changesById[id] },
+        //   }),
+        //   { ...oldRow }
+        // );
+        // const newRow = { ...oldRow, ...mappedChanges };
+        // setCells((old) =>
+        //   old.map((row, index) => {
+        //     if (rowIndex === index) {
+        //       return newRow;
+        //     }
+        //     return row;
+        //   })
+        // );
+
+        onCellChange({ rowId, changes: changesById });
       }
-    }, [data]);
+    };
     useEffect(() => {
       if (!isEqual(headers, columns)) {
         setColumns(headers);
       }
     }, [headers, columns]);
-
-    useEffect(() => {
-      skipResetRef.current = false;
-    }, [cells]);
     return (
       <>
         {/* <RTables
@@ -121,15 +126,6 @@ export const ReactTable = memo(
           data={cells}
           updateMyData={updateMyData}
         /> */}
-
-        <RTables2
-          // ref={skipResetRef}
-          {...rest}
-          columns={columns}
-          data={cells}
-          updateMyData={updateMyData}
-        />
-
         {/* {/* {(pagination || counter) && ( */}
         <TableFooter {...pagination} currentPageSize={data.length} />
       </>
