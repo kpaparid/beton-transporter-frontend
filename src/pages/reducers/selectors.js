@@ -18,7 +18,7 @@ export const useGridSelectors = ({
     rowsSelector,
     labelsSelector,
     tablesSelector,
-    editModesSelector,
+    modesSelector,
     filtersSelector,
     changesSelector,
   },
@@ -80,12 +80,12 @@ export const useGridSelectors = ({
     (state) => rowsSelector.selectIds(state, entityId) || [],
     [entityId, rowsSelector]
   );
-  const selectEditMode = useCallback(
+  const selectMode = useCallback(
     (state) =>
-      (editModesSelector.selectById(state, entityId) &&
-        editModesSelector.selectById(state, entityId).value) ||
+      (modesSelector.selectById(state, entityId) &&
+        modesSelector.selectById(state, entityId).value) ||
       false,
-    [entityId, editModesSelector]
+    [entityId, modesSelector]
   );
   const selectConstants = useCallback(
     (state) => metaSelector.selectById(state, "constants") || [],
@@ -123,10 +123,10 @@ export const useGridSelectors = ({
   const selectShownHeadersReactTable = useMemo(
     () =>
       createSelector(
-        [selectShownLabels, selectAllLabelsById, selectAllLabelsById],
+        [selectShownLabels, selectAllLabelsById, selectConstants],
         (labels, allLabelsById, constants) => {
           return labels.map((l) => {
-            const { text, id, idx, type, measurement, links } =
+            const { text, id, idx, type, measurement, maxWidth, links } =
               allLabelsById[l];
 
             const props = {
@@ -136,7 +136,7 @@ export const useGridSelectors = ({
               type,
               measurement: measurement,
               minWidth: "10px",
-              maxWidth: maxWidthByType(type),
+              maxWidth,
               links:
                 links &&
                 links.map(({ connectionIdx, ...rest }) => ({
@@ -147,7 +147,6 @@ export const useGridSelectors = ({
             if (type === "date")
               return {
                 ...props,
-                disableMonthSwap: true,
               };
             else if (type !== "constant") return props;
             else
@@ -158,18 +157,13 @@ export const useGridSelectors = ({
           });
         }
       ),
-    [selectShownLabels, selectAllLabelsById, entityId]
+    [selectShownLabels, selectAllLabelsById, selectConstants, entityId]
   );
   const selectReactTableData = useMemo(
     () =>
       createSelector(
-        [
-          selectShownLabels,
-          selectAllLabelsById,
-          selectConstants,
-          selectChangesOverRows,
-        ],
-        (labelsIds, allLabelsById, constants, shownValues) => {
+        [selectShownLabels, selectAllLabelsById, selectChangesOverRows],
+        (labelsIds, allLabelsById, shownValues) => {
           const shownLabels = labelsIds.map((id) => allLabelsById[id]);
           return shownValues.map((row) => ({
             id: row.id,
@@ -435,7 +429,7 @@ export const useGridSelectors = ({
     selectShownHeadersReactTable,
     selectReactTableData,
     selectConstants,
-    selectEditMode,
+    selectMode,
     selectShownRows,
     selectShownLabels,
     selectChangesExist,
@@ -457,7 +451,7 @@ export const useGridCallbacks = ({
     addChange,
     setSelectedRows,
     resetChanges,
-    toggleEdit,
+    changeMode,
     saveChanges,
     changeDate,
     fetchFiltered,
@@ -503,9 +497,12 @@ export const useGridCallbacks = ({
     dispatch(resetChanges(entityId));
   }, [dispatch, entityId, resetChanges]);
 
-  const onToggleEdit = useCallback(() => {
-    dispatch(toggleEdit(entityId));
-  }, [dispatch, entityId, toggleEdit]);
+  const onChangeMode = useCallback(
+    (mode) => {
+      dispatch(changeMode({ entityId, mode }));
+    },
+    [dispatch, entityId, changeMode]
+  );
   const onSave = useCallback(() => {
     dispatch(saveChanges(entityId));
   }, [dispatch, entityId, saveChanges]);
@@ -536,7 +533,7 @@ export const useGridCallbacks = ({
         })
       ).then(() => dispatch(addMeta([{ id: "date", value: date }])));
     },
-    [dispatch, changeDate, entityId, fetchEntityGrid]
+    [dispatch, entityId, fetchEntityGrid, addMeta]
   );
   const onChangeCurrentUser = useCallback(
     (value) => {
@@ -553,7 +550,7 @@ export const useGridCallbacks = ({
       );
       // .then(() => dispatch(changeDate(date)));
     },
-    [dispatch, changeDate, entityId, fetchEntityGrid]
+    [dispatch, entityId, fetchEntityGrid]
   );
   const onToggleCheckboxFilter = useCallback(
     (filter) => {
@@ -627,7 +624,7 @@ export const useGridCallbacks = ({
     onCellChange,
     setSelectedRows: setSelectedRowsCallback,
     forceClose,
-    onToggleEdit,
+    onChangeMode,
     onSave,
     onClose,
     onDownload,
@@ -658,7 +655,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectShownHeadersReactTable,
     selectSortedHeadersReactTable,
     selectReactTableData,
-    selectEditMode,
+    selectMode,
     selectChangesExist,
     selectSelectedRowsExist,
     selectItemsFilter,
@@ -674,7 +671,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onSelectRow,
     onSelectAllRows,
     forceClose,
-    onToggleEdit,
+    onChangeMode,
     onSave,
     onClose,
     onDownload,
@@ -740,7 +737,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
   };
   const tableProps = {
     selectSelectedRows,
-    editModeSelector: selectEditMode,
+    modeselector: selectMode,
     selectShownColumns: selectShownHeadersReactTable,
     selectHiddenColumns: selectHiddenHeadersReactTable,
     selectSortedColumn: selectSortedHeadersReactTable,
@@ -776,7 +773,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     title: "ModalTitle",
   };
   const buttonGroupProps = {
-    selectEditMode,
+    selectMode,
     selectChangesExist,
     selectSelectedRowsExist,
     onAdd,
@@ -784,7 +781,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     onDownload,
     onClose,
     onSave,
-    onToggleEdit,
+    onChangeMode,
     forceClose,
     download,
     remove,

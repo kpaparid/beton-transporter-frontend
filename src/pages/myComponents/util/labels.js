@@ -2,11 +2,19 @@ import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
 import { PAGINATION } from "./types";
 
-const toDateFormat = (date) => moment(date, "YYYY/MM/DD").format("DD.MM.YYYY");
-const dateToMonth = (date) => moment(date, "YYYY/MM").format("MMMM");
+const toDateFormat = (date) =>
+  moment(date, "YYYY/MM/DD", true).isValid()
+    ? moment(date, "YYYY/MM/DD").format("DD.MM.YYYY")
+    : date;
+const dateToMonth = (date) =>
+  moment(date, "YYYY/MM", true).isValid()
+    ? moment(date, "YYYY/MM").format("MMMM")
+    : date;
 
 const dateToDay = (date) => {
-  return moment(date[0], "YYYY/MM/DD").format("dddd");
+  return moment(date[0], "YYYY/MM/DD", true).isValid()
+    ? moment(date[0], "YYYY/MM/DD").format("dddd")
+    : date[0];
 };
 const calcDaysDifference = (arr) => {
   const t1 = moment(arr[0], "YYYY/MM/DD");
@@ -32,7 +40,8 @@ export const getGridLabelFormat = (entityId, labelIdx) =>
 export const getGridLabelFn = (entityId, labelIdx) =>
   getGridLabels(entityId)[labelIdx].fn;
 export const getGridLabelLinks = (entityId, labelIdx) =>
-  (getGridLabels(entityId)[labelIdx].connections || []).map((c) => ({
+  getGridLabels(entityId)[labelIdx].connections &&
+  getGridLabels(entityId)[labelIdx].connections.map((c) => ({
     connection: c,
     dependencies: getGridLabels(entityId)[c].dependencies,
   }));
@@ -110,6 +119,7 @@ const gridLabels = {
         type: "date",
         filterType: "date",
         format: toDateFormat,
+        maxWidth: "100px",
       },
       vehicle: {
         nanoid: nanoid(),
@@ -117,6 +127,7 @@ const gridLabels = {
         text: "Vehicle",
         type: "constant",
         filterType: "checkbox",
+        maxWidth: "80px",
       },
       workPlant: {
         nanoid: nanoid(),
@@ -124,6 +135,7 @@ const gridLabels = {
         text: "Work Plant",
         type: "constant",
         filterType: "checkbox",
+        maxWidth: "200px",
       },
       cbm: {
         nanoid: nanoid(),
@@ -134,6 +146,7 @@ const gridLabels = {
         min: 0,
         max: 30,
         measurement: "m³",
+        maxWidth: "60px",
       },
       departure: {
         nanoid: nanoid(),
@@ -141,6 +154,7 @@ const gridLabels = {
         text: "Departure",
         type: "time",
         filterType: "time",
+        maxWidth: "100px",
       },
       arrival: {
         nanoid: nanoid(),
@@ -148,24 +162,28 @@ const gridLabels = {
         text: "Arrival",
         type: "time",
         filterType: "time",
+        maxWidth: "100px",
       },
       kmDeparture: {
         nanoid: nanoid(),
         id: "kmDeparture",
         text: "Km at Departure",
         type: "bigNumber",
+        maxWidth: "150px",
       },
       kmArrival: {
         nanoid: nanoid(),
         id: "kmArrival",
         text: "Km at Arrival",
         type: "bigNumber",
+        maxWidth: "150px",
       },
       deliveryNr: {
         nanoid: nanoid(),
         id: "deliveryNr",
         text: "Delivery Nr",
         type: "bigText",
+        maxWidth: "150px",
       },
       driver: {
         nanoid: nanoid(),
@@ -173,6 +191,7 @@ const gridLabels = {
         text: "Driver",
         type: "constant",
         filterType: "checkbox",
+        maxWidth: "200px",
       },
       buildingSite: {
         nanoid: nanoid(),
@@ -180,6 +199,7 @@ const gridLabels = {
         text: "Building Site",
         type: "bigText",
         filterType: "checkbox",
+        maxWidth: "250px",
       },
       dischargeBegin: {
         nanoid: nanoid(),
@@ -187,6 +207,7 @@ const gridLabels = {
         text: "Discharge Begin",
         type: "time",
         filterType: "time",
+        maxWidth: "130px",
       },
       dischargeEnd: {
         nanoid: nanoid(),
@@ -194,6 +215,7 @@ const gridLabels = {
         text: "Discharge End",
         type: "time",
         filterType: "time",
+        maxWidth: "130px",
       },
       dischargeType: {
         nanoid: nanoid(),
@@ -201,6 +223,7 @@ const gridLabels = {
         text: "Discharge Type",
         type: "constant",
         filterType: "checkbox",
+        maxWidth: "130px",
       },
       waitTime: {
         nanoid: nanoid(),
@@ -209,14 +232,16 @@ const gridLabels = {
         type: "number",
         min: 0,
         max: 480,
-        measurement: "minutes",
+        measurement: "min",
         filterType: "range",
+        maxWidth: "100px",
       },
       other: {
         nanoid: nanoid(),
         id: "other",
         text: "Other",
         type: "bigText",
+        maxWidth: "250px",
       },
     },
   },
@@ -248,6 +273,7 @@ const gridLabels = {
         filterType: "date",
         connections: ["day"],
         format: toDateFormat,
+        maxWidth: "100px",
       },
       day: {
         nanoid: nanoid(),
@@ -257,6 +283,7 @@ const gridLabels = {
         filterType: "checkbox",
         dependencies: ["date"],
         fn: dateToDay,
+        maxWidth: "100px",
       },
 
       begin: {
@@ -265,6 +292,7 @@ const gridLabels = {
         text: "Begin",
         type: "time",
         connections: ["duration"],
+        maxWidth: "100px",
       },
       end: {
         nanoid: nanoid(),
@@ -272,6 +300,7 @@ const gridLabels = {
         text: "End",
         type: "time",
         connections: ["duration"],
+        maxWidth: "100px",
       },
       duration: {
         nanoid: nanoid(),
@@ -281,6 +310,7 @@ const gridLabels = {
         measurement: "min",
         dependencies: ["begin", "end"],
         fn: calcMinuteDifference,
+        maxWidth: "100px",
       },
       pause: {
         nanoid: nanoid(),
@@ -289,6 +319,7 @@ const gridLabels = {
         type: "number",
         measurement: "min",
         filterType: "range",
+        maxWidth: "100px",
       },
     },
   },
@@ -317,6 +348,7 @@ const gridLabels = {
         text: "Month",
         type: "text",
         format: dateToMonth,
+        maxWidth: "100px",
       },
       hours: {
         nanoid: nanoid(),
@@ -324,6 +356,7 @@ const gridLabels = {
         text: "Hours",
         type: "number",
         measurement: "h",
+        maxWidth: "100px",
       },
     },
   },
@@ -353,6 +386,7 @@ const gridLabels = {
         type: "date",
         connections: ["days"],
         format: toDateFormat,
+        maxWidth: "100px",
       },
       to: {
         nanoid: nanoid(),
@@ -361,6 +395,7 @@ const gridLabels = {
         type: "date",
         connections: ["days"],
         format: toDateFormat,
+        maxWidth: "100px",
       },
       days: {
         nanoid: nanoid(),
@@ -369,12 +404,14 @@ const gridLabels = {
         type: "number",
         dependencies: ["from", "to"],
         fn: calcDaysDifference,
+        maxWidth: "100px",
       },
       reason: {
         nanoid: nanoid(),
         id: "reason",
         text: "Reason",
         type: "text",
+        maxWidth: "100px",
       },
     },
   },
@@ -400,6 +437,7 @@ const gridLabels = {
         id: "taken",
         text: "Taken",
         type: "number",
+        maxWidth: "100px",
         // measurement: "",
         // grid: 5,
         // page: 1,
@@ -411,6 +449,7 @@ const gridLabels = {
         id: "rest",
         text: "Rest",
         type: "number",
+        maxWidth: "100px",
       },
     },
   },
@@ -441,6 +480,7 @@ const gridLabels = {
         type: "date",
         connections: ["days"],
         format: toDateFormat,
+        maxWidth: "100px",
       },
       to: {
         nanoid: nanoid(),
@@ -449,6 +489,7 @@ const gridLabels = {
         type: "date",
         connections: ["days"],
         format: toDateFormat,
+        maxWidth: "100px",
       },
       days: {
         nanoid: nanoid(),
@@ -457,24 +498,23 @@ const gridLabels = {
         type: "text",
         dependencies: ["from", "to"],
         fn: calcDaysDifference,
+        maxWidth: "100px",
       },
     },
   },
 };
-export function maxWidthByType(type) {
-  return type === "date"
-    ? "120px"
-    : type === "number"
-    ? "60px"
-    : type === "day"
+export function maxWidthByType(textType) {
+  return textType === "text"
     ? "100px"
-    : type === "time"
-    ? "75px"
-    : type === "bigText"
-    ? "250px"
-    : type === "bigNumber"
-    ? "250px"
-    : type === "constant"
+    : textType === "number"
+    ? "100px"
+    : textType === "bigText"
     ? "200px"
-    : "75px";
+    : textType === "bigNumber"
+    ? "200px"
+    : textType === "smallText"
+    ? "75px"
+    : textType === "smallNumber"
+    ? "50px"
+    : "50px";
 }

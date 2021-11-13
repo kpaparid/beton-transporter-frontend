@@ -1,0 +1,53 @@
+.table-virtual {
+  color: $gray-900;
+  font-size: 14px;
+  font-weight: 400;
+  &:first-child {
+    padding-top: 20px;
+  }
+  .cell {
+    background-color: $white;
+    border-bottom: $border;
+    span:first-of-type {
+      // text-overflow: ellipsis;
+      // overflow: hidden;
+      // &:hover {
+      //   background-color: red;
+      //   text-overflow: auto;
+      //   overflow-x: auto;
+      // }
+    }
+  }
+  .header {
+    .cell {
+      background-color: $gray-500;
+      text-align: center;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+
+      .sortable {
+        .sort-arrow {
+          color: $tertiary;
+          width: "15px";
+          height: "15px";
+          .svg {
+            transform: scale(1.2);
+          }
+        }
+        &:hover {
+          .sort-arrow {
+            color: $dark !important;
+          }
+          cursor: pointer;
+          color: $dark !important;
+          background-color: $light-tertiary !important;
+        }
+      }
+    }
+  }
+}

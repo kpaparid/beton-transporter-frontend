@@ -1,19 +1,12 @@
 import isequal from "lodash.isequal";
-import TimePicker from "@mui/lab/TimePicker";
 import React, { memo, useCallback, useEffect, useRef } from "react";
-import TextField from "@mui/material/TextField";
-import moment from "moment";
-import { IconButton } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowsAltH,
-  faCalendar,
   faLongArrowAltLeft,
   faLongArrowAltRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { CustomDropdown } from "../Filters/CustomDropdown";
 import { ButtonGroup } from "react-bootstrap";
-import WheelPicker from "react-wheelpicker";
 import { Button, Card } from "@themesberg/react-bootstrap";
 import Scrollbars from "react-custom-scrollbars";
 export const MyTimePicker = memo(
@@ -23,14 +16,15 @@ export const MyTimePicker = memo(
     disabled = false,
     portal = true,
     withButton = false,
+    inputStyle,
   }) => {
-    const ref = useRef(null);
-
-    const handleInputChange = useCallback((e) => {
-      const v = e.target.value;
-      onChange && onChange(v);
-    }, []);
-
+    const handleInputChange = useCallback(
+      (e) => {
+        const v = e.target.value;
+        onChange && onChange(v);
+      },
+      [onChange]
+    );
     return (
       <>
         <div className="d-block w-100">
@@ -39,12 +33,18 @@ export const MyTimePicker = memo(
               id={"TourFilter"}
               as={ButtonGroup}
               disabled={disabled}
-              ref={{ ref: ref }}
               toggleAs="custom"
               className={!withButton ? "w-100" : null}
               portal={portal}
               value={
-                <input type="text" value={value} onChange={handleInputChange} />
+                <div className="w-100 justify-content-center d-flex">
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={handleInputChange}
+                    style={inputStyle}
+                  />
+                </div>
               }
             >
               <TimeSelector value={value} onChange={onChange}></TimeSelector>

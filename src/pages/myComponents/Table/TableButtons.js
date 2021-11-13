@@ -18,36 +18,41 @@ const TableButtons = memo(
   ({
     selectSelectedRowsExist,
     selectChangesExist,
-    selectEditMode,
+    selectMode,
     onAdd,
     onDelete,
     onDownload,
     onClose,
     onSave,
-    onToggleEdit,
+    onChangeMode,
     forceClose,
     modalProps,
     filterProps,
     download,
     remove,
   }) => {
-    const editMode = useSelector(selectEditMode);
+    const mode = useSelector(selectMode);
+    const editMode = mode === "edit";
+    const addMode = mode === "addRow";
+
     const selectedRowsExist = useSelector(selectSelectedRowsExist);
     const changesExist = useSelector(selectChangesExist);
     // const modalLabels = useSelector(labelsSelector);
-    const [showModalDefault, setShowModalDefault] = useState(false);
-    const handleAddRow = () => setShowModalDefault(true);
-    const handleCloseAddRow = () => setShowModalDefault(false);
     const clearChanges = useCallback(() => {
       onClose();
     }, [onClose]);
+
+    const handleAddRow = useCallback(() => {
+      onChangeMode("addRow");
+    }, [onChangeMode]);
     const handleEditEnable = useCallback(() => {
-      onToggleEdit();
-    }, [onToggleEdit]);
-    const handleEditDisable = useCallback(() => {
-      onToggleEdit();
       clearChanges();
-    }, [onToggleEdit, clearChanges]);
+      onChangeMode("edit");
+    }, [onChangeMode, clearChanges]);
+    const handleClose = useCallback(() => {
+      onChangeMode("idle");
+      clearChanges();
+    }, [onChangeMode, clearChanges]);
     const handleSave = useCallback(() => {
       onSave();
     }, [onSave]);
@@ -60,10 +65,9 @@ const TableButtons = memo(
 
     useEffect(() => {
       if (editMode && !selectedRowsExist) {
-        onToggleEdit();
-        // clearChanges();
+        onChangeMode();
       }
-    }, [selectedRowsExist, editMode, onToggleEdit]);
+    }, [selectedRowsExist, editMode, onChangeMode]);
     return (
       <div className="d-flex flex-nowrap button-group">
         {filterProps && <Filter {...filterProps}></Filter>}
@@ -89,19 +93,24 @@ const TableButtons = memo(
             value={<FontAwesomeIcon icon={faDownload} />}
           />
         )}
-        {editMode && (
-          <MyBtn
-            disabled={!changesExist}
-            onClick={handleSave}
-            value={<FontAwesomeIcon icon={faSave} />}
-          />
-        )}
-        {modalProps && <AddRowModal {...modalProps} />}
+        {editMode ||
+          (addMode && (
+            <MyBtn
+              disabled={!changesExist}
+              onClick={handleSave}
+              value={<FontAwesomeIcon icon={faSave} />}
+            />
+          ))}
+        <MyBtn
+          disabled={addMode}
+          onClick={handleAddRow}
+          value={<FontAwesomeIcon icon={faPlus} />}
+        />
 
-        {editMode && (
+        {(editMode || addMode) && (
           <MyBtn
             variant="danger"
-            onClick={handleEditDisable}
+            onClick={handleClose}
             value={<FontAwesomeIcon icon={faWindowClose} />}
           />
         )}

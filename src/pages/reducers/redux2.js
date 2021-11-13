@@ -59,7 +59,7 @@ function createGenericSlice(sliceName) {
   const datesAdapter = createEntityAdapter();
   const labelsAdapter = createEntityAdapter();
   const changesAdapter = createEntityAdapter();
-  const editModesAdapter = createEntityAdapter();
+  const modesAdapter = createEntityAdapter();
   const filtersAdapter = createEntityAdapter();
 
   const metaSelector = metaAdapter.getSelectors(
@@ -83,8 +83,8 @@ function createGenericSlice(sliceName) {
   const changesSelector = changesAdapter.getSelectors(
     (state) => state[sliceName].changes
   );
-  const editModesSelector = editModesAdapter.getSelectors(
-    (state) => state[sliceName].editModes
+  const modesSelector = modesAdapter.getSelectors(
+    (state) => state[sliceName].modes
   );
   const filtersSelector = filtersAdapter.getSelectors(
     (state) => state[sliceName].filters
@@ -92,8 +92,8 @@ function createGenericSlice(sliceName) {
 
   const rowsSelectIds = (state) =>
     rowsAdapter.getSelectors().selectEntities(state.rows);
-  const editModesSelectById = (state, id) =>
-    editModesAdapter.getSelectors().selectById(state.editModes, id);
+  const modesSelectById = (state, id) =>
+    modesAdapter.getSelectors().selectById(state.modes, id);
   const tablesSelectById = (state, id) =>
     tablesAdapter.getSelectors().selectById(state.tables, id);
   const changesSelectById = (state, id) =>
@@ -376,7 +376,7 @@ function createGenericSlice(sliceName) {
       dates: datesAdapter.getInitialState(),
       labels: labelsAdapter.getInitialState(),
       changes: changesAdapter.getInitialState(),
-      editModes: editModesAdapter.getInitialState(),
+      modes: modesAdapter.getInitialState(),
       filters: filtersAdapter.getInitialState(),
       users: usersAdapter.getInitialState(),
     },
@@ -390,19 +390,26 @@ function createGenericSlice(sliceName) {
       toggleColumn: (state, action) => {
         const { id, columnId } = action.payload;
         const oldValues = tablesSelectById(state, id).selectedLabels;
+        const mode = modesSelectById(state, id).value;
+        mode === "addRow" &&
+          modesAdapter.upsertOne(state.modes, { id, value: "idle" });
         const newValue = oldValues.includes(columnId)
           ? oldValues.filter((v) => v !== columnId)
           : [...oldValues, columnId];
         tablesAdapter.upsertOne(state.tables, { id, selectedLabels: newValue });
       },
-      toggleEdit: (state, action) => {
-        const id = action.payload;
-        const oldValue = editModesSelectById(state, id).value;
-        editModesAdapter.updateOne(state.editModes, {
-          id,
-          changes: {
-            value: !oldValue,
-          },
+      changeMode: (state, action) => {
+        const { entityId, mode } = action.payload;
+        const oldValue = modesSelectById(state, entityId).value;
+        mode === "addRow" &&
+          tablesAdapter.upsertOne(state.tables, {
+            id: entityId,
+            selectedLabels: tablesSelectById(state, entityId).labels || [],
+          });
+        modesAdapter.upsertOne(state.modes, {
+          id: entityId,
+          value:
+            mode === "edit" ? (oldValue === "edit" ? "idle" : "edit") : mode,
         });
       },
       toggleAllChecked: (state, action) => {
@@ -501,7 +508,7 @@ function createGenericSlice(sliceName) {
         console.log("fullfiled", entityId);
         const { id, ...rest } = data;
         const mapped = mapPromiseData(rest, entityId);
-        const { tables, rows, labels, editModes } = normalizeApi({
+        const { tables, rows, labels, modes } = normalizeApi({
           data: mapped,
           meta: { ...meta, loading: false },
         });
@@ -509,7 +516,7 @@ function createGenericSlice(sliceName) {
         tablesAdapter.upsertMany(state.tables, tables);
         rowsAdapter.upsertMany(state.rows, rows);
         labelsAdapter.upsertMany(state.labels, labels);
-        editModesAdapter.upsertMany(state.editModes, editModes);
+        modesAdapter.upsertMany(state.modes, modes);
         state.loading = false;
       },
       [postRows.fulfilled](state, { meta: { arg } }) {
@@ -520,7 +527,7 @@ function createGenericSlice(sliceName) {
         rowsAdapter.upsertMany(state.rows, newRows);
         changesAdapter.removeMany(state.changes, changesIds);
         tablesAdapter.upsertOne(state.tables, { id: arg, changes: [] });
-        editModesAdapter.upsertOne(state.editModes, {
+        modesAdapter.upsertOne(state.modes, {
           id: arg,
           value: false,
         });
@@ -536,7 +543,7 @@ function createGenericSlice(sliceName) {
       rowsSelector,
       datesSelector,
       changesSelector,
-      editModesSelector,
+      modesSelector,
       filtersSelector,
       usersSelector,
       metaSelector,

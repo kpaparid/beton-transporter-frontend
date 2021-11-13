@@ -323,11 +323,25 @@
         }
       }
       td {
+        .fallback {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          &:hover {
+            text-overflow: initial;
+            overflow-x: auto;
+            white-space: pre-wrap;
+          }
+        }
         border: none;
       }
     }
     thead {
       background-color: $gray-500;
+      th {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
       th.sortable {
         .sort-arrow {
           color: $tertiary;
@@ -363,10 +377,11 @@
   }
   thead .form-check-input[type="checkbox"] {
     background-color: white;
-    border-color: $gray-600 !important;
+    border-color: "transparent" !important;
     &:focus,
     &:hover,
     &:active {
+      border-color: $gray-600 !important;
       border-color: $dark !important;
     }
     &:indeterminate,

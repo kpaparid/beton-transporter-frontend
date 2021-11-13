@@ -4,6 +4,7 @@ import { TableLabel } from "./TableHeader";
 import { Card } from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import TableCore from "./TableCore";
+import { ReactWindow } from "./ReactWindow";
 export const EntityTable = memo(({ tableProps, ...rest }) => {
   return (
     <Card className="card-dark h-100">

@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback } from "react";
+import React, { forwardRef, useCallback, useRef } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { useState } from "react";
 import "../MyForm.css";
@@ -20,8 +20,12 @@ export const CustomDropdown = forwardRef(
       portal = true,
       drop,
     },
-    { ref, refList = [] }
+    initialRef
   ) => {
+    const refList = (initialRef && initialRef.refList) || [];
+    const backupRef = initialRef && initialRef.ref;
+    const ref2 = useRef(null);
+    const domRef = ref2 || backupRef;
     const toggleAsComponent =
       toggleAs === "default" ? DropdownToggle : CustomToggle;
     const [show, setShow] = useState(false);
@@ -58,7 +62,7 @@ export const CustomDropdown = forwardRef(
           <Portal>
             <Dropdown.Menu
               flip={false}
-              ref={ref}
+              ref={domRef}
               className={"m-0 p-0 border border-0 " + menuClassName}
             >
               {children}
@@ -69,7 +73,7 @@ export const CustomDropdown = forwardRef(
             popperConfig={{
               modifiers: [{ name: "offset", options: { offset: [-250, 0] } }],
             }}
-            ref={ref}
+            ref={domRef}
             className={"p-0 border border-0 " + menuClassName}
           >
             {children}

@@ -125,12 +125,12 @@ export function normalizeApi({ data, meta }) {
 
   const tables = getTable(mObject, labelsByTableId, meta);
 
-  const editModes = tableIds.map((id) => ({ id: id, value: false }));
+  const modes = tableIds.map((id) => ({ id: id, value: "idle" }));
   return {
     labels,
     rows,
     tables,
-    editModes,
+    modes,
   };
 }
 export function getConnections(m) {
@@ -193,16 +193,18 @@ export function getLabelsByTableId(tableIds, nanoidsByLabelIdByTableId) {
                 ...a,
                 {
                   ...getGridLabelProps(tableId, b),
-                  links: getGridLabelLinks(tableId, b).map(
-                    ({ connection, dependencies }) => ({
-                      connectionIdx: connection,
-                      connection:
-                        nanoidsByLabelIdByTableId[tableId][connection],
-                      dependencies: dependencies.map(
-                        (c) => nanoidsByLabelIdByTableId[tableId][c]
-                      ),
-                    })
-                  ),
+                  links:
+                    getGridLabelLinks(tableId, b) &&
+                    getGridLabelLinks(tableId, b).map(
+                      ({ connection, dependencies }) => ({
+                        connectionIdx: connection,
+                        connection:
+                          nanoidsByLabelIdByTableId[tableId][connection],
+                        dependencies: dependencies.map(
+                          (c) => nanoidsByLabelIdByTableId[tableId][c]
+                        ),
+                      })
+                    ),
                   id: nanoidsByLabelIdByTableId[tableId][b],
                 },
               ]

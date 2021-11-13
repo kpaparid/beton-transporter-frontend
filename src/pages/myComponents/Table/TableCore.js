@@ -25,8 +25,10 @@ import {
   faAngleRight,
   faCaretDown,
   faCaretUp,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
+import { nanoid } from "@reduxjs/toolkit";
 
 const Lazer = React.lazy(() => import("../TextArea/LazyInput"));
 
@@ -42,12 +44,10 @@ const TableCore = memo((props) => {
   const data = useSelector(selectData);
   const headers = useSelector(selectShownColumns);
   const [columns, setColumns] = useState(headers);
-
   const updateMyData = useCallback(
-    ({ value, labelId, rowId, links, row }) => {
-      const oldRow = row;
-      if (oldRow[labelId] !== value) {
-        console.log("yikes", value, oldRow[labelId]);
+    ({ value, labelId, rowId, links = [], row }) => {
+      if (row && row[labelId] !== value) {
+        // console.log("yikes", value, row[labelId]);
         const changesById = {
           [labelId]: value,
           ...links.reduce(
@@ -55,17 +55,23 @@ const TableCore = memo((props) => {
               ...a,
               [connection]: format(
                 dependencies.map((d) => {
-                  return d === labelId ? value : oldRow[d];
+                  return d === labelId ? value : row[d];
                 })
               ),
             }),
             {}
           ),
         };
-        onCellChange({ rowId, changes: changesById });
+        return onCellChange({ rowId, changes: changesById });
       }
+      !row && onCellChange({ rowId, changes: { [labelId]: value } });
     },
-    [onCellChange]
+    []
+  );
+
+  const debouncedUpdate = useMemo(
+    () => _.debounce(updateMyData, 300),
+    [updateMyData]
   );
   useEffect(() => {
     if (!isEqual(headers, columns)) {
@@ -78,7 +84,7 @@ const TableCore = memo((props) => {
         {...rest}
         columns={columns}
         data={data}
-        updateMyData={updateMyData}
+        updateMyData={debouncedUpdate}
       />
       <TableFooter {...pagination} currentPageSize={data.length} />
     </>
@@ -91,7 +97,7 @@ const RTables = memo(
     columns,
     selectHiddenColumns,
     massEdit = false,
-    editModeSelector,
+    modeselector,
     updateMyData,
     onSelectRow,
     onSelectAllRows,
@@ -123,7 +129,7 @@ const RTables = memo(
             labels={labels}
             selectHiddenColumns={selectHiddenColumns}
             selectSelectedRows={selectSelectedRows}
-            editModeSelector={editModeSelector}
+            modeselector={modeselector}
             onSelectRow={onSelectRow}
             updateMyData={updateMyData}
           />
@@ -142,36 +148,52 @@ const TableBody = React.memo(
     selectSelectedRows,
     updateMyData,
     onSelectRow,
-    editModeSelector,
+    modeselector,
     massEdit,
   }) => {
     const hiddenColumns = useSelector(selectHiddenColumns);
     const display = useMemo(() => hiddenColumns, [hiddenColumns]);
     const selectedRows = useSelector(selectSelectedRows);
-    const editMode = useSelector(editModeSelector);
+    const mode = useSelector(modeselector);
 
     return (
       <>
         <tbody>
-          <tr key={"addRow-tr"}>
-            {!massEdit && <td />}
-            <AddRow
-              labels={labels}
-              key={"addrow"}
-              index={0}
-              display={display}
-            />
+          <tr
+            key={"addRow-tr"}
+            // className={mode === "addRow" ? "visible" : "invisible"}
+            // style={{
+            //   scale: mode === "addRow" ? "50px" : "0px",
+            //   position: mode === "addRow" ? "initial" : "absolute",
+            //   transition: "height 0.5s",
+            // }}
+          >
+            {mode === "addRow" && (
+              <>
+                {!massEdit && <td></td>}
+                <AddRow
+                  row={nanoid()}
+                  labels={labels}
+                  key={"addrow"}
+                  index={0}
+                  display={display}
+                  updateMyData={updateMyData}
+                />
+              </>
+            )}
           </tr>
           {data.map((row, index) => {
             const isSelected = selectedRows.includes(row.id);
-            const editable = editMode && isSelected;
+            const editable = mode === "edit" && isSelected;
             return (
               <tr key={"row" + index}>
                 {!massEdit && (
-                  <IndeterminateCheckbox
-                    onChange={() => onSelectRow(row.id)}
-                    isSelected={isSelected}
-                  />
+                  <td className="px-3 py-1" style={{ width: "50px" }}>
+                    <IndeterminateCheckbox
+                      onChange={() => onSelectRow(row.id)}
+                      isSelected={isSelected}
+                    />
+                  </td>
                 )}
                 <RenderRow
                   row={row}
@@ -191,28 +213,23 @@ const TableBody = React.memo(
   },
   isEqual
 );
-const AddRow = memo(({ row, labels, index, display }) => {
-  const renderCell = useCallback((id, cell, index, isEditable) => {
-    return (
-      <EditableCell
-        value={cell}
-        // updateMyData={updateMyData}
-        index={index}
-        id={id}
-        isEditable={isEditable}
-      />
-    );
-  }, []);
-  return labels.map((label) => (
-    <TableCell
-      isEditable={true}
-      value={""}
-      cellProps={label}
-      index={index}
-      key={label.id + "-" + index}
-      display={display[label.id]}
-    />
-  ));
+const AddRow = memo(({ row, labels, index, updateMyData }) => {
+  return (
+    <>
+      {labels.map((label) => (
+        <TableCell
+          row={row}
+          isEditable={true}
+          value={""}
+          cellProps={label}
+          index={index}
+          key={label.id + "-" + index}
+          measurement={false}
+          updateMyData={updateMyData}
+        />
+      ))}
+    </>
+  );
 }, isEqual);
 
 const RenderRow = memo(
@@ -238,18 +255,30 @@ const RenderRow = memo(
 );
 
 const TableCell = memo(
-  ({ row, value, index, display, updateMyData, isEditable, cellProps }) => {
+  ({
+    row,
+    value,
+    index,
+    display = "auto",
+    updateMyData,
+    isEditable,
+    cellProps,
+    measurement = true,
+  }) => {
     return (
       <td style={{ display }} className="px-2 py-1">
-        <div className="d-flex justify-content-center w-100">
-          <EditableCell
-            cellProps={cellProps}
-            value={value}
-            updateMyData={updateMyData}
-            index={index}
-            row={row}
-            isEditable={isEditable}
-          />
+        <div className="w-100 d-flex justify-content-center">
+          <div className="w-100 d-flex justify-content-center">
+            <EditableCell
+              cellProps={cellProps}
+              value={value}
+              updateMyData={updateMyData}
+              index={index}
+              row={row}
+              isEditable={isEditable}
+              measurement={measurement}
+            />
+          </div>
         </div>
       </td>
     );
@@ -264,39 +293,39 @@ const EditableCell = React.memo(
     updateMyData,
     cellProps,
     value: initialValue,
+    measurement: measurementEnabled,
   }) => {
     const { id: label, idx, links, measurement, ...rest } = cellProps;
     const [value, setValue] = useState(initialValue);
     const handleUpdateData = useCallback(
-      (v = value) => {
+      (v = value) =>
         updateMyData({
           rowIndex: index,
           value: v,
           labelId: label,
           rowId: row,
           links,
-        });
-      },
+        }),
       [value, index, label, row, links, updateMyData]
     );
-    const debouncedUpdate = _.debounce(handleUpdateData, 300);
+
     const onChange = useCallback(
       (value, type) => {
         switch (type) {
           case "date":
-            const v = moment(value, "YYYY/MM/DD", true).isValid
+            const v = moment(value, "YYYY/MM/DD", true).isValid()
               ? moment(value, "YYYY/MM/DD").format("DD.MM.YYYY")
               : value;
             setValue(v);
-            debouncedUpdate(value);
+            handleUpdateData(value);
             break;
 
           default:
             setValue(value);
-            debouncedUpdate(value);
+            handleUpdateData(value);
         }
       },
-      [debouncedUpdate]
+      [handleUpdateData]
     );
     useEffect(() => {
       setValue(initialValue);
@@ -304,10 +333,21 @@ const EditableCell = React.memo(
 
     return (
       <>
-        <div className={isEditable ? "d-none" : "d-block"}>
-          {value + (measurement ? " " + measurement : "")}
+        <div
+          style={{
+            padding: "1px ",
+            width: rest.maxWidth,
+            // whiteSpace: "pre-wrap",
+          }}
+          className={
+            isEditable && cellProps.type !== "nonEditable"
+              ? "p-0 d-none dummy"
+              : "d-block text-center fallback"
+          }
+        >
+          {value + (measurementEnabled && measurement ? " " + measurement : "")}
         </div>
-        {isEditable && (
+        {isEditable && cellProps.type !== "nonEditable" && (
           <Suspense
             fallback={
               <ComponentPreLoader show logo={false}></ComponentPreLoader>
@@ -341,13 +381,16 @@ const TableHead = ({
       : selectedRows.length === 0
       ? "unchecked"
       : "indeterminate";
+
   return (
     <thead>
       <tr className="text-center" key={"th-0"}>
         {!massEdit && (
-          <IndeterminateCheckbox state={state} onChange={onSelectAllRows} />
+          <th className="border-0" style={{ width: "50px" }}>
+            <IndeterminateCheckbox state={state} onChange={onSelectAllRows} />
+          </th>
         )}
-        {columns.map(({ Header, id }, index) => {
+        {columns.map(({ Header, id, maxWidth, ...rest }, index) => {
           const display = hiddenColumns[id];
           const sorted = sortedColumn && id === sortedColumn.id;
           const order = sorted && sortedColumn.order;
@@ -357,6 +400,7 @@ const TableHead = ({
               column={Header}
               id={id}
               display={display}
+              maxWidth={maxWidth}
               onToggleSort={onToggleSort}
               sorted={sorted}
               order={order}
@@ -372,6 +416,9 @@ const TableColumn = ({
   id,
   sorted = false,
   order,
+  display = "auto",
+  maxWidth = "auto",
+  onToggleSort,
   sortedComponent = sorted ? (
     <span className="sort-arrow ms-2" style={{ width: "15px", height: "15px" }}>
       <FontAwesomeIcon
@@ -382,8 +429,6 @@ const TableColumn = ({
   ) : (
     <></>
   ),
-  display,
-  onToggleSort,
 }) => {
   const handleClick = useCallback((e) => onToggleSort(id), [onToggleSort, id]);
   return (
@@ -406,20 +451,18 @@ const IndeterminateCheckbox = memo(
       resolvedRef.current.indeterminate = state === "indeterminate";
     }, [resolvedRef, state]);
     return (
-      <td className="px-3 py-1" style={{ maxWidth: "50px" }}>
-        <div className="d-flex justify-content-center w-100">
-          <div>
-            <Form.Check
-              ref={resolvedRef}
-              checked={
-                isSelected || state === "checked" || state === "indeterminate"
-              }
-              {...rest}
-              className="checkbox"
-            />
-          </div>
+      <div className="d-flex justify-content-center w-100">
+        <div>
+          <Form.Check
+            ref={resolvedRef}
+            checked={
+              isSelected || state === "checked" || state === "indeterminate"
+            }
+            {...rest}
+            className="checkbox"
+          />
         </div>
-      </td>
+      </div>
     );
   }
 );
@@ -505,7 +548,7 @@ const TableFooter = React.memo(
         )}
 
         {counterEnabled && (
-          <small className="fw-bold">
+          <small className="fw-bold ps-3">
             Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
           </small>
         )}

@@ -2030,6 +2030,11 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.10.2.tgz#0798c03351f0dea1a5a4cabddf26a55a7cbee590"
   integrity sha512-IXf3XA7+XyN7CP9gGh/XB0UxVMlvARGEgGXLubFICsUMGz6Q+DU+i4gGlpOxTjKvXjkJDJC8YdqdKkDj9qZHEQ==
 
+"@reach/observe-rect@^1.1.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@reach/observe-rect/-/observe-rect-1.2.0.tgz#d7a6013b8aafcc64c778a0ccb83355a11204d3b2"
+  integrity sha512-Ba7HmkFgfQxZqqaeIWWkNK0rEhpxVQHIoVyW1YDSkGsGIXzcaW4deC8B0pZrNSSyLTdIk7y+5olKt5+g0GmFIQ==
+
 "@react-aria/ssr@^3.0.1":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@react-aria/ssr/-/ssr-3.1.0.tgz#b7163e6224725c30121932a8d1422ef91d1fab22"
@@ -11518,6 +11523,18 @@ react-transition-group@^4.3.0, react-transition-group@^4.4.0, react-transition-g
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-truncate@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/react-truncate/-/react-truncate-2.4.0.tgz#3cf5ff09ab86f93e3c078d359f4de6d75aa60510"
+  integrity sha512-3QW11/COYwi6iPUaunUhl06DW5NJBJD1WkmxW5YxqqUu6kvP+msB3jfoLg8WRbu57JqgebjVW8Lknw6T5/QZdA==
+
+react-virtual@^2.8.2:
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/react-virtual/-/react-virtual-2.8.2.tgz#e204b30c57c426bd260ed1ac49f8b1099e92b7cb"
+  integrity sha512-CwnvF/3Jev4M14S9S7fgzGc0UFQ/bG/VXbrUCq+AB0zH8WGnVDTG0lQT7O3jPY76YLPzTHBu+AMl64Stp8+exg==
+  dependencies:
+    "@reach/observe-rect" "^1.1.0"
 
 react-virtualized-auto-sizer@^1.0.6:
   version "1.0.6"

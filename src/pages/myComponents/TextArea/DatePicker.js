@@ -13,12 +13,10 @@ import { ButtonGroup, Table } from "react-bootstrap";
 import { CustomDropdown } from "../Filters/CustomDropdown";
 import { calcIndexedCalendarDays, rotateArray } from "../util/utilities";
 
-export const DateSelectorDropdown = memo(
+const DateSelectorDropdown = memo(
   ({
     value,
     onChange,
-    maxWidth,
-    minWidth,
     inputStyle,
     disabled = false,
     portal = true,
@@ -31,16 +29,24 @@ export const DateSelectorDropdown = memo(
     disableMonthSwap = false,
   }) => {
     const ref = useRef(null);
-    const handleSelectorChange = useCallback((value) => {
-      onChange && onChange(value);
-    }, []);
-    const handleInputChange = useCallback((e) => {
-      const v = e.target.value;
-      onChange && onChange(v);
-    }, []);
+    const handleSelectorChange = useCallback(
+      (value) => {
+        onChange && onChange(value);
+      },
+      [onChange]
+    );
+    const handleInputChange = useCallback(
+      (e) => {
+        const v = moment(e.target.value, format, true).isValid()
+          ? moment(e.target.value, format).format("YYYY/MM/DD")
+          : e.target.value;
+        onChange && onChange(v);
+      },
+      [onChange, format]
+    );
     const domInput = useCallback(
       ({ value, ...rest }) => {
-        const v = moment(value, "YYYY/MM/DD", true).isValid
+        const v = moment(value, "YYYY/MM/DD", true).isValid()
           ? moment(value, "YYYY/MM/DD").format(format)
           : value;
         return Input ? (
@@ -114,9 +120,8 @@ export const DateSelectorDropdown = memo(
               <DateSelector
                 singleDate={singleDate}
                 onChange={handleSelectorChange}
-                values={singleDate ? [value] : value}
-                maxWidth={maxWidth}
-                minWidth={minWidth}
+                from={singleDate ? value : value[0]}
+                to={!singleDate && value[1]}
                 disableMonthSwap={disableMonthSwap}
               />
             </CustomDropdown>
@@ -190,9 +195,12 @@ const DateSelectorComponent = memo(
     singleDate = false,
     disableMonthSwap = false,
     style,
-
-    year: initialYear = moment().format("YYYY"),
-    month: initialMonth = moment().format("M"),
+    year: initialYear = moment(values[0], "YYYY/MM/DD", true).isValid()
+      ? moment(values[0], "YYYY/MM/DD").format("YYYY")
+      : moment().format("YYYY"),
+    month: initialMonth = moment(values[0], "YYYY/MM/DD", true).isValid()
+      ? moment(values[0], "YYYY/MM/DD").format("MM")
+      : moment().format("MM"),
   }) => {
     const [month, setMonth] = useState(initialMonth);
     const [year, setYear] = useState(initialYear);
@@ -209,7 +217,7 @@ const DateSelectorComponent = memo(
     const handleIncreaseMonth = useCallback(
       (e) => {
         const newMonth = parseInt(month) + 1;
-        setMonth(newMonth === 13 ? 1 : newMonth);
+        setMonth(newMonth === 13 ? "01" : ("0" + newMonth).slice(-2));
         newMonth === 13 && setYear((old) => parseInt(old) + 1);
       },
       [month]
@@ -217,7 +225,7 @@ const DateSelectorComponent = memo(
     const handleDecreaseMonth = useCallback(
       (e) => {
         const newMonth = parseInt(month) - 1;
-        setMonth(newMonth === 0 ? 12 : newMonth);
+        setMonth(newMonth === 0 ? "12" : ("0" + newMonth).slice(-2));
         newMonth === 0 && setYear((old) => parseInt(old) - 1);
       },
       [month]
@@ -410,3 +418,4 @@ export const CalendarButton = (props) => {
     </Button>
   );
 };
+export default DateSelectorDropdown;
