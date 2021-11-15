@@ -38,6 +38,7 @@ import Profile1 from "../assets/img/team/profile-picture-1.jpg";
 import ProfileCover from "../assets/img/profile-cover.jpg";
 
 import teamMembers from "../data/teamMembers";
+import moment from "moment";
 
 export const ProfileCardWidget = () => {
   return (
@@ -407,12 +408,9 @@ export const RankingWidget = () => {
 };
 
 export const SalesValueWidget = (props) => {
-  const { title, value, percentage, data = [] } = props;
+  const { title, value, percentage, series = [], labels = [] } = props;
   const percentageIcon = percentage < 0 ? faAngleDown : faAngleUp;
   const percentageColor = percentage < 0 ? "text-danger" : "text-success";
-
-  const labels = data.label;
-  const series = data.value;
 
   return (
     <Card className="shadow-sm">

@@ -7,6 +7,8 @@ var workHoursBank = require("./data/workHoursBank.json");
 var vacations = require("./data/vacations.json");
 var vacationsOverview = require("./data/vacationsOverview.json");
 var workHoursByDate = require("./data/workHoursByDate.json");
+var sales = require("./data/sales.json");
+var cbm = require("./data/cbm.json");
 // and so on
 
 module.exports = function () {
@@ -20,6 +22,8 @@ module.exports = function () {
     vacations,
     "vacations-overview": vacationsOverview,
     "workhours-byDate": workHoursByDate,
+    cbm,
+    sales,
     // and so on
   };
 };

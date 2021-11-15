@@ -47,6 +47,7 @@ export const MyFormSelect = (props) => {
             className="w-100"
             onChange={handleChange}
             isSearchable={false}
+            menuPortalTarget={document.querySelector("body")}
             components={{
               IndicatorSeparator: () => null,
             }}

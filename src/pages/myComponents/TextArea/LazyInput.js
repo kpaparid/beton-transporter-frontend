@@ -75,7 +75,7 @@ export const LazyInput = memo(
                 value={value}
                 onChange={handleTextAreaChange}
                 ref={domRef}
-                style={{ width: maxWidth }}
+                style={{ minWidth, maxWidth }}
               />
             );
 
@@ -86,7 +86,7 @@ export const LazyInput = memo(
                 value={value}
                 onChange={handleTextAreaChange}
                 ref={domRef}
-                style={{ width: maxWidth }}
+                style={{ minWidth, maxWidth }}
               />
             );
           case "time":
@@ -95,7 +95,7 @@ export const LazyInput = memo(
                 className={inputClassName}
                 value={value}
                 onChange={handleDefaultChange}
-                inputStyle={{ maxWidth }}
+                inputStyle={{ minWidth, maxWidth }}
               />
             );
           case "constant":
@@ -105,8 +105,8 @@ export const LazyInput = memo(
                 onChange={handleDefaultChange}
                 availableValues={availableValues}
                 value={value}
-                maxWidth={maxWidth}
                 minWidth={minWidth}
+                maxWidth={maxWidth}
                 labelIsDisabled
               />
             );
@@ -122,7 +122,7 @@ export const LazyInput = memo(
                 onChange={handleDateChange}
                 format="DD.MM.YYYY"
                 disableMonthSwap={disableMonthSwap}
-                inputStyle={{ maxWidth }}
+                inputStyle={{ minWidth, maxWidth }}
                 value={v}
               />
             );
@@ -146,7 +146,7 @@ export const LazyInput = memo(
                   value={value}
                   onChange={handleTextAreaChange}
                   ref={domRef}
-                  style={{ maxWidth }}
+                  style={{ minWidth, maxWidth }}
                   autoFocus={false}
                 />
               </div>
@@ -160,10 +160,12 @@ export const LazyInput = memo(
         handleOutsideClick,
         inputClassName,
         maxWidth,
+        minWidth,
         type,
         value,
         handleTextAreaChange,
         handleDefaultChange,
+        availableValues,
       ]);
       return (
         <>

@@ -12,6 +12,7 @@ import {
   getGridSecondaryLabels,
 } from "../pages/myComponents/util/labels";
 
+import { API } from "../pages/myComponents/MyConsts";
 export function loadOverviewPage(
   { fetchEntityGrid, fetchMeta, addMeta },
   dispatch
@@ -35,10 +36,30 @@ export function loadOverviewPage(
           url: getGridUrl("currentVacations"),
           limit: getGridWidgets("currentVacations").pageSize,
           initialFilters: { from: { lte: today }, to: { gte: today } },
+          initialSort: { id: "from", order: "desc" },
         })
       )
     )
-    .then(() => dispatch(addMeta([{ id: "date", value: date }])));
+    .then(() =>
+      fetch(API + "sales?&date_gte=2021/01&date_lte=2021/12").then((res) =>
+        res.json().then((sales) => {
+          return fetch(API + "cbm?&date_gte=2021/01&date_lte=2021/12").then(
+            (res) =>
+              res.json().then((cbm) => {
+                const k = cbm;
+                const sd = sales;
+                return dispatch(
+                  addMeta([
+                    { id: "date", value: date },
+                    { id: "cbm", value: cbm },
+                    { id: "sales", value: sales },
+                  ])
+                );
+              })
+          );
+        })
+      )
+    );
 }
 
 export function loadToursPage(

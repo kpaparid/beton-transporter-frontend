@@ -1,0 +1,57 @@
+[
+  {
+    "id": "6192cfcd6ef2a1ce5781884a",
+    "sales": 259,
+    "date": "2021/01"
+  },
+  {
+    "id": "6192cfcd48975bb3304fe00f",
+    "sales": 115,
+    "date": "2021/02"
+  },
+  {
+    "id": "6192cfcd853f34e37259c484",
+    "sales": 176,
+    "date": "2021/03"
+  },
+  {
+    "id": "6192cfcd6cbddbed1e79379c",
+    "sales": 252,
+    "date": "2021/04"
+  },
+  {
+    "id": "6192cfcd2619e1e75437c99d",
+    "sales": 159,
+    "date": "2021/05"
+  },
+  {
+    "id": "6192cfcd1e8d602cbdd812f6",
+    "sales": 281,
+    "date": "2021/06"
+  },
+  {
+    "id": "6192cfcd7a37bcd9a6e2c723",
+    "sales": 132,
+    "date": "2021/07"
+  },
+  {
+    "id": "6192cfcd6c5c5aca89abb219",
+    "sales": 205,
+    "date": "2021/08"
+  },
+  {
+    "id": "6192cfcddcb83e9ba00cb3b9",
+    "sales": 162,
+    "date": "2021/09"
+  },
+  {
+    "id": "6192cfcdc40077499ac908e0",
+    "sales": 216,
+    "date": "2021/10"
+  },
+  {
+    "id": "6192cfcd2ed7da843df550d8",
+    "sales": 174,
+    "date": "2021/11"
+  }
+]

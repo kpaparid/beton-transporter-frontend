@@ -307,7 +307,7 @@ const EditableCell = React.memo(
         <div
           style={{
             padding: "1px ",
-            width: rest.maxWidth,
+            minWidth: rest.maxWidth,
             // whiteSpace: "pre-wrap",
           }}
           className={

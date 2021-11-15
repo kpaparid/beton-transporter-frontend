@@ -16,7 +16,7 @@ export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
           className="btn-title"
           // style={{ backgroundColor: "#f5f8fb" }}
         >
-          <h5>
+          <h5 className="text-wrap text-start">
             {title} {moment(date, "YYYY/MM").format("MMMM YYYY")}
           </h5>
         </Dropdown.Toggle>

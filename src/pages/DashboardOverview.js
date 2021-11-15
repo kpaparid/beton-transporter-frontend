@@ -19,7 +19,7 @@ import {
 } from "../components/Tables";
 import { totalOrders, monthlySales, workplantSales } from "../data/charts";
 
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { Breadcrumb } from "@themesberg/react-bootstrap";
 
@@ -28,10 +28,43 @@ import { useLoadData } from "./myComponents/MyConsts";
 import { workHoursSlice } from "./reducers/redux2";
 import { GridTableComponent, Loader } from "./myComponents/Table/GridComponent";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 export const DashBoardOverview = memo(() => {
   const { actions, selectors } = workHoursSlice;
   const stateAPIStatus = useLoadData("overviewTable", actions);
+
+  const handleSales = useCallback(
+    (state) => selectors.metaSelector.selectById(state, "sales"),
+    [selectors]
+  );
+  const handleCbm = useCallback(
+    (state) => selectors.metaSelector.selectById(state, "cbm"),
+    [selectors]
+  );
+  const sales = useSelector(handleSales);
+  const cbm = useSelector(handleCbm);
+  const currentMonthDate = moment().format("YYYY/MM");
+  const lastMonthDate = moment().subtract(1, "months").format("YYYY/MM");
+  const currentMonthSales = useMemo(
+    () => sales && sales.value.find((e) => e.date === currentMonthDate).sales,
+    [currentMonthDate, sales]
+  );
+  const currentMonthCbm = useMemo(
+    () => cbm && cbm.value.find((e) => e.date === currentMonthDate).cbm,
+    [currentMonthDate, cbm]
+  );
+  const lastMonthSales = useMemo(
+    () => sales && sales.value.find((e) => e.date === lastMonthDate).sales,
+    [lastMonthDate, sales]
+  );
+  const lastMonthCbm = useMemo(
+    () => cbm && cbm.value.find((e) => e.date === lastMonthDate).cbm,
+    [lastMonthDate, cbm]
+  );
+
+  const chartLabels = moment.monthsShort();
+  const chartSeries = useMemo(() => sales && [], [sales]);
 
   const renderComponent = useCallback(
     (entityId) => {
@@ -67,88 +100,89 @@ export const DashBoardOverview = memo(() => {
         </Breadcrumb>
       </div>
 
-      <div className="d-flex flex-wrap">
+      <div className="d-flex flex-wrap w-100">
         <div className="d-flex w-100 flex-wrap">
-          <Col lg={12} xl={6} className="mb-4 d-flex flex-wrap">
-            <Col xs={12} sm={6} className="mb-2 pe-2">
-              <div className="w-100 p-2">
+          <div className="d-flex flex-wrap col-12 col-xl-6">
+            <div className="col-12 col-sm-6 col-xl-12 col-xxl-6 mb-2">
+              <div className="w-100 h-100 p-2">
                 <CounterWidget
                   className="h-100"
-                  category="cbm akt. Monat"
-                  title="7000.5 cbm"
-                  period={moment().format("MMM")}
-                  percentage={18.2}
+                  category="Cbm akt. Monat"
+                  title={currentMonthCbm + " cbm"}
+                  period={moment(currentMonthDate, "YYYY/MM").format("MMM")}
+                  percentage={18}
                   icon={faChartLine}
                   iconColor="shape-secondary"
                 />
               </div>
-            </Col>
+            </div>
 
-            <Col xs={12} sm={6} className="mb-2 ps-2">
-              <div className="w-100 p-2">
+            <div className="col-12 col-sm-6 col-xl-12 col-xxl-6 mb-2">
+              <div className="w-100 h-100 p-2">
                 <CounterWidget
                   className="h-100"
-                  category="cbm letz. Monat"
-                  title="6856.5 cbm"
-                  period={moment().subtract(1, "months").format("MMM")}
+                  category="Cbm letz. Monat"
+                  title={lastMonthCbm + " cbm"}
+                  period={moment(lastMonthDate, "YYYY/MM").format("MMM")}
                   percentage={-28.4}
                   icon={faChartLine}
                   iconColor="shape-tertiary"
                 />
               </div>
-            </Col>
-            <Col xs={12} sm={6} className="mb-2 pe-2">
-              <div className="w-100 p-2">
+            </div>
+            <div className="col-12 col-sm-6 col-xl-12 col-xxl-6 mb-2">
+              <div className="w-100 h-100 p-2">
                 <CounterWidget
                   className="h-100"
                   category="Umsatz akt. Monat"
-                  title="6856.5 cbm"
-                  period={moment().format("MMM")}
+                  title={currentMonthSales + " €"}
+                  period={moment(currentMonthDate, "YYYY/MM").format("MMM")}
                   percentage={-28.4}
                   icon={faCashRegister}
                   iconColor="shape-tertiary"
                 />
               </div>
-            </Col>
-            <Col xs={12} sm={6} className="mb-2 ps-2">
-              <div className="w-100 p-2">
+            </div>
+            <div className="col-12 col-sm-6 col-xl-12 col-xxl-6 mb-2">
+              <div className="w-100 h-100 p-2">
                 <CounterWidget
                   className="h-100"
-                  category="Umsatz letzte. Monat"
-                  title="7000.5 cbm"
-                  period={moment().subtract(1, "months").format("MMM")}
+                  category="Umsatz letz. Monat"
+                  title={lastMonthSales + " €"}
+                  period={moment(lastMonthDate, "YYYY/MM").format("MMM")}
                   percentage={18.2}
                   icon={faCashRegister}
                   iconColor="shape-secondary"
                 />
               </div>
-            </Col>
-            <Col xs={12} className="p-0">
+            </div>
+            <div className="col-12 p-0">
               <div className="w-100 h-100 p-2">
                 {renderComponent("currentVacations")}
               </div>
-            </Col>
-          </Col>
+            </div>
+          </div>
 
-          <Col lg={12} xl={6} className="mb-4">
+          <div className="d-flex col-12 col-xl-6">
             <div className="w-100 p-2">
               {renderComponent("workHoursByDate")}
             </div>
-          </Col>
+          </div>
         </div>
-        <div className="d-flex w-100">
-          <Col lg={12} xl={6} className="mb-4 p-0">
+        <div className="d-flex w-100 flex-wrap">
+          <div className="col-lg-6 col-sm-12 col-12 mb-4 p-0">
             <div className="p-2">
               <SalesValueWidget
                 title="Sales Value"
-                value="9,500"
+                value={currentMonthSales}
                 percentage={10.57}
-                data={monthlySales}
+                labels={chartLabels}
+                series={chartSeries}
               />
             </div>
-          </Col>
+          </div>
 
-          <Col lg={12} xl={6} className="mb-4">
+          <div className="col-lg-6 col-sm-12 col-12 mb-4 p-0">
             <div className="p-2">
               <BarChartWidget
                 title="Workplant's Sales"
@@ -157,7 +191,7 @@ export const DashBoardOverview = memo(() => {
                 data={totalOrders}
               ></BarChartWidget>
             </div>
-          </Col>
+          </div>
         </div>
       </div>
     </>
