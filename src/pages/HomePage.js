@@ -5,7 +5,7 @@ import { Routes } from "../routes";
 // pages
 import Presentation from "./Presentation";
 import Upgrade from "./Upgrade";
-import DashboardOverview from "./dashboard/DashboardOverview";
+import DashboardOverview from "./DashboardOverview";
 import { Tours } from "./Tours";
 import Arbeitszeiten from "./Arbeitszeiten";
 import Nachrichten from "./Nachrichten";

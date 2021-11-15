@@ -6,6 +6,7 @@ var absent = require("./data/absent.json");
 var workHoursBank = require("./data/workHoursBank.json");
 var vacations = require("./data/vacations.json");
 var vacationsOverview = require("./data/vacationsOverview.json");
+var workHoursByDate = require("./data/workHoursByDate.json");
 // and so on
 
 module.exports = function () {
@@ -15,9 +16,10 @@ module.exports = function () {
     workHours,
     absent,
     values,
-    "workHours-bank": workHoursBank,
+    "workhours-bank": workHoursBank,
     vacations,
     "vacations-overview": vacationsOverview,
+    "workhours-byDate": workHoursByDate,
     // and so on
   };
 };

@@ -17,14 +17,14 @@ const dateToDay = (date) => {
     : date[0];
 };
 const calcDaysDifference = (arr) => {
-  const t1 = moment(arr[0], "YYYY/MM/DD");
-  const t2 = moment(arr[1], "YYYY/MM/DD");
-  return t2.diff(t1, "days");
+  const t1 = moment(arr[0], "YYYY/MM/DD", true);
+  const t2 = moment(arr[1], "YYYY/MM/DD", true);
+  return t1.isValid() && t2.isValid() ? t2.diff(t1, "days") : "";
 };
 const calcMinuteDifference = (arr) => {
-  const t1 = moment(arr[0], "HH:mm");
-  const t2 = moment(arr[1], "HH:mm");
-  return t2.diff(t1, "minutes");
+  const t1 = moment(arr[0], "HH:mm", true);
+  const t2 = moment(arr[1], "HH:mm", true);
+  return t1.isValid() && t2.isValid() ? t2.diff(t1, "minutes") : "";
 };
 
 export const getGridTitle = (entityId) => gridLabels[entityId].title;
@@ -72,28 +72,10 @@ const gridLabels = {
       pagination: PAGINATION.SERVER,
       counter: true,
       pageSize: 20,
+      edit: true,
     },
     title: "Tours",
     primaryLabels: [
-      "date",
-      "vehicle",
-      "workPlant",
-      "cbm",
-      "departure",
-      "arrival",
-      "kmDeparture",
-      "kmArrival",
-      "deliveryNr",
-      "driver",
-      "buildingSite",
-      "dischargeBegin",
-      "dischargeEnd",
-      "dischargeType",
-      "waitTime",
-      "other",
-    ],
-    secondaryLabels: [],
-    editable: [
       "date",
       "vehicle",
       "workPlant",
@@ -259,6 +241,7 @@ const gridLabels = {
       counter: true,
       pageSize: 40,
       sort: true,
+      edit: true,
     },
     title: "Workhours",
     primaryLabels: ["date", "begin", "end", "pause"],
@@ -292,6 +275,7 @@ const gridLabels = {
         text: "Begin",
         type: "time",
         connections: ["duration"],
+        filterType: "time",
         maxWidth: "100px",
       },
       end: {
@@ -300,6 +284,7 @@ const gridLabels = {
         text: "End",
         type: "time",
         connections: ["duration"],
+        filterType: "time",
         maxWidth: "100px",
       },
       duration: {
@@ -318,6 +303,7 @@ const gridLabels = {
         text: "Pause",
         type: "number",
         measurement: "min",
+        max: "180",
         filterType: "range",
         maxWidth: "100px",
       },
@@ -327,15 +313,16 @@ const gridLabels = {
     url: "workhours-bank",
     widgets: {
       filter: false,
-      add: true,
-      remove: true,
-      delete: true,
-      massEdit: false,
+      add: false,
+      remove: false,
+      delete: false,
+      massEdit: true,
       download: true,
       pagination: true,
       counter: false,
       pageSize: 6,
       sort: true,
+      edit: false,
     },
     title: "Workhours Bank",
     primaryLabels: ["month", "hours"],
@@ -350,6 +337,7 @@ const gridLabels = {
         format: dateToMonth,
         maxWidth: "100px",
       },
+
       hours: {
         nanoid: nanoid(),
         id: "hours",
@@ -373,6 +361,7 @@ const gridLabels = {
       counter: false,
       pageSize: 5,
       sort: true,
+      edit: true,
     },
     title: "Absent",
     primaryLabels: ["from", "to", "reason"],
@@ -427,10 +416,10 @@ const gridLabels = {
       counter: false,
       pageSize: 5,
       sort: false,
+      edit: true,
     },
     title: "Vacations",
     primaryLabels: ["taken", "rest"],
-    editable: ["taken", "rest"],
     labels: {
       taken: {
         nanoid: nanoid(),
@@ -438,11 +427,6 @@ const gridLabels = {
         text: "Taken",
         type: "number",
         maxWidth: "100px",
-        // measurement: "",
-        // grid: 5,
-        // page: 1,
-        // required: true,
-        // priority: 1,
       },
       rest: {
         nanoid: nanoid(),
@@ -465,12 +449,12 @@ const gridLabels = {
       counter: true,
       pageSize: 5,
       sort: true,
+      edit: true,
     },
     title: "Vacations Overview",
     footer: ["Total", "", "SUM"],
     primaryLabels: ["from", "to"],
     secondaryLabels: ["days"],
-    editable: ["from", "to"],
 
     labels: {
       from: {
@@ -499,6 +483,82 @@ const gridLabels = {
         dependencies: ["from", "to"],
         fn: calcDaysDifference,
         maxWidth: "100px",
+      },
+    },
+  },
+  workHoursByDate: {
+    url: "workhours-byDate",
+    widgets: {
+      filter: false,
+      add: false,
+      download: true,
+      remove: false,
+      massEdit: true,
+      pagination: true,
+      counter: true,
+      pageSize: 15,
+      sort: true,
+      edit: false,
+    },
+    title: "Total working time in ",
+    primaryLabels: ["driver", "hours"],
+    labels: {
+      driver: {
+        nanoid: nanoid(),
+        id: "driver",
+        text: "Driver",
+        type: "nonEditable",
+        maxWidth: "200px",
+      },
+      hours: {
+        nanoid: nanoid(),
+        id: "hours",
+        text: "Hours",
+        type: "nonEditable",
+        maxWidth: "100px",
+      },
+    },
+  },
+  currentVacations: {
+    url: "vacations-overview",
+    widgets: {
+      filter: false,
+      add: false,
+      download: true,
+      remove: false,
+      massEdit: true,
+      pagination: PAGINATION.INTERNAL,
+      counter: true,
+      pageSize: 3,
+      sort: true,
+      edit: false,
+    },
+    title: "Current Vacations",
+    primaryLabels: ["from", "to", "driver"],
+
+    labels: {
+      driver: {
+        nanoid: nanoid(),
+        id: "driver",
+        text: "Driver",
+        type: "text",
+        maxWidth: "140px",
+      },
+      from: {
+        nanoid: nanoid(),
+        id: "from",
+        text: "From",
+        type: "date",
+        format: toDateFormat,
+        maxWidth: "140px",
+      },
+      to: {
+        nanoid: nanoid(),
+        id: "to",
+        text: "To",
+        type: "date",
+        format: toDateFormat,
+        maxWidth: "140px",
       },
     },
   },

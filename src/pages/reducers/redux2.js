@@ -15,6 +15,7 @@ import {
   calcSort,
   sortToUrl,
 } from "../../api/apiMappers";
+import { getGridLabelFn } from "../myComponents/util/labels";
 
 const myInitialState = {};
 
@@ -96,6 +97,8 @@ function createGenericSlice(sliceName) {
     modesAdapter.getSelectors().selectById(state.modes, id);
   const tablesSelectById = (state, id) =>
     tablesAdapter.getSelectors().selectById(state.tables, id);
+  const labelsSelectById = (state, id) =>
+    labelsAdapter.getSelectors().selectById(state.labels, id);
   const changesSelectById = (state, id) =>
     changesAdapter.getSelectors().selectById(state.changes, id);
   const rowsSelectById = (state, id) =>
@@ -123,8 +126,14 @@ function createGenericSlice(sliceName) {
           .selectById(state[sliceName].tables, entityId).initialFilters,
         ...initialFilters,
       };
+      const newInitialSort = {
+        ...tablesAdapter
+          .getSelectors()
+          .selectById(state[sliceName].tables, entityId).initialSort,
+        ...initialSort,
+      };
       const filterLink = filtersToUrl(newInitialFilters);
-      const sortLink = sortToUrl(initialSort);
+      const sortLink = sortToUrl(newInitialSort);
 
       const finalUrl =
         API +
@@ -145,7 +154,7 @@ function createGenericSlice(sliceName) {
               entityId,
               initialFilters: newInitialFilters,
               url,
-              initialSort,
+              initialSort: newInitialSort,
               pagination: parsePagination({ res, page, limit }),
             };
           })
@@ -155,7 +164,7 @@ function createGenericSlice(sliceName) {
           entityId,
           initialFilters: newInitialFilters,
           url,
-          initialSort,
+          initialSort: newInitialSort,
           pagination: { page, limit, rowsCount: 0, pagesCount: 0 },
         }));
     }
@@ -462,16 +471,41 @@ function createGenericSlice(sliceName) {
         });
       },
       addChange: (state, action) => {
-        const { id, rowId, changes } = action.payload;
-        const originalRow = rowsSelectById(state, rowId);
-        changesAdapter.upsertOne(state.changes, { id: rowId, ...changes });
+        const {
+          id,
+          rowId,
+          changes: { labelId, value },
+        } = action.payload;
 
         const oldChangesIds = tablesSelectById(state, id).changes || [];
-        const sad = "";
         const newChanges = oldChangesIds.concat(rowId);
+
         tablesAdapter.upsertOne(state.tables, {
           id,
           changes: newChanges,
+        });
+
+        const oldChanges = changesSelectById(state, rowId);
+        const oldRow = rowsSelectById(state, rowId);
+        const newRow = { ...oldRow, ...oldChanges };
+        const { links = [], idx } = labelsSelectById(state, labelId);
+        const changesById = {
+          [labelId]: value,
+          ...links.reduce((a, { connection, connectionIdx, dependencies }) => {
+            const format = getGridLabelFn(id, connectionIdx);
+            return {
+              ...a,
+              [connection]: format(
+                dependencies.map((d) => {
+                  return d === labelId ? value : newRow[d];
+                })
+              ),
+            };
+          }, {}),
+        };
+        changesAdapter.upsertOne(state.changes, {
+          id: rowId,
+          ...changesById,
         });
       },
       resetChanges: (state, action) => {
@@ -523,7 +557,10 @@ function createGenericSlice(sliceName) {
         state.loading = false;
         console.log("post done", arg);
         const changesIds = tablesSelectById(state, arg).changes || [];
-        const newRows = changesIds.map((id) => changesSelectById(state, id));
+        const addRowId = tablesSelectById(state, arg).addRow;
+        const newRows = changesIds
+          .filter((id) => id !== addRowId)
+          .map((id) => changesSelectById(state, id));
         rowsAdapter.upsertMany(state.rows, newRows);
         changesAdapter.removeMany(state.changes, changesIds);
         tablesAdapter.upsertOne(state.tables, { id: arg, changes: [] });

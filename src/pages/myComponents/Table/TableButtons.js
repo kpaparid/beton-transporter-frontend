@@ -30,11 +30,13 @@ const TableButtons = memo(
     filterProps,
     download,
     remove,
+    edit,
+    add,
+    filter,
   }) => {
     const mode = useSelector(selectMode);
     const editMode = mode === "edit";
     const addMode = mode === "addRow";
-
     const selectedRowsExist = useSelector(selectSelectedRowsExist);
     const changesExist = useSelector(selectChangesExist);
     // const modalLabels = useSelector(labelsSelector);
@@ -70,8 +72,8 @@ const TableButtons = memo(
     }, [selectedRowsExist, editMode, onChangeMode]);
     return (
       <div className="d-flex flex-nowrap button-group">
-        {filterProps && <Filter {...filterProps}></Filter>}
-        {(selectedRowsExist || (editMode && !selectedRowsExist)) && (
+        {filter && <Filter {...filterProps}></Filter>}
+        {edit && (selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn
             disabled={editMode}
             onClick={handleEditEnable}
@@ -93,21 +95,22 @@ const TableButtons = memo(
             value={<FontAwesomeIcon icon={faDownload} />}
           />
         )}
-        {editMode ||
-          (addMode && (
-            <MyBtn
-              disabled={!changesExist}
-              onClick={handleSave}
-              value={<FontAwesomeIcon icon={faSave} />}
-            />
-          ))}
-        <MyBtn
-          disabled={addMode}
-          onClick={handleAddRow}
-          value={<FontAwesomeIcon icon={faPlus} />}
-        />
+        {(edit || add) && (editMode || addMode) && (
+          <MyBtn
+            disabled={!changesExist}
+            onClick={handleSave}
+            value={<FontAwesomeIcon icon={faSave} />}
+          />
+        )}
+        {add && (
+          <MyBtn
+            disabled={addMode}
+            onClick={handleAddRow}
+            value={<FontAwesomeIcon icon={faPlus} />}
+          />
+        )}
 
-        {(editMode || addMode) && (
+        {(edit || add) && (editMode || addMode) && (
           <MyBtn
             variant="danger"
             onClick={handleClose}

@@ -120,6 +120,16 @@ export const useGridSelectors = ({
       ),
     [selectShownRows, selectAllRowsById, selectChanges]
   );
+  const selectAddRow = useCallback(
+    (state) => {
+      const id = tablesSelector.selectById(state, entityId).addRow;
+      const row = rowsSelector.selectById(state, id);
+      const change = changesSelector.selectById(state, id);
+      return { ...row, ...change };
+    },
+    [tablesSelector, rowsSelector, entityId, changesSelector]
+  );
+
   const selectShownHeadersReactTable = useMemo(
     () =>
       createSelector(
@@ -169,38 +179,6 @@ export const useGridSelectors = ({
             id: row.id,
             ...shownLabels
               .map((label) => {
-                // const props = {
-                //   id: row.id,
-                //   idx: label.idx,
-                //   value: getGridLabelFormat(entityId, label.idx)
-                //     ? getGridLabelFormat(entityId, label.idx)(row[label.id])
-                //     : row[label.id],
-                //   label: label.id,
-                //   type: label.type,
-                //   measurement: label.measurement,
-                //   minWidth: "10px",
-                //   maxWidth: maxWidthByType(label.type),
-                //   links: label.links.map(({ connectionIdx, ...rest }) => ({
-                //     format: getGridLabelFn(entityId, connectionIdx),
-                //     ...rest,
-                //   })),
-                // };
-
-                // if (props.type === "date")
-                //   return {
-                //     [label.id]: {
-                //       ...props,
-                //       disableMonthSwap: true,
-                //     },
-                //   };
-                // else if (props.type !== "constant") return { [label.id]: props };
-                // else
-                //   return {
-                //     [label.id]: {
-                //       ...props,
-                //       availableValues: constants[label.idx],
-                //     },
-                //   };
                 return {
                   [label.id]: getGridLabelFormat(entityId, label.idx)
                     ? getGridLabelFormat(entityId, label.idx)(row[label.id])
@@ -211,13 +189,7 @@ export const useGridSelectors = ({
           }));
         }
       ),
-    [
-      selectShownLabels,
-      selectAllLabelsById,
-      selectChangesOverRows,
-      selectConstants,
-      entityId,
-    ]
+    [selectShownLabels, selectAllLabelsById, selectChangesOverRows, entityId]
   );
 
   const selectHiddenHeadersReactTable = useMemo(
@@ -430,6 +402,7 @@ export const useGridSelectors = ({
     selectReactTableData,
     selectConstants,
     selectMode,
+    selectAddRow,
     selectShownRows,
     selectShownLabels,
     selectChangesExist,
@@ -535,6 +508,22 @@ export const useGridCallbacks = ({
     },
     [dispatch, entityId, fetchEntityGrid, addMeta]
   );
+  const onChangeCurrentYearMonth = useCallback(
+    (date) => {
+      const initialFilters = {
+        date: { eq: [date] },
+      };
+      dispatch(
+        fetchEntityGrid({
+          entityId,
+          url: getGridUrl(entityId),
+          limit: getGridWidgets(entityId).pageSize,
+          initialFilters,
+        })
+      ).then(() => dispatch(addMeta([{ id: "date", value: date }])));
+    },
+    [dispatch, entityId, fetchEntityGrid, addMeta]
+  );
   const onChangeCurrentUser = useCallback(
     (value) => {
       const initialFilters = {
@@ -621,6 +610,7 @@ export const useGridCallbacks = ({
 
   return {
     onChangeCurrentUser,
+    onChangeCurrentYearMonth,
     onCellChange,
     setSelectedRows: setSelectedRowsCallback,
     forceClose,
@@ -662,10 +652,12 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     selectNestedCheckboxFilter,
     selectPaginationData,
     selectLoading,
+    selectAddRow,
     selectItemsNestedFilter,
   } = useGridSelectors({ selectors, entityId });
 
   const {
+    onChangeCurrentYearMonth,
     onCellChange,
     setSelectedRows,
     onSelectRow,
@@ -699,10 +691,14 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
       <TitleComponent
         entityId={entityId}
         selectDate={selectDate}
-        onChange={onChangeCurrentDate}
+        onChange={
+          entityId === "workHoursByDate"
+            ? onChangeCurrentYearMonth
+            : onChangeCurrentDate
+        }
       />
     ),
-    [entityId, onChangeCurrentDate, selectDate]
+    [entityId, onChangeCurrentYearMonth, onChangeCurrentDate, selectDate]
   );
   const nestedFilterComponent = useCallback(
     (props) => (
@@ -730,6 +726,7 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     massEdit,
     pagination,
     pageSize,
+    edit,
     counter,
   } = getGridWidgets(entityId);
   const addRowProps = {
@@ -738,11 +735,13 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
   const tableProps = {
     selectSelectedRows,
     modeselector: selectMode,
+    addRowSelector: selectAddRow,
     selectShownColumns: selectShownHeadersReactTable,
     selectHiddenColumns: selectHiddenHeadersReactTable,
     selectSortedColumn: selectSortedHeadersReactTable,
     selectData: selectReactTableData,
     onSelectRow,
+    selectAddRow,
     onSelectAllRows,
     selectPaginationData,
     setSelectedRows,
@@ -773,6 +772,9 @@ export const useGridTableProps = ({ actions, selectors, entityId }) => {
     title: "ModalTitle",
   };
   const buttonGroupProps = {
+    edit,
+    add,
+    filter,
     selectMode,
     selectChangesExist,
     selectSelectedRowsExist,

@@ -45,28 +45,10 @@ const TableCore = memo((props) => {
   const headers = useSelector(selectShownColumns);
   const [columns, setColumns] = useState(headers);
   const updateMyData = useCallback(
-    ({ value, labelId, rowId, links = [], row }) => {
-      if (row && row[labelId] !== value) {
-        // console.log("yikes", value, row[labelId]);
-        const changesById = {
-          [labelId]: value,
-          ...links.reduce(
-            (a, { connection, dependencies, format }) => ({
-              ...a,
-              [connection]: format(
-                dependencies.map((d) => {
-                  return d === labelId ? value : row[d];
-                })
-              ),
-            }),
-            {}
-          ),
-        };
-        return onCellChange({ rowId, changes: changesById });
-      }
-      !row && onCellChange({ rowId, changes: { [labelId]: value } });
+    ({ value, labelId, rowId }) => {
+      onCellChange({ rowId, changes: { labelId, value } });
     },
-    []
+    [onCellChange]
   );
 
   const debouncedUpdate = useMemo(
@@ -105,6 +87,7 @@ const RTables = memo(
     onToggleSort,
     selectSortedColumn,
     selectPaginationData,
+    selectAddRow,
   }) => {
     const labels = useMemo(() => columns.map((e) => e), [columns]);
     return (
@@ -124,6 +107,7 @@ const RTables = memo(
             selectPaginationData={selectPaginationData}
           ></TableHead>
           <TableBody
+            selectAddRow={selectAddRow}
             massEdit={massEdit}
             data={data}
             labels={labels}
@@ -148,6 +132,7 @@ const TableBody = React.memo(
     selectSelectedRows,
     updateMyData,
     onSelectRow,
+    selectAddRow,
     modeselector,
     massEdit,
   }) => {
@@ -155,26 +140,19 @@ const TableBody = React.memo(
     const display = useMemo(() => hiddenColumns, [hiddenColumns]);
     const selectedRows = useSelector(selectSelectedRows);
     const mode = useSelector(modeselector);
+    const addRow = useSelector(selectAddRow);
 
     return (
       <>
         <tbody>
-          <tr
-            key={"addRow-tr"}
-            // className={mode === "addRow" ? "visible" : "invisible"}
-            // style={{
-            //   scale: mode === "addRow" ? "50px" : "0px",
-            //   position: mode === "addRow" ? "initial" : "absolute",
-            //   transition: "height 0.5s",
-            // }}
-          >
+          <tr key={"addRow-tr"}>
             {mode === "addRow" && (
               <>
                 {!massEdit && <td></td>}
                 <AddRow
-                  row={nanoid()}
+                  row={addRow}
                   labels={labels}
-                  key={"addrow"}
+                  key={"add-row"}
                   index={0}
                   display={display}
                   updateMyData={updateMyData}
@@ -218,13 +196,12 @@ const AddRow = memo(({ row, labels, index, updateMyData }) => {
     <>
       {labels.map((label) => (
         <TableCell
-          row={row}
+          row={row.id}
           isEditable={true}
-          value={""}
+          value={row[label.id]}
           cellProps={label}
           index={index}
           key={label.id + "-" + index}
-          measurement={false}
           updateMyData={updateMyData}
         />
       ))}
@@ -234,10 +211,6 @@ const AddRow = memo(({ row, labels, index, updateMyData }) => {
 
 const RenderRow = memo(
   ({ row, labels, index, updateMyData, display, isEditable }) => {
-    const handleUpdate = useCallback(
-      (props) => updateMyData({ ...props, row }),
-      [row, updateMyData]
-    );
     return labels.map((label) => (
       <TableCell
         row={row.id}
@@ -247,7 +220,7 @@ const RenderRow = memo(
         index={index}
         key={label.id + "-" + index}
         display={display[label.id]}
-        updateMyData={handleUpdate}
+        updateMyData={updateMyData}
       />
     ));
   },
@@ -300,13 +273,11 @@ const EditableCell = React.memo(
     const handleUpdateData = useCallback(
       (v = value) =>
         updateMyData({
-          rowIndex: index,
           value: v,
           labelId: label,
           rowId: row,
-          links,
         }),
-      [value, index, label, row, links, updateMyData]
+      [value, label, row, updateMyData]
     );
 
     const onChange = useCallback(
@@ -345,7 +316,10 @@ const EditableCell = React.memo(
               : "d-block text-center fallback"
           }
         >
-          {value + (measurementEnabled && measurement ? " " + measurement : "")}
+          {value +
+            (measurementEnabled && value !== "" && measurement
+              ? " " + measurement
+              : "")}
         </div>
         {isEditable && cellProps.type !== "nonEditable" && (
           <Suspense
@@ -487,9 +461,9 @@ const TableFooter = React.memo(
       pagesCount,
     } = useSelector(selectPaginationData);
     return (
-      <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
+      <Card.Footer className="p-0 border-0 d-lg-flex flex-wrap align-items-center justify-content-between">
         {paginationEnabled && currentPageSize < maxRows && (
-          <Nav>
+          <Nav className="pt-4">
             <Pagination className="mb-2 mb-lg-0">
               <Pagination.Prev
                 onClick={() => onPageChange(1)}
@@ -506,7 +480,7 @@ const TableFooter = React.memo(
               {[...Array(pagesCount > 5 ? 5 : pagesCount)].map((_, index) => {
                 const itemProps = {
                   page:
-                    pagesCount <= 3
+                    pagesCount <= 4
                       ? index + 1
                       : pagesCount <= parseInt(pageIndex) + 1
                       ? pagesCount - 4 + index
@@ -515,7 +489,7 @@ const TableFooter = React.memo(
                       : index + 1,
                   gotoPage: onPageChange,
                   active:
-                    pagesCount <= 3
+                    pagesCount <= 4
                       ? parseInt(pageIndex) === index + 1
                       : pagesCount <= parseInt(pageIndex) + 1
                       ? pagesCount - 4 + index === parseInt(pageIndex)
@@ -548,7 +522,7 @@ const TableFooter = React.memo(
         )}
 
         {counterEnabled && (
-          <small className="fw-bold ps-3">
+          <small className="fw-bold ps-3 pt-4">
             Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
           </small>
         )}

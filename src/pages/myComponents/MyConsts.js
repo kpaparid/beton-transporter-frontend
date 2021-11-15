@@ -8,7 +8,11 @@ import { createReduxStore2 } from "../reducers/redux2";
 import { MonthSelectorDropdown } from "./TextArea/MonthPicker";
 import { nanoid } from "@reduxjs/toolkit";
 import { Button } from "@themesberg/react-bootstrap";
-import { loadToursPage, loadWorkHoursPage } from "../../api/apiMappers";
+import {
+  loadOverviewPage,
+  loadToursPage,
+  loadWorkHoursPage,
+} from "../../api/apiMappers";
 import { getGridTitle } from "./util/labels";
 // dark 0
 // #485354  1
@@ -150,6 +154,9 @@ function useLoadData(tableName, actions, meta) {
       case "toursTable":
         loadToursPage(actions, dispatch).then(() => setAPIStatus("success"));
         break;
+      case "overviewTable":
+        loadOverviewPage(actions, dispatch).then(() => setAPIStatus("success"));
+        break;
       default:
         break;
     }
@@ -162,7 +169,11 @@ const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
   const title = getGridTitle(entityId);
   const date = useSelector(selectDate);
 
-  if (entityId === "workHours" || entityId === "tours") {
+  if (
+    entityId === "workHours" ||
+    entityId === "tours" ||
+    entityId === "workHoursByDate"
+  ) {
     return <MonthSelectorDropdown {...props} title={title} date={date} />;
   } else
     return (

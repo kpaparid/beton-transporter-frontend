@@ -12,6 +12,35 @@ import {
   getGridSecondaryLabels,
 } from "../pages/myComponents/util/labels";
 
+export function loadOverviewPage(
+  { fetchEntityGrid, fetchMeta, addMeta },
+  dispatch
+) {
+  const date = moment().format("YYYY/MM");
+  const today = moment().format("YYYY/MM/DD");
+  const dateFilter = { date: { eq: [date] } };
+  return dispatch(
+    fetchEntityGrid({
+      entityId: "workHoursByDate",
+      url: getGridUrl("workHoursByDate"),
+      limit: getGridWidgets("workHoursByDate").pageSize,
+      initialFilters: dateFilter,
+      initialSort: { id: "hours", order: "desc" },
+    })
+  )
+    .then(() =>
+      dispatch(
+        fetchEntityGrid({
+          entityId: "currentVacations",
+          url: getGridUrl("currentVacations"),
+          limit: getGridWidgets("currentVacations").pageSize,
+          initialFilters: { from: { lte: today }, to: { gte: today } },
+        })
+      )
+    )
+    .then(() => dispatch(addMeta([{ id: "date", value: date }])));
+}
+
 export function loadToursPage(
   { fetchEntityGrid, fetchMeta, addMeta },
   dispatch
@@ -113,6 +142,19 @@ export function normalizeApi({ data, meta }) {
   const tableIds = Object.keys(mObject);
 
   const nanoidLabelsTable = getNanoidLabelsTable(mObject);
+  const addRow = tableIds.reduce(
+    (a, tableId) => ({
+      ...a,
+      [tableId]: {
+        id: nanoid(),
+        ...Object.values(nanoidLabelsTable[tableId]).reduce(
+          (a, b) => ({ ...a, [b]: "" }),
+          {}
+        ),
+      },
+    }),
+    {}
+  );
   const labelsByTableId = getLabelsByTableId(tableIds, nanoidLabelsTable);
   const labels = tableIds
     .map((r) => labelsByTableId[r])
@@ -120,10 +162,10 @@ export function normalizeApi({ data, meta }) {
 
   const rowsByTableId = mapRowsToNanoidLabels(mObject, nanoidLabelsTable);
   const rows = tableIds
-    .map((r) => rowsByTableId[r])
-    .reduce((a, b) => [...a, ...b], []);
+    .map((r) => rowsByTableId[r].concat(addRow[r]))
+    .reduce((a, b) => [...a, ...b]);
 
-  const tables = getTable(mObject, labelsByTableId, meta);
+  const tables = getTable(mObject, labelsByTableId, meta, addRow);
 
   const modes = tableIds.map((id) => ({ id: id, value: "idle" }));
   return {
@@ -230,7 +272,7 @@ export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
 }
-export function getTable(mObject, labelsByTableId, meta) {
+export function getTable(mObject, labelsByTableId, meta, addRow) {
   return Object.keys(mObject).map((tableId) => {
     const tableRowsIds = mObject[tableId].map(({ id }) => id);
     const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
@@ -245,6 +287,7 @@ export function getTable(mObject, labelsByTableId, meta) {
       selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
       selectedLabels: tableLabelIds,
       nanoids: nanoids,
+      addRow: addRow[tableId].id,
       ...meta,
     };
   });

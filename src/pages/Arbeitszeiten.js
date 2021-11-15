@@ -81,7 +81,7 @@ export const ArbeitsZeiten = memo(() => {
           <Breadcrumb.Item active>WorkHours</Breadcrumb.Item>
         </Breadcrumb>
       </div>
-      <div className="d-flex pb-3">
+      <div className="d-flex px-2 pb-3">
         <OutlinedSelect
           onChange={setDriver}
           value={currentSelectLabel}
