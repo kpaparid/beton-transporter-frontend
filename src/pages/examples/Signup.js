@@ -20,9 +20,9 @@ import {
   Container,
   InputGroup,
 } from "@themesberg/react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { Routes } from "../../routes";
+import { MyRoutes } from "../../routes";
 import BgImage from "../../assets/img/illustrations/signin.svg";
 import { useAuth } from "../../contexts/AuthContext";
 import { Alert } from "react-bootstrap";
@@ -34,7 +34,7 @@ export const Signup = () => {
   const { signup } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const history = useNavigate();
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -60,7 +60,7 @@ export const Signup = () => {
           <p className="text-center">
             <Card.Link
               as={Link}
-              to={Routes.DashboardOverview.path}
+              to={MyRoutes.DashboardOverview.path}
               className="text-gray-700"
             >
               <FontAwesomeIcon icon={faAngleLeft} className="me-2" /> Back to
@@ -168,7 +168,7 @@ export const Signup = () => {
                     Already have an account?
                     <Card.Link
                       as={Link}
-                      to={Routes.Signin.path}
+                      to={MyRoutes.Signin.path}
                       className="fw-bold"
                     >
                       {` Login here `}

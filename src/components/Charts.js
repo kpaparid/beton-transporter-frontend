@@ -1,8 +1,7 @@
 import React from "react";
 import Chartist from "react-chartist";
 import ChartistTooltip from "chartist-plugin-tooltips-updated";
-import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
-import { ResponsiveBar } from "@nivo/bar";
+import { Bar, Line } from "react-chartjs-2";
 
 export const SalesValueChart = (props) => {
   const data = {

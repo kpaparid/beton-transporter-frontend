@@ -6,9 +6,9 @@
     "configurations": [
         {
             "type": "pwa-chrome",
-            "name": "http://localhost:3000/#/arbeitszeiten",
+            "name": "http://localhost:3000/#/",
             "request": "launch",
-            "url": "http://localhost:3000/#/arbeitszeiten"
+            "url": "http://localhost:3000/#/"
         }
     ]
 }

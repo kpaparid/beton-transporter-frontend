@@ -12,11 +12,10 @@ import { Button } from "@themesberg/react-bootstrap";
 
 import "./MyForm.css";
 import { isEqual } from "lodash";
-import Scrollbars from "react-custom-scrollbars";
+import Scrollbars from "react-custom-scrollbars-2";
 import memoize from "memoize-one";
 import { FixedSizeList, areEqual } from "react-window";
 import _ from "lodash";
-import { useSelector } from "react-redux";
 function MyCheckboxContainer(props) {
   const {
     text,

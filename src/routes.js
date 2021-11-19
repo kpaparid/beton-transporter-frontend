@@ -1,4 +1,4 @@
-export const Routes = {
+export const MyRoutes = {
   // pages
   Presentation: { path: "/presentation" },
   DashboardOverview: { path: "/" },

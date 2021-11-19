@@ -1671,35 +1671,35 @@ $spinner-border-width-sm: 0.2em;
 
 // Datepicker
 
-$datepicker-border-radius: $border-radius-sm;
-$datepicker-dropdown-padding: 20px 22px;
+// $datepicker-border-radius: $border-radius-sm;
+// $datepicker-dropdown-padding: 20px 22px;
 
-$datepicker-cell-transition: $transition-base;
-$datepicker-cell-hover-background: lighten($gray-400, 55%);
-$datepicker-cell-border-radius: 50%;
-$datepicker-cell-width: 36px;
-$datepicker-cell-height: 36px;
+// $datepicker-cell-transition: $transition-base;
+// $datepicker-cell-hover-background: lighten($gray-400, 55%);
+// $datepicker-cell-border-radius: 50%;
+// $datepicker-cell-width: 36px;
+// $datepicker-cell-height: 36px;
 
-$datepicker-disabled-cell-color: $gray-300;
-$datepicker-disabled-old-new-color: $gray-500;
+// $datepicker-disabled-cell-color: $gray-300;
+// $datepicker-disabled-old-new-color: $gray-500;
 
-$datepicker-header-cell-border-radius: $border-radius-sm;
+// $datepicker-header-cell-border-radius: $border-radius-sm;
 
-$datepicker-active-color: $white;
-$datepicker-active-background: $secondary;
-$datepicker-active-box-shadow: none;
+// $datepicker-active-color: $white;
+// $datepicker-active-background: $secondary;
+// $datepicker-active-box-shadow: none;
 
-$datepicker-range-background: $secondary;
-$datepicker-range-cell-focused-background: darken(
-  $datepicker-range-background,
-  5%
-);
-$datepicker-range-color: $white;
-$datepicker-range-highlighted-bg: $gray-200;
+// $datepicker-range-background: $secondary;
+// $datepicker-range-cell-focused-background: darken(
+//   $datepicker-range-background,
+//   5%
+// );
+// $datepicker-range-color: $white;
+// $datepicker-range-highlighted-bg: $gray-200;
 
-$datepicker-dropdown-border: lighten($gray-400, 40%);
-$datepicker-dropdown-bg: $white;
-$datepicker-highlighted-bg: $datepicker-active-background;
+// $datepicker-dropdown-border: lighten($gray-400, 40%);
+// $datepicker-dropdown-bg: $white;
+// $datepicker-highlighted-bg: $datepicker-active-background;
 
 // Close
 

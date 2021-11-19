@@ -25,7 +25,7 @@ import {
 } from "@themesberg/react-bootstrap";
 import { Link } from "react-router-dom";
 
-import { Routes } from "../routes";
+import { MyRoutes } from "../routes";
 import ThemesbergLogo from "../assets/img/themesberg.svg";
 import ReactHero from "../assets/img/technologies/react-hero-logo.svg";
 import ProfilePicture from "../assets/img/team/profile-picture-3.jpg";
@@ -128,7 +128,7 @@ const Sidebar = (props = {}) => {
         <Navbar.Brand
           className="me-lg-5"
           as={Link}
-          to={Routes.DashboardOverview.path}
+          to={MyRoutes.DashboardOverview.path}
         >
           <Image src={ReactHero} className="navbar-brand-light" />
         </Navbar.Brand>
@@ -159,7 +159,7 @@ const Sidebar = (props = {}) => {
                     as={Link}
                     variant="secondary"
                     size="xs"
-                    to={Routes.Signin.path}
+                    to={MyRoutes.Signin.path}
                     className="text-dark"
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />{" "}
@@ -177,28 +177,28 @@ const Sidebar = (props = {}) => {
             <Nav className="flex-column pt-3 pt-md-0">
               <NavItem
                 title="Overview"
-                link={Routes.DashboardOverview.path}
+                link={MyRoutes.DashboardOverview.path}
                 icon={faChartPie}
               />
               <NavItem
                 title="Tours"
                 icon={faHandHoldingUsd}
-                link={Routes.Tours.path}
+                link={MyRoutes.Tours.path}
               />
               <NavItem
                 title="Workhours"
                 icon={faHandHoldingUsd}
-                link={Routes.Arbeitszeiten.path}
+                link={MyRoutes.Arbeitszeiten.path}
               />
               <NavItem
                 title="Messages"
                 icon={faHandHoldingUsd}
-                link={Routes.Nachrichten.path}
+                link={MyRoutes.Nachrichten.path}
               />
               <NavItem
                 title="Settings"
                 icon={faCog}
-                link={Routes.Settings.path}
+                link={MyRoutes.Settings.path}
               />
 
               <Dropdown.Divider className="my-3 border-indigo" />
@@ -210,7 +210,7 @@ const Sidebar = (props = {}) => {
               >
                 <NavItem
                   title="React Project"
-                  link={Routes.Presentation.path}
+                  link={MyRoutes.Presentation.path}
                   image={ReactHero}
                 />
                 <CollapsableNavItem
@@ -218,9 +218,9 @@ const Sidebar = (props = {}) => {
                   title="Components"
                   icon={faBoxOpen}
                 >
-                  <NavItem title="Accordion" link={Routes.Accordions.path} />
-                  <NavItem title="Alerts" link={Routes.Alerts.path} />
-                  <NavItem title="Badges" link={Routes.Badges.path} />
+                  <NavItem title="Accordion" link={MyRoutes.Accordions.path} />
+                  <NavItem title="Alerts" link={MyRoutes.Alerts.path} />
+                  <NavItem title="Badges" link={MyRoutes.Badges.path} />
                   <NavItem
                     external
                     title="Widgets"
@@ -228,19 +228,22 @@ const Sidebar = (props = {}) => {
                     target="_blank"
                     badgeText="Pro"
                   />
-                  <NavItem title="Breadcrumbs" link={Routes.Breadcrumbs.path} />
-                  <NavItem title="Buttons" link={Routes.Buttons.path} />
-                  <NavItem title="Forms" link={Routes.Forms.path} />
-                  <NavItem title="Modals" link={Routes.Modals.path} />
-                  <NavItem title="Navbars" link={Routes.Navbars.path} />
-                  <NavItem title="Navs" link={Routes.Navs.path} />
-                  <NavItem title="Pagination" link={Routes.Pagination.path} />
-                  <NavItem title="Popovers" link={Routes.Popovers.path} />
-                  <NavItem title="Progress" link={Routes.Progress.path} />
-                  <NavItem title="Tables" link={Routes.Tables.path} />
-                  <NavItem title="Tabs" link={Routes.Tabs.path} />
-                  <NavItem title="Toasts" link={Routes.Toasts.path} />
-                  <NavItem title="Tooltips" link={Routes.Tooltips.path} />
+                  <NavItem
+                    title="Breadcrumbs"
+                    link={MyRoutes.Breadcrumbs.path}
+                  />
+                  <NavItem title="Buttons" link={MyRoutes.Buttons.path} />
+                  <NavItem title="Forms" link={MyRoutes.Forms.path} />
+                  <NavItem title="Modals" link={MyRoutes.Modals.path} />
+                  <NavItem title="Navbars" link={MyRoutes.Navbars.path} />
+                  <NavItem title="Navs" link={MyRoutes.Navs.path} />
+                  <NavItem title="Pagination" link={MyRoutes.Pagination.path} />
+                  <NavItem title="Popovers" link={MyRoutes.Popovers.path} />
+                  <NavItem title="Progress" link={MyRoutes.Progress.path} />
+                  <NavItem title="Tables" link={MyRoutes.Tables.path} />
+                  <NavItem title="Tabs" link={MyRoutes.Tabs.path} />
+                  <NavItem title="Toasts" link={MyRoutes.Toasts.path} />
+                  <NavItem title="Tooltips" link={MyRoutes.Tooltips.path} />
                 </CollapsableNavItem>
                 <CollapsableNavItem
                   eventKey="tables/"
@@ -249,7 +252,7 @@ const Sidebar = (props = {}) => {
                 >
                   <NavItem
                     title="Bootstrap Table"
-                    link={Routes.BootstrapTables.path}
+                    link={MyRoutes.BootstrapTables.path}
                   />
                 </CollapsableNavItem>
 
@@ -258,21 +261,24 @@ const Sidebar = (props = {}) => {
                   title="Page Examples"
                   icon={faFileAlt}
                 >
-                  <NavItem title="Sign In" link={Routes.Signin.path} />
-                  <NavItem title="Sign Up" link={Routes.Signup.path} />
+                  <NavItem title="Sign In" link={MyRoutes.Signin.path} />
+                  <NavItem title="Sign Up" link={MyRoutes.Signup.path} />
                   <NavItem
                     title="Forgot password"
-                    link={Routes.ForgotPassword.path}
+                    link={MyRoutes.ForgotPassword.path}
                   />
                   <NavItem
                     title="Reset password"
-                    link={Routes.ResetPassword.path}
+                    link={MyRoutes.ResetPassword.path}
                   />
-                  <NavItem title="Lock" link={Routes.Lock.path} />
-                  <NavItem title="404 Not Found" link={Routes.NotFound.path} />
+                  <NavItem title="Lock" link={MyRoutes.Lock.path} />
+                  <NavItem
+                    title="404 Not Found"
+                    link={MyRoutes.NotFound.path}
+                  />
                   <NavItem
                     title="500 Server Error"
-                    link={Routes.ServerError.path}
+                    link={MyRoutes.ServerError.path}
                   />
                 </CollapsableNavItem>
 
@@ -285,19 +291,19 @@ const Sidebar = (props = {}) => {
                   icon={faChartPie}
                 />
 
-                <NavItem title="Overview" link={Routes.DocsOverview.path} />
-                <NavItem title="Download" link={Routes.DocsDownload.path} />
+                <NavItem title="Overview" link={MyRoutes.DocsOverview.path} />
+                <NavItem title="Download" link={MyRoutes.DocsDownload.path} />
                 <NavItem
                   title="Quick Start"
-                  link={Routes.DocsQuickStart.path}
+                  link={MyRoutes.DocsQuickStart.path}
                 />
-                <NavItem title="License" link={Routes.DocsLicense.path} />
+                <NavItem title="License" link={MyRoutes.DocsLicense.path} />
                 <NavItem
                   title="Folder Structure"
-                  link={Routes.DocsFolderStructure.path}
+                  link={MyRoutes.DocsFolderStructure.path}
                 />
-                <NavItem title="Build Tools" link={Routes.DocsBuild.path} />
-                <NavItem title="Changelog" link={Routes.DocsChangelog.path} />
+                <NavItem title="Build Tools" link={MyRoutes.DocsBuild.path} />
+                <NavItem title="Changelog" link={MyRoutes.DocsChangelog.path} />
               </CollapsableNavItem>
             </Nav>
           </div>

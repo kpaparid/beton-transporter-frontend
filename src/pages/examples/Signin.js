@@ -21,9 +21,9 @@ import {
   InputGroup,
   Alert,
 } from "@themesberg/react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { Routes } from "../../routes";
+import { MyRoutes } from "../../routes";
 import BgImage from "../../assets/img/illustrations/signin.svg";
 import { useAuth } from "../../contexts/AuthContext";
 const Signin = () => {
@@ -32,7 +32,7 @@ const Signin = () => {
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+  const history = useNavigate();
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -55,7 +55,7 @@ const Signin = () => {
           <p className="text-center">
             <Card.Link
               as={Link}
-              to={Routes.DashboardOverview.path}
+              to={MyRoutes.DashboardOverview.path}
               className="text-gray-700"
             >
               <FontAwesomeIcon icon={faAngleLeft} className="me-2" /> Back to
@@ -160,7 +160,7 @@ const Signin = () => {
                     Not registered?
                     <Card.Link
                       as={Link}
-                      to={Routes.Signup.path}
+                      to={MyRoutes.Signup.path}
                       className="fw-bold"
                     >
                       {` Create account `}

@@ -8,7 +8,7 @@ import {
 import { CustomDropdown } from "../Filters/CustomDropdown";
 import { ButtonGroup } from "react-bootstrap";
 import { Button, Card } from "@themesberg/react-bootstrap";
-import Scrollbars from "react-custom-scrollbars";
+import Scrollbars from "react-custom-scrollbars-2";
 export const MyTimePicker = memo(
   ({
     value = "00:00",

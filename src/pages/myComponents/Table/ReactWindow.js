@@ -5,10 +5,7 @@ import { useSelector } from "react-redux";
 // import "./styles.css";
 
 import { useVirtual } from "react-virtual";
-import LazyInput from "../TextArea/LazyInput";
 import { Form } from "@themesberg/react-bootstrap";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import Truncate from "react-truncate";
 export function ReactWindow({
   selectData,
   selectShownColumns,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
-import { Routes } from "../routes";
+import { Route, Routes, Navigate, Outlet } from "react-router-dom";
+import { MyRoutes } from "../routes";
 
 // pages
 import Presentation from "./Presentation";
@@ -114,253 +114,276 @@ const RouteWithSidebar = ({ component: Component, ...rest }) => {
     />
   );
 };
-function PrivateRoute({
-  component: Component,
-  revert = false,
-  route: CustomRoute,
-  ...rest
-}) {
+// function PrivateRoute({
+//   component: Component,
+//   revert = false,
+//   route: CustomRoute,
+//   ...rest
+// }) {
+//   const { currentUser } = useAuth();
+//   return currentUser ? (
+//     <>
+//       <CustomRoute {...rest} component={Component}></CustomRoute>
+//     </>
+//   ) : (
+//     <Navigate to={MyRoutes.Signin.path} />
+//   );
+// }
+function PrivateOutlet() {
   const { currentUser } = useAuth();
-  const c = !revert && currentUser;
-  return currentUser ? (
-    <CustomRoute {...rest} component={Component}></CustomRoute>
-  ) : (
-    <Redirect to={Routes.Signin.path} />
-  );
+  return currentUser ? <Outlet /> : <Navigate to={MyRoutes.Signin.path} />;
+  // return <Navigate to={MyRoutes.Signin.path} />;
 }
 const HomePage = () => (
   <AuthProvider>
-    <Switch>
-      <PrivateRoute
+    <Routes>
+      {/* <Route path="/#" element={<PrivateRoute />}>
+        <Route exact path={MyRoutes.Signup.path} element={<Signup />} />
+      </Route> */}
+      <Route path="*" element={<NotFoundPage />}></Route>
+      <Route exact path={MyRoutes.Tours.path} element={<PrivateOutlet />}>
+        <Route exact path={MyRoutes.Tours.path} element={<Tours />} />
+      </Route>
+      <Route exact path={MyRoutes.Signin.path} element={<Signin />} />
+      <Route exact path={MyRoutes.NotFound.path} element={<PrivateOutlet />}>
+        <Route exact element={<NotFoundPage />} />
+      </Route>
+      <Route exact path={MyRoutes.ServerError.path} element={<PrivateOutlet />}>
+        <Route exact element={<ServerError />} />
+      </Route>
+      <Route
+        exact
+        path={MyRoutes.NotFound.path}
+        element={<NotFoundPage />}
+      ></Route>
+      {/* <PrivateRoute
         route={RouteWithLoader}
         exact
-        path={Routes.Presentation.path}
+        path={MyRoutes.Presentation.path}
         component={Presentation}
       />
-      <RouteWithLoader exact path={Routes.Signin.path} component={Signin} />
+      <RouteWithLoader exact path={MyRoutes.Signin.path} component={Signin} />
       <PrivateRoute
         route={RouteWithLoader}
         revert
         exact
-        path={Routes.Signup.path}
+        path={MyRoutes.Signup.path}
         component={Signup}
       />
       <RouteWithLoader
         exact
-        path={Routes.ForgotPassword.path}
+        path={MyRoutes.ForgotPassword.path}
         component={ForgotPassword}
       />
       <PrivateRoute
         route={RouteWithLoader}
         exact
-        path={Routes.ResetPassword.path}
+        path={MyRoutes.ResetPassword.path}
         component={ResetPassword}
       />
       <PrivateRoute
         route={RouteWithLoader}
         exact
-        path={Routes.Lock.path}
+        path={MyRoutes.Lock.path}
         component={Lock}
       />
       <RouteWithLoader
         exact
-        path={Routes.NotFound.path}
+        path={MyRoutes.NotFound.path}
         component={NotFoundPage}
       />
       <RouteWithLoader
         exact
-        path={Routes.ServerError.path}
+        path={MyRoutes.ServerError.path}
         component={ServerError}
       />
 
-      {/* pages */}
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DashboardOverview.path}
+        path={MyRoutes.DashboardOverview.path}
         component={DashboardOverview}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Upgrade.path}
+        path={MyRoutes.Upgrade.path}
         component={Upgrade}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Tours.path}
+        path={MyRoutes.Tours.path}
         component={Tours}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Arbeitszeiten.path}
+        path={MyRoutes.Arbeitszeiten.path}
         component={Arbeitszeiten}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Nachrichten.path}
+        path={MyRoutes.Nachrichten.path}
         component={Nachrichten}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Settings.path}
+        path={MyRoutes.Settings.path}
         component={Settings}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.BootstrapTables.path}
+        path={MyRoutes.BootstrapTables.path}
         component={BootstrapTables}
       />
 
-      {/* components */}
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Accordions.path}
+        path={MyRoutes.Accordions.path}
         component={Accordion}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Alerts.path}
+        path={MyRoutes.Alerts.path}
         component={Alerts}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Badges.path}
+        path={MyRoutes.Badges.path}
         component={Badges}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Breadcrumbs.path}
+        path={MyRoutes.Breadcrumbs.path}
         component={Breadcrumbs}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Buttons.path}
+        path={MyRoutes.Buttons.path}
         component={Buttons}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Forms.path}
+        path={MyRoutes.Forms.path}
         component={Forms}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Modals.path}
+        path={MyRoutes.Modals.path}
         component={Modals}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Navs.path}
+        path={MyRoutes.Navs.path}
         component={Navs}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Navbars.path}
+        path={MyRoutes.Navbars.path}
         component={Navbars}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Pagination.path}
+        path={MyRoutes.Pagination.path}
         component={Pagination}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Popovers.path}
+        path={MyRoutes.Popovers.path}
         component={Popovers}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Progress.path}
+        path={MyRoutes.Progress.path}
         component={Progress}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Tables.path}
+        path={MyRoutes.Tables.path}
         component={Tables}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Tabs.path}
+        path={MyRoutes.Tabs.path}
         component={Tabs}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Tooltips.path}
+        path={MyRoutes.Tooltips.path}
         component={Tooltips}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.Toasts.path}
+        path={MyRoutes.Toasts.path}
         component={Toasts}
       />
 
-      {/* documentation */}
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsOverview.path}
+        path={MyRoutes.DocsOverview.path}
         component={DocsOverview}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsDownload.path}
+        path={MyRoutes.DocsDownload.path}
         component={DocsDownload}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsQuickStart.path}
+        path={MyRoutes.DocsQuickStart.path}
         component={DocsQuickStart}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsLicense.path}
+        path={MyRoutes.DocsLicense.path}
         component={DocsLicense}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsFolderStructure.path}
+        path={MyRoutes.DocsFolderStructure.path}
         component={DocsFolderStructure}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsBuild.path}
+        path={MyRoutes.DocsBuild.path}
         component={DocsBuild}
       />
       <PrivateRoute
         route={RouteWithSidebar}
         exact
-        path={Routes.DocsChangelog.path}
+        path={MyRoutes.DocsChangelog.path}
         component={DocsChangelog}
       />
 
-      <Redirect to={Routes.NotFound.path} />
-    </Switch>
+      <Navigate to={MyRoutes.NotFound.path} /> */}
+    </Routes>
   </AuthProvider>
 );
+
 export default HomePage;
