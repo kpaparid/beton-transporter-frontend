@@ -29,6 +29,7 @@ import { workHoursSlice } from "./reducers/redux2";
 import { GridTableComponent, Loader } from "./myComponents/Table/GridComponent";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { nanoid } from "@reduxjs/toolkit";
 
 export const DashBoardOverview = memo(() => {
   const { actions, selectors } = workHoursSlice;
@@ -42,29 +43,76 @@ export const DashBoardOverview = memo(() => {
     (state) => selectors.metaSelector.selectById(state, "cbm"),
     [selectors]
   );
-  const sales = useSelector(handleSales);
-  const cbm = useSelector(handleCbm);
-  const currentMonthDate = moment().format("YYYY/MM");
-  const lastMonthDate = moment().subtract(1, "months").format("YYYY/MM");
-  const currentMonthSales = useMemo(
-    () => sales && sales.value.find((e) => e.date === currentMonthDate).sales,
-    [currentMonthDate, sales]
-  );
-  const currentMonthCbm = useMemo(
-    () => cbm && cbm.value.find((e) => e.date === currentMonthDate).cbm,
-    [currentMonthDate, cbm]
-  );
-  const lastMonthSales = useMemo(
-    () => sales && sales.value.find((e) => e.date === lastMonthDate).sales,
-    [lastMonthDate, sales]
-  );
-  const lastMonthCbm = useMemo(
-    () => cbm && cbm.value.find((e) => e.date === lastMonthDate).cbm,
-    [lastMonthDate, cbm]
+  const handleSalesByWorkPlant = useCallback(
+    (state) =>
+      stateAPIStatus !== "loading" &&
+      selectors.metaSelector.selectById(state, "salesByWorkPlant").value[0],
+    [selectors, stateAPIStatus]
   );
 
-  const chartLabels = moment.monthsShort();
-  const chartSeries = useMemo(() => sales && [], [sales]);
+  const sales = useSelector(handleSales);
+  const cbm = useSelector(handleCbm);
+  const salesByWorkPlant = useSelector(handleSalesByWorkPlant);
+  const dateCurrentMonth = moment().format("YYYY/MM");
+  const dateLastMonth = moment().subtract(1, "months").format("YYYY/MM");
+  const dateTwoMonthsAgo = moment().subtract(2, "months").format("YYYY/MM");
+  const salesCurrentMonth = useMemo(
+    () => sales && sales.value.find((e) => e.date === dateCurrentMonth).sales,
+    [dateCurrentMonth, sales]
+  );
+  const salesLastMonth = useMemo(
+    () => sales && sales.value.find((e) => e.date === dateLastMonth).sales,
+    [dateLastMonth, sales]
+  );
+  const cbmCurrentMonth = useMemo(
+    () => cbm && cbm.value.find((e) => e.date === dateCurrentMonth).cbm,
+    [dateCurrentMonth, cbm]
+  );
+
+  const cbmLastMonth = useMemo(
+    () => cbm && cbm.value.find((e) => e.date === dateLastMonth).cbm,
+    [dateLastMonth, cbm]
+  );
+  const salesTwoMonthsAgo = useMemo(
+    () => sales && sales.value.find((e) => e.date === dateTwoMonthsAgo).sales,
+    [dateTwoMonthsAgo, sales]
+  );
+  const cbmTwoMonthsAgo = useMemo(
+    () => cbm && cbm.value.find((e) => e.date === dateTwoMonthsAgo).cbm,
+    [dateTwoMonthsAgo, cbm]
+  );
+  const percentageFn = useCallback(
+    (start, final) =>
+      (
+        ((parseFloat(final) - parseFloat(start)) * 100) /
+        Math.abs(parseFloat(start))
+      ).toFixed(2),
+    []
+  );
+  const cbmPercentageCurrentMonth = percentageFn(cbmCurrentMonth, cbmLastMonth);
+  const salesPercentageCurrentMonth = percentageFn(
+    salesCurrentMonth,
+    salesLastMonth
+  );
+  const cbmPercentageLastMonth = percentageFn(cbmLastMonth, cbmTwoMonthsAgo);
+  const salesPercentageLastMonth = percentageFn(
+    salesLastMonth,
+    salesTwoMonthsAgo
+  );
+
+  const salesLabels = useMemo(() => moment.monthsShort(), []);
+  const salesSeries = useMemo(
+    () => sales && sales.value.map((s) => parseInt(s.sales)),
+    [sales]
+  );
+  const { workPlantLabels, workPlantSeries } = useMemo(() => {
+    const { id, date, ...rest } = salesByWorkPlant;
+    const workPlantSales = Object.entries(rest);
+    return {
+      workPlantLabels: workPlantSales.map((v) => v[0]),
+      workPlantSeries: workPlantSales.map((v) => parseInt(v[1])),
+    };
+  }, [salesByWorkPlant]);
 
   const renderComponent = useCallback(
     (entityId) => {
@@ -88,7 +136,7 @@ export const DashBoardOverview = memo(() => {
 
   return (
     <>
-      <div className="d-block pt-4 mb-4 mb-md-0">
+      {/* <div className="d-block pt-4 mb-4 mb-md-0">
         <Breadcrumb
           className="d-none d-md-inline-block"
           listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
@@ -98,7 +146,7 @@ export const DashBoardOverview = memo(() => {
           </Breadcrumb.Item>
           <Breadcrumb.Item active>Tours</Breadcrumb.Item>
         </Breadcrumb>
-      </div>
+      </div> */}
 
       <div className="d-flex flex-wrap w-100">
         <div className="d-flex w-100 flex-wrap">
@@ -108,9 +156,9 @@ export const DashBoardOverview = memo(() => {
                 <CounterWidget
                   className="h-100"
                   category="Cbm akt. Monat"
-                  title={currentMonthCbm + " cbm"}
-                  period={moment(currentMonthDate, "YYYY/MM").format("MMM")}
-                  percentage={18}
+                  title={cbmCurrentMonth + " cbm"}
+                  period={moment(dateCurrentMonth, "YYYY/MM").format("MMM.")}
+                  percentage={cbmPercentageCurrentMonth}
                   icon={faChartLine}
                   iconColor="shape-secondary"
                 />
@@ -122,11 +170,14 @@ export const DashBoardOverview = memo(() => {
                 <CounterWidget
                   className="h-100"
                   category="Cbm letz. Monat"
-                  title={lastMonthCbm + " cbm"}
-                  period={moment(lastMonthDate, "YYYY/MM").format("MMM")}
-                  percentage={-28.4}
+                  title={cbmLastMonth + " cbm"}
+                  period={moment(dateLastMonth, "YYYY/MM").format("MMM.")}
+                  percentage={cbmPercentageLastMonth}
                   icon={faChartLine}
                   iconColor="shape-tertiary"
+                  previousPeriod={moment(dateLastMonth, "YYYY/MM")
+                    .subtract(1, "months")
+                    .format("MMM.")}
                 />
               </div>
             </div>
@@ -135,9 +186,9 @@ export const DashBoardOverview = memo(() => {
                 <CounterWidget
                   className="h-100"
                   category="Umsatz akt. Monat"
-                  title={currentMonthSales + " €"}
-                  period={moment(currentMonthDate, "YYYY/MM").format("MMM")}
-                  percentage={-28.4}
+                  title={salesCurrentMonth}
+                  period={moment(dateCurrentMonth, "YYYY/MM").format("MMM.")}
+                  percentage={salesPercentageCurrentMonth}
                   icon={faCashRegister}
                   iconColor="shape-tertiary"
                 />
@@ -148,11 +199,14 @@ export const DashBoardOverview = memo(() => {
                 <CounterWidget
                   className="h-100"
                   category="Umsatz letz. Monat"
-                  title={lastMonthSales + " €"}
-                  period={moment(lastMonthDate, "YYYY/MM").format("MMM")}
-                  percentage={18.2}
+                  title={salesLastMonth}
+                  period={moment(dateLastMonth, "YYYY/MM").format("MMM.")}
+                  percentage={salesPercentageLastMonth}
                   icon={faCashRegister}
                   iconColor="shape-secondary"
+                  previousPeriod={moment(dateLastMonth, "YYYY/MM")
+                    .subtract(1, "months")
+                    .format("MMM.")}
                 />
               </div>
             </div>
@@ -170,25 +224,22 @@ export const DashBoardOverview = memo(() => {
           </div>
         </div>
         <div className="d-flex w-100 flex-wrap">
-          <div className="col-lg-6 col-sm-12 col-12 mb-4 p-0">
+          <div className="col-xl-6 col-sm-12 col-12 mb-4 p-0">
             <div className="p-2">
               <SalesValueWidget
                 title="Sales Value"
-                value={currentMonthSales}
-                percentage={10.57}
-                labels={chartLabels}
-                series={chartSeries}
+                labels={salesLabels}
+                series={salesSeries}
               />
             </div>
           </div>
 
-          <div className="col-lg-6 col-sm-12 col-12 mb-4 p-0">
+          <div className="col-xl-6 col-sm-12 col-12 mb-4 p-0">
             <div className="p-2">
               <BarChartWidget
                 title="Workplant's Sales"
-                value="9,500"
-                percentage={10.57}
-                data={totalOrders}
+                labels={workPlantLabels}
+                series={workPlantSeries}
               ></BarChartWidget>
             </div>
           </div>

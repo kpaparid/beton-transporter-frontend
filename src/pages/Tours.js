@@ -33,18 +33,6 @@ export const Tours = memo(() => {
 
   return (
     <>
-      <div className="d-block pt-4 mb-4 mb-md-0">
-        <Breadcrumb
-          className="d-none d-md-inline-block"
-          listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
-        >
-          <Breadcrumb.Item>
-            <FontAwesomeIcon icon={faHome} />
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>Tours</Breadcrumb.Item>
-        </Breadcrumb>
-      </div>
-
       <div className="col-12 py-2">{renderComponent("tours")}</div>
     </>
   );

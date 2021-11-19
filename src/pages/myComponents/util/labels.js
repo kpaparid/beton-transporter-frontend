@@ -525,7 +525,7 @@ const gridLabels = {
     widgets: {
       filter: false,
       add: false,
-      download: true,
+      download: false,
       remove: false,
       massEdit: true,
       pagination: PAGINATION.INTERNAL,

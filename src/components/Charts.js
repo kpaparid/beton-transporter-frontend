@@ -1,40 +1,49 @@
 import React from "react";
 import Chartist from "react-chartist";
 import ChartistTooltip from "chartist-plugin-tooltips-updated";
+import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
+import { ResponsiveBar } from "@nivo/bar";
 
 export const SalesValueChart = (props) => {
   const data = {
     labels: props.labels,
-    series: props.series,
+    datasets: [
+      {
+        label: "",
+        data: props.series,
+        fill: false,
+        backgroundColor: "rgba(7,113,171, 1)",
+        borderColor: "rgba(7,113,171, 0.2)",
+      },
+    ],
   };
 
   const options = {
-    low: 75,
-    showArea: true,
-    fullWidth: true,
-    fullHeight: true,
-    axisX: {
-      position: "end",
-      showGrid: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        displayColors: false,
+      },
     },
-    axisY: {
-      // On the y-axis start means left and end means right
-      showGrid: false,
-      showLabel: true,
-      labelInterpolationFnc: (value) => `${value / 1}€`,
+    aspectRatio: 1.4,
+    scales: {
+      x: {
+        grid: {
+          tickColor: "transparent",
+        },
+      },
+      y: {
+        grid: {
+          tickColor: "transparent",
+        },
+        beginAtZero: false,
+      },
     },
   };
 
-  const plugins = [ChartistTooltip()];
-
-  return (
-    <Chartist
-      data={data}
-      options={{ ...options, plugins }}
-      type="Line"
-      className="ct-golden-section"
-    />
-  );
+  return <Line data={data} options={options} />;
 };
 
 export const SalesValueChartphone = () => {
@@ -100,37 +109,49 @@ export const CircleChart = (props) => {
 };
 
 export const BarChart = (props) => {
-  const {
-    labels1 = [],
-    series1 = [],
-    chartClassName = "ct-golden-section",
-  } = props;
-
-  const labels = ["Werk 1", "Werk 2", "Werk 3"];
-  const series = [200, 150, 320];
-  const data = { labels, series };
-
-  const options = {
-    low: 100,
-    showArea: true,
-    axisX: {
-      position: "end",
-    },
-    axisY: {
-      showGrid: true,
-      showLabel: true,
-    },
-    distributeSeries: true,
+  const data = {
+    labels: props.labels,
+    datasets: [
+      {
+        label: "",
+        data: props.series,
+        backgroundColor: "rgba(7,113,171, 1)",
+        borderColor: "rgba(7,113,171, 0.2)",
+      },
+    ],
   };
 
-  const plugins = [ChartistTooltip()];
+  const options = {
+    plugins: {
+      tooltip: {
+        displayColors: false,
+      },
+      legend: {
+        display: false,
+      },
+    },
+    aspectRatio: 1.4,
+    autoSkip: false,
+    scales: {
+      x: {
+        ticks: {
+          callback: function (label, index) {
+            return props.labels[label]
+              .split(" ")
+              .reduce((a, b) => a + " " + b.substring(0, 3) + ".", "");
+          },
+        },
+        grid: {
+          color: "transparent",
+          tickColor: "transparent",
+        },
+      },
+    },
+  };
 
   return (
-    <Chartist
-      data={data}
-      options={{ ...options, plugins }}
-      type="Bar"
-      className={chartClassName}
-    />
+    // <div style={{ height: "500px" }}>
+    <Bar width={"100%"} data={data} options={options} />
+    // </div>
   );
 };

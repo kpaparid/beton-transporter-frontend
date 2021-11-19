@@ -17,49 +17,50 @@ export function loadOverviewPage(
   { fetchEntityGrid, fetchMeta, addMeta },
   dispatch
 ) {
+  const year = moment().format("YYYY");
   const date = moment().format("YYYY/MM");
   const today = moment().format("YYYY/MM/DD");
   const dateFilter = { date: { eq: [date] } };
-  return dispatch(
-    fetchEntityGrid({
-      entityId: "workHoursByDate",
-      url: getGridUrl("workHoursByDate"),
-      limit: getGridWidgets("workHoursByDate").pageSize,
-      initialFilters: dateFilter,
-      initialSort: { id: "hours", order: "desc" },
-    })
-  )
-    .then(() =>
-      dispatch(
-        fetchEntityGrid({
-          entityId: "currentVacations",
-          url: getGridUrl("currentVacations"),
-          limit: getGridWidgets("currentVacations").pageSize,
-          initialFilters: { from: { lte: today }, to: { gte: today } },
-          initialSort: { id: "from", order: "desc" },
-        })
+  const fetchers = [
+    fetch(API + "sales?&date_gte=2021/01&date_lte=2021/12"),
+    fetch(API + "cbm?&date_gte=" + year + "/01&date_lte=" + year + "/12"),
+    fetch(API + "sales-ByWorkPlant?&date=" + date),
+  ];
+  const dispatchers = [
+    dispatch(fetchMeta("?id=workPlant")),
+    dispatch(
+      fetchEntityGrid({
+        entityId: "workHoursByDate",
+        url: getGridUrl("workHoursByDate"),
+        limit: getGridWidgets("workHoursByDate").pageSize,
+        initialFilters: dateFilter,
+        initialSort: { id: "hours", order: "desc" },
+      })
+    ),
+    dispatch(
+      fetchEntityGrid({
+        entityId: "currentVacations",
+        url: getGridUrl("currentVacations"),
+        limit: getGridWidgets("currentVacations").pageSize,
+        initialFilters: { from: { lte: today }, to: { gte: today } },
+        initialSort: { id: "from", order: "desc" },
+      })
+    ),
+  ];
+  const meta = ["sales", "cbm", "salesByWorkPlant"];
+  return Promise.all(dispatchers).then(() =>
+    Promise.all(fetchers)
+      .then((responses) => Promise.all(responses.map((r) => r.json())))
+      .then((jsonObjects) =>
+        dispatch(
+          addMeta(
+            jsonObjects
+              .map((j, index) => ({ id: meta[index], value: j }))
+              .concat({ id: "date", value: date })
+          )
+        )
       )
-    )
-    .then(() =>
-      fetch(API + "sales?&date_gte=2021/01&date_lte=2021/12").then((res) =>
-        res.json().then((sales) => {
-          return fetch(API + "cbm?&date_gte=2021/01&date_lte=2021/12").then(
-            (res) =>
-              res.json().then((cbm) => {
-                const k = cbm;
-                const sd = sales;
-                return dispatch(
-                  addMeta([
-                    { id: "date", value: date },
-                    { id: "cbm", value: cbm },
-                    { id: "sales", value: sales },
-                  ])
-                );
-              })
-          );
-        })
-      )
-    );
+  );
 }
 
 export function loadToursPage(

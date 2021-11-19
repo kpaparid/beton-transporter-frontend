@@ -176,28 +176,22 @@ const Sidebar = (props = {}) => {
             </div>
             <Nav className="flex-column pt-3 pt-md-0">
               <NavItem
-                title="React Project"
-                link={Routes.Presentation.path}
-                image={ReactHero}
-              />
-
-              <NavItem
                 title="Overview"
                 link={Routes.DashboardOverview.path}
                 icon={faChartPie}
               />
               <NavItem
-                title="Touren"
+                title="Tours"
                 icon={faHandHoldingUsd}
                 link={Routes.Tours.path}
               />
               <NavItem
-                title="Arbeitszeiten"
+                title="Workhours"
                 icon={faHandHoldingUsd}
                 link={Routes.Arbeitszeiten.path}
               />
               <NavItem
-                title="Nachrichten"
+                title="Messages"
                 icon={faHandHoldingUsd}
                 link={Routes.Nachrichten.path}
               />
@@ -207,49 +201,6 @@ const Sidebar = (props = {}) => {
                 link={Routes.Settings.path}
               />
 
-              <CollapsableNavItem
-                eventKey="tables/"
-                title="Tables"
-                icon={faTable}
-              >
-                <NavItem
-                  title="Bootstrap Table"
-                  link={Routes.BootstrapTables.path}
-                />
-              </CollapsableNavItem>
-
-              <CollapsableNavItem
-                eventKey="examples/"
-                title="Page Examples"
-                icon={faFileAlt}
-              >
-                <NavItem title="Sign In" link={Routes.Signin.path} />
-                <NavItem title="Sign Up" link={Routes.Signup.path} />
-                <NavItem
-                  title="Forgot password"
-                  link={Routes.ForgotPassword.path}
-                />
-                <NavItem
-                  title="Reset password"
-                  link={Routes.ResetPassword.path}
-                />
-                <NavItem title="Lock" link={Routes.Lock.path} />
-                <NavItem title="404 Not Found" link={Routes.NotFound.path} />
-                <NavItem
-                  title="500 Server Error"
-                  link={Routes.ServerError.path}
-                />
-              </CollapsableNavItem>
-
-              <NavItem
-                external
-                title="Plugins"
-                link="https://demo.themesberg.com/volt-pro-react/#/plugins/charts"
-                target="_blank"
-                badgeText="Pro"
-                icon={faChartPie}
-              />
-
               <Dropdown.Divider className="my-3 border-indigo" />
 
               <CollapsableNavItem
@@ -257,6 +208,83 @@ const Sidebar = (props = {}) => {
                 title="Getting Started"
                 icon={faBook}
               >
+                <NavItem
+                  title="React Project"
+                  link={Routes.Presentation.path}
+                  image={ReactHero}
+                />
+                <CollapsableNavItem
+                  eventKey="components/"
+                  title="Components"
+                  icon={faBoxOpen}
+                >
+                  <NavItem title="Accordion" link={Routes.Accordions.path} />
+                  <NavItem title="Alerts" link={Routes.Alerts.path} />
+                  <NavItem title="Badges" link={Routes.Badges.path} />
+                  <NavItem
+                    external
+                    title="Widgets"
+                    link="https://demo.themesberg.com/volt-pro-react/#/components/widgets"
+                    target="_blank"
+                    badgeText="Pro"
+                  />
+                  <NavItem title="Breadcrumbs" link={Routes.Breadcrumbs.path} />
+                  <NavItem title="Buttons" link={Routes.Buttons.path} />
+                  <NavItem title="Forms" link={Routes.Forms.path} />
+                  <NavItem title="Modals" link={Routes.Modals.path} />
+                  <NavItem title="Navbars" link={Routes.Navbars.path} />
+                  <NavItem title="Navs" link={Routes.Navs.path} />
+                  <NavItem title="Pagination" link={Routes.Pagination.path} />
+                  <NavItem title="Popovers" link={Routes.Popovers.path} />
+                  <NavItem title="Progress" link={Routes.Progress.path} />
+                  <NavItem title="Tables" link={Routes.Tables.path} />
+                  <NavItem title="Tabs" link={Routes.Tabs.path} />
+                  <NavItem title="Toasts" link={Routes.Toasts.path} />
+                  <NavItem title="Tooltips" link={Routes.Tooltips.path} />
+                </CollapsableNavItem>
+                <CollapsableNavItem
+                  eventKey="tables/"
+                  title="Tables"
+                  icon={faTable}
+                >
+                  <NavItem
+                    title="Bootstrap Table"
+                    link={Routes.BootstrapTables.path}
+                  />
+                </CollapsableNavItem>
+
+                <CollapsableNavItem
+                  eventKey="examples/"
+                  title="Page Examples"
+                  icon={faFileAlt}
+                >
+                  <NavItem title="Sign In" link={Routes.Signin.path} />
+                  <NavItem title="Sign Up" link={Routes.Signup.path} />
+                  <NavItem
+                    title="Forgot password"
+                    link={Routes.ForgotPassword.path}
+                  />
+                  <NavItem
+                    title="Reset password"
+                    link={Routes.ResetPassword.path}
+                  />
+                  <NavItem title="Lock" link={Routes.Lock.path} />
+                  <NavItem title="404 Not Found" link={Routes.NotFound.path} />
+                  <NavItem
+                    title="500 Server Error"
+                    link={Routes.ServerError.path}
+                  />
+                </CollapsableNavItem>
+
+                <NavItem
+                  external
+                  title="Plugins"
+                  link="https://demo.themesberg.com/volt-pro-react/#/plugins/charts"
+                  target="_blank"
+                  badgeText="Pro"
+                  icon={faChartPie}
+                />
+
                 <NavItem title="Overview" link={Routes.DocsOverview.path} />
                 <NavItem title="Download" link={Routes.DocsDownload.path} />
                 <NavItem
@@ -270,35 +298,6 @@ const Sidebar = (props = {}) => {
                 />
                 <NavItem title="Build Tools" link={Routes.DocsBuild.path} />
                 <NavItem title="Changelog" link={Routes.DocsChangelog.path} />
-              </CollapsableNavItem>
-              <CollapsableNavItem
-                eventKey="components/"
-                title="Components"
-                icon={faBoxOpen}
-              >
-                <NavItem title="Accordion" link={Routes.Accordions.path} />
-                <NavItem title="Alerts" link={Routes.Alerts.path} />
-                <NavItem title="Badges" link={Routes.Badges.path} />
-                <NavItem
-                  external
-                  title="Widgets"
-                  link="https://demo.themesberg.com/volt-pro-react/#/components/widgets"
-                  target="_blank"
-                  badgeText="Pro"
-                />
-                <NavItem title="Breadcrumbs" link={Routes.Breadcrumbs.path} />
-                <NavItem title="Buttons" link={Routes.Buttons.path} />
-                <NavItem title="Forms" link={Routes.Forms.path} />
-                <NavItem title="Modals" link={Routes.Modals.path} />
-                <NavItem title="Navbars" link={Routes.Navbars.path} />
-                <NavItem title="Navs" link={Routes.Navs.path} />
-                <NavItem title="Pagination" link={Routes.Pagination.path} />
-                <NavItem title="Popovers" link={Routes.Popovers.path} />
-                <NavItem title="Progress" link={Routes.Progress.path} />
-                <NavItem title="Tables" link={Routes.Tables.path} />
-                <NavItem title="Tabs" link={Routes.Tabs.path} />
-                <NavItem title="Toasts" link={Routes.Toasts.path} />
-                <NavItem title="Tooltips" link={Routes.Tooltips.path} />
               </CollapsableNavItem>
             </Nav>
           </div>

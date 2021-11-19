@@ -140,7 +140,7 @@ function mapData(data) {
   return c;
 }
 function useLoadData(tableName, actions, meta) {
-  const [stateAPIStatus, setAPIStatus] = useState("idle");
+  const [stateAPIStatus, setAPIStatus] = useState("loading");
   const dispatch = useDispatch();
   useEffect(() => {
     console.log("loading");

@@ -32,6 +32,7 @@ import {
   BarChart,
   SalesValueChart,
   SalesValueChartphone,
+  SalesValueChart2,
 } from "./Charts";
 
 import Profile1 from "../assets/img/team/profile-picture-1.jpg";
@@ -112,6 +113,7 @@ export const CounterWidget = (props) => {
     period,
     percentage,
     className = "",
+    previousPeriod = "last month",
   } = props;
   const percentageIcon = percentage < 0 ? faAngleDown : faAngleUp;
   const percentageColor = percentage < 0 ? "text-danger" : "text-success";
@@ -121,7 +123,7 @@ export const CounterWidget = (props) => {
       <Card.Body>
         <Row className="d-block d-xl-flex align-items-center">
           <Col
-            xl={5}
+            xl={3}
             className="text-xl-center d-flex align-items-center justify-content-xl-center mb-3 mb-xl-0"
           >
             <div
@@ -148,7 +150,7 @@ export const CounterWidget = (props) => {
               <span className={`${percentageColor} fw-bold`}>
                 {percentage}%
               </span>{" "}
-              Since last month
+              Since {previousPeriod}
             </div>
           </Col>
         </Row>
@@ -196,23 +198,17 @@ export const CircleChartWidget = (props) => {
 };
 
 export const BarChartWidget = (props) => {
-  const { title, value, percentage, data = [] } = props;
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const series = data.map((d) => d.value);
-  const percentageIcon = percentage < 0 ? faAngleDown : faAngleUp;
-  const percentageColor = percentage < 0 ? "text-danger" : "text-success";
+  const { title, value = " ", percentage, labels = [], series = [] } = props;
 
   return (
-    <Card border="light" className="shadow-sm">
-      <Card.Body className="d-flex flex-row align-items-center flex-0 border-bottom">
-        <div className="d-block">
-          <h5 className="fw-normal mb-2">{title}</h5>
-          <h3>{value}€</h3>
-          <br></br>
+    <Card border="light" className="card-dark">
+      <Card.Header className="border border-0 p-0">
+        <div style={{ padding: "0.55rem 0.75rem" }}>
+          <h5> {title} </h5>
         </div>
-      </Card.Body>
+      </Card.Header>
       <Card.Body className="p-2">
-        <BarChart labels={labels} series={series} />
+        <BarChart series={series} labels={labels} />
       </Card.Body>
     </Card>
   );
@@ -409,23 +405,12 @@ export const RankingWidget = () => {
 
 export const SalesValueWidget = (props) => {
   const { title, value, percentage, series = [], labels = [] } = props;
-  const percentageIcon = percentage < 0 ? faAngleDown : faAngleUp;
-  const percentageColor = percentage < 0 ? "text-danger" : "text-success";
 
   return (
-    <Card className="shadow-sm">
-      <Card.Header className="d-flex flex-row align-items-center flex-0">
-        <div className="d-block">
-          <h5 className="fw-normal mb-2">{title}</h5>
-          <h3>{value}€</h3>
-          <small className="fw-bold mt-2">
-            <span className="me-2">Last Month</span>
-            <FontAwesomeIcon
-              icon={percentageIcon}
-              className={`${percentageColor} me-1`}
-            />
-            <span className={percentageColor}>{percentage}%</span>
-          </small>
+    <Card className="card-dark">
+      <Card.Header className="border border-0 p-0">
+        <div style={{ padding: "0.55rem 0.75rem" }}>
+          <h5> {title} </h5>
         </div>
       </Card.Header>
       <Card.Body className="p-2">

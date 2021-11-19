@@ -109,8 +109,8 @@ function createGenericSlice(sliceName) {
     (filtersSelectById(state, id) && filtersSelectById(state, id)[operator]) ||
     [];
 
-  const fetchMeta = createAsyncThunk("data/fetchMeta", async () => {
-    return await fetch(API + "values").then((res) => res.json());
+  const fetchMeta = createAsyncThunk("data/fetchMeta", async (filter = "") => {
+    return await fetch(API + "values" + filter).then((res) => res.json());
   });
 
   const fetchEntityGrid = createAsyncThunk(

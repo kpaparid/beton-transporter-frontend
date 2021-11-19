@@ -406,9 +406,16 @@ const TableColumn = ({
 }) => {
   const handleClick = useCallback((e) => onToggleSort(id), [onToggleSort, id]);
   return (
-    <th onClick={handleClick} className="border-0 sortable" style={{ display }}>
+    <th
+      onClick={handleClick}
+      className="border-0 sortable align-items-center"
+      style={{ display }}
+    >
       <div>
-        <span className="d-flex flex-nowrap justify-content-center align-items-center">
+        <span
+          style={{ lineHeight: "21px" }}
+          className="d-flex flex-nowrap justify-content-center align-self-center"
+        >
           {column}
           {sortedComponent}
         </span>
@@ -464,7 +471,7 @@ const TableFooter = React.memo(
       <Card.Footer className="p-0 border-0 d-lg-flex flex-wrap align-items-center justify-content-between">
         {paginationEnabled && currentPageSize < maxRows && (
           <Nav className="pt-4">
-            <Pagination className="mb-2 mb-lg-0">
+            <Pagination className="mb-2 mb-lg-0 d-flex flex-wrap">
               <Pagination.Prev
                 onClick={() => onPageChange(1)}
                 disabled={parseInt(pageIndex) === 1}

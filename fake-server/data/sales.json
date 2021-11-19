@@ -1,57 +1,112 @@
 [
-  {
-    "id": "6192cfcd6ef2a1ce5781884a",
-    "sales": 259,
-    "date": "2021/01"
-  },
-  {
-    "id": "6192cfcd48975bb3304fe00f",
-    "sales": 115,
-    "date": "2021/02"
-  },
-  {
-    "id": "6192cfcd853f34e37259c484",
-    "sales": 176,
-    "date": "2021/03"
-  },
-  {
-    "id": "6192cfcd6cbddbed1e79379c",
-    "sales": 252,
-    "date": "2021/04"
-  },
-  {
-    "id": "6192cfcd2619e1e75437c99d",
-    "sales": 159,
-    "date": "2021/05"
-  },
-  {
-    "id": "6192cfcd1e8d602cbdd812f6",
-    "sales": 281,
-    "date": "2021/06"
-  },
-  {
-    "id": "6192cfcd7a37bcd9a6e2c723",
-    "sales": 132,
-    "date": "2021/07"
-  },
-  {
-    "id": "6192cfcd6c5c5aca89abb219",
-    "sales": 205,
-    "date": "2021/08"
-  },
-  {
-    "id": "6192cfcddcb83e9ba00cb3b9",
-    "sales": 162,
-    "date": "2021/09"
-  },
-  {
-    "id": "6192cfcdc40077499ac908e0",
-    "sales": 216,
-    "date": "2021/10"
-  },
-  {
-    "id": "6192cfcd2ed7da843df550d8",
-    "sales": 174,
-    "date": "2021/11"
-  }
+    {
+        "id": "h5M48dayyzestfNHgCCPn",
+        "date": "2020/01",
+        "sales": "11446€"
+    },
+    {
+        "id": "Rj6C6Cy0_zqV_Af7F61D-",
+        "date": "2020/02",
+        "sales": "8973€"
+    },
+    {
+        "id": "F2Fez6hiepCA05rFHUVPM",
+        "date": "2020/03",
+        "sales": "8773€"
+    },
+    {
+        "id": "xtwxqzOzuih6se6SaXBoc",
+        "date": "2020/04",
+        "sales": "10449€"
+    },
+    {
+        "id": "HHjRKeKpkYXsr_f-sbr9M",
+        "date": "2020/05",
+        "sales": "8320€"
+    },
+    {
+        "id": "Yq2mgYw14-WT3zsXMUg_h",
+        "date": "2020/06",
+        "sales": "10299€"
+    },
+    {
+        "id": "Cq7km-nADq3Z090rGDtZ3",
+        "date": "2020/07",
+        "sales": "11891€"
+    },
+    {
+        "id": "cDLbzVHg6GpXEChpyObVS",
+        "date": "2020/08",
+        "sales": "11071€"
+    },
+    {
+        "id": "pPKTlqQCgfl-PhE0Ps5hi",
+        "date": "2020/09",
+        "sales": "11905€"
+    },
+    {
+        "id": "SaiwxgaJ81GQu2kFOyu-x",
+        "date": "2020/10",
+        "sales": "9249€"
+    },
+    {
+        "id": "iKuxIxnWNnUBwvvGkiHF7",
+        "date": "2020/11",
+        "sales": "11567€"
+    },
+    {
+        "id": "e3DSFlgauXVSHFjnvLUB5",
+        "date": "2021/01",
+        "sales": "10408€"
+    },
+    {
+        "id": "NY8SJF43izZ5XPzeklnKQ",
+        "date": "2021/02",
+        "sales": "8794€"
+    },
+    {
+        "id": "91pEjfjB7AhERDJz0JynO",
+        "date": "2021/03",
+        "sales": "8562€"
+    },
+    {
+        "id": "R9YW-994OoJZkttfWHoXl",
+        "date": "2021/04",
+        "sales": "9032€"
+    },
+    {
+        "id": "MgO7zz4AfmCh6YrRK8RcE",
+        "date": "2021/05",
+        "sales": "11942€"
+    },
+    {
+        "id": "4ydLDDzwyymht-DIRfNV-",
+        "date": "2021/06",
+        "sales": "9959€"
+    },
+    {
+        "id": "aOyApyz-qBTzzjrkzKfsU",
+        "date": "2021/07",
+        "sales": "8821€"
+    },
+    {
+        "id": "NrabY9Kj4BggfEJ0-jamv",
+        "date": "2021/08",
+        "sales": "9792€"
+    },
+    {
+        "id": "MXpy_8fw58owT1WcxvLyS",
+        "date": "2021/09",
+        "sales": "10767€"
+    },
+    {
+        "id": "l5mzdV-QKXvN3KCL37xNd",
+        "date": "2021/10",
+        "sales": "11423€"
+    },
+    {
+        "id": "8V4l1wLspjxQcF1EkM1Pw",
+        "date": "2021/11",
+        "sales": "8425€"
+    }
 ]

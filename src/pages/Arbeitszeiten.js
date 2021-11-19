@@ -70,17 +70,6 @@ export const ArbeitsZeiten = memo(() => {
 
   return (
     <>
-      <div className="d-block pt-4 mb-4 mb-md-0">
-        <Breadcrumb
-          className="d-none d-md-inline-block"
-          listProps={{ className: "breadcrumb-dark breadcrumb-transparent" }}
-        >
-          <Breadcrumb.Item>
-            <FontAwesomeIcon icon={faHome} />
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active>WorkHours</Breadcrumb.Item>
-        </Breadcrumb>
-      </div>
       <div className="d-flex px-2 pb-3">
         <OutlinedSelect
           onChange={setDriver}

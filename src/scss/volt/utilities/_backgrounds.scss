@@ -1,7 +1,30 @@
 /**
  * = Backgrounds
 */
+.ct-chart {
+  .ct-labels {
+    .ct-label.ct-vertical {
+      // background-color: red;
+      width: 50px !important;
+      text-align: center;
+    }
+  }
+}
 
+.ct-line {
+  stroke-width: 2px !important;
+}
+.ct-line,
+.ct-point {
+  stroke: $darker-blue !important;
+}
+.ct-area {
+  fill: $secondary !important;
+}
+.ct-label.ct-horizontal {
+  position: fixed;
+  left: -10px;
+}
 .my-card {
   .card-header {
     padding: 1rem;
@@ -264,17 +287,16 @@
     padding: 0.25rem;
     background-color: transparent;
     color: black !important;
-
+    h5,
+    h6,
+    h4,
+    h1 {
+      margin: 0;
+      padding: 1rem !important;
+      font-weight: 600;
+      color: black !important;
+    }
     .btn-title {
-      h5,
-      h6,
-      h4,
-      h1 {
-        margin: 0;
-        padding: 1rem !important;
-        font-weight: 600;
-        color: black !important;
-      }
       &:hover {
         :first-child {
           color: $very-light-tertiary !important;
