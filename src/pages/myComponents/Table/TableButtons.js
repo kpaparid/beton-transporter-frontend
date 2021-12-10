@@ -88,13 +88,13 @@ const TableButtons = memo(
           ></MyBtn>
         )}
 
-        {download && (
+        {/* {download && (
           <MyBtn
             disabled={editMode}
             onClick={handleDownload}
             value={<FontAwesomeIcon icon={faDownload} />}
           />
-        )}
+        )} */}
         {(edit || add) && (editMode || addMode) && (
           <MyBtn
             disabled={!changesExist}

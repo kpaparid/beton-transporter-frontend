@@ -37,7 +37,7 @@ const TableCore = memo((props) => {
     selectData,
     selectShownColumns,
     onCellChange,
-    pagination,
+    footerProps,
     counter,
     ...rest
   } = props;
@@ -68,27 +68,13 @@ const TableCore = memo((props) => {
         data={data}
         updateMyData={debouncedUpdate}
       />
-      <TableFooter {...pagination} currentPageSize={data.length} />
+      <TableFooter {...footerProps} currentPageSize={data.length} />
     </>
   );
 }, isEqual);
 
 const RTables = memo(
-  ({
-    data,
-    columns,
-    selectHiddenColumns,
-    massEdit = false,
-    modeselector,
-    updateMyData,
-    onSelectRow,
-    onSelectAllRows,
-    selectSelectedRows,
-    onToggleSort,
-    selectSortedColumn,
-    selectPaginationData,
-    selectAddRow,
-  }) => {
+  ({ data, columns, updateMyData, headerProps, bodyProps }) => {
     const labels = useMemo(() => columns.map((e) => e), [columns]);
     return (
       <>
@@ -96,25 +82,11 @@ const RTables = memo(
           responsive
           className="align-items-center table-flush align-items-center user-table"
         >
-          <TableHead
-            massEdit={massEdit}
-            columns={columns}
-            selectHiddenColumns={selectHiddenColumns}
-            onSelectAllRows={onSelectAllRows}
-            selectSelectedRows={selectSelectedRows}
-            onToggleSort={onToggleSort}
-            selectSortedColumn={selectSortedColumn}
-            selectPaginationData={selectPaginationData}
-          ></TableHead>
+          <TableHead {...headerProps} columns={columns}></TableHead>
           <TableBody
-            selectAddRow={selectAddRow}
-            massEdit={massEdit}
+            {...bodyProps}
             data={data}
             labels={labels}
-            selectHiddenColumns={selectHiddenColumns}
-            selectSelectedRows={selectSelectedRows}
-            modeselector={modeselector}
-            onSelectRow={onSelectRow}
             updateMyData={updateMyData}
           />
         </Table>
@@ -308,7 +280,6 @@ const EditableCell = React.memo(
           style={{
             padding: "1px ",
             minWidth: rest.maxWidth,
-            // whiteSpace: "pre-wrap",
           }}
           className={
             isEditable && cellProps.type !== "nonEditable"
@@ -316,10 +287,12 @@ const EditableCell = React.memo(
               : "d-block text-center fallback"
           }
         >
-          {value +
-            (measurementEnabled && value !== "" && measurement
-              ? " " + measurement
-              : "")}
+          {value !== undefined
+            ? value +
+              (measurementEnabled && value !== "" && measurement
+                ? " " + measurement
+                : "")
+            : ""}
         </div>
         {isEditable && cellProps.type !== "nonEditable" && (
           <Suspense
@@ -338,12 +311,12 @@ const EditableCell = React.memo(
 const TableHead = ({
   columns,
   selectHiddenColumns,
-  selectSortedColumn,
   massEdit,
   onSelectAllRows,
   selectSelectedRows,
-  onToggleSort,
   selectPaginationData,
+  selectSortedColumn,
+  sortProps,
 }) => {
   const { rowsCount } = useSelector(selectPaginationData);
   const hiddenColumns = useSelector(selectHiddenColumns);
@@ -364,7 +337,7 @@ const TableHead = ({
             <IndeterminateCheckbox state={state} onChange={onSelectAllRows} />
           </th>
         )}
-        {columns.map(({ Header, id, maxWidth, ...rest }, index) => {
+        {columns.map(({ Header, id, ignoreSort, maxWidth, ...rest }, index) => {
           const display = hiddenColumns[id];
           const sorted = sortedColumn && id === sortedColumn.id;
           const order = sorted && sortedColumn.order;
@@ -373,9 +346,10 @@ const TableHead = ({
               key={id}
               column={Header}
               id={id}
+              ignoreSort={ignoreSort}
               display={display}
               maxWidth={maxWidth}
-              onToggleSort={onToggleSort}
+              {...sortProps}
               sorted={sorted}
               order={order}
             />
@@ -390,9 +364,11 @@ const TableColumn = ({
   id,
   sorted = false,
   order,
+  ignoreSort,
   display = "auto",
   maxWidth = "auto",
   onToggleSort,
+  sortEnabled,
   sortedComponent = sorted ? (
     <span className="sort-arrow ms-2" style={{ width: "15px", height: "15px" }}>
       <FontAwesomeIcon
@@ -404,7 +380,10 @@ const TableColumn = ({
     <></>
   ),
 }) => {
-  const handleClick = useCallback((e) => onToggleSort(id), [onToggleSort, id]);
+  const handleClick = useCallback(
+    (e) => sortEnabled && !ignoreSort && onToggleSort(id),
+    [sortEnabled, ignoreSort, onToggleSort, id]
+  );
   return (
     <th
       onClick={handleClick}
@@ -456,11 +435,10 @@ const PaginationItem = ({ page, gotoPage, active = false }) => {
 };
 const TableFooter = React.memo(
   ({
-    paginationEnabled = true,
-    counterEnabled = true,
-    currentPageSize = 0,
-    onPageChange,
+    paginationProps,
+    counterProps,
     selectPaginationData,
+    currentPageSize,
   }) => {
     const {
       rowsCount: maxRows,
@@ -469,71 +447,88 @@ const TableFooter = React.memo(
     } = useSelector(selectPaginationData);
     return (
       <Card.Footer className="p-0 border-0 d-lg-flex flex-wrap align-items-center justify-content-between">
-        {paginationEnabled && currentPageSize < maxRows && (
-          <Nav className="pt-4">
-            <Pagination className="mb-2 mb-lg-0 d-flex flex-wrap">
-              <Pagination.Prev
-                onClick={() => onPageChange(1)}
-                disabled={parseInt(pageIndex) === 1}
-              >
-                <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
-              </Pagination.Prev>
-              <Pagination.Prev
-                onClick={() => onPageChange(parseInt(pageIndex) - 1)}
-                disabled={parseInt(pageIndex) === 1}
-              >
-                <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
-              </Pagination.Prev>
-              {[...Array(pagesCount > 5 ? 5 : pagesCount)].map((_, index) => {
-                const itemProps = {
-                  page:
-                    pagesCount <= 4
-                      ? index + 1
-                      : pagesCount <= parseInt(pageIndex) + 1
-                      ? pagesCount - 4 + index
-                      : pageIndex > 3
-                      ? parseInt(pageIndex) - 2 + index
-                      : index + 1,
-                  gotoPage: onPageChange,
-                  active:
-                    pagesCount <= 4
-                      ? parseInt(pageIndex) === index + 1
-                      : pagesCount <= parseInt(pageIndex) + 1
-                      ? pagesCount - 4 + index === parseInt(pageIndex)
-                      : parseInt(pageIndex) > 3
-                      ? parseInt(pageIndex) - 2 + index === parseInt(pageIndex)
-                      : index + 1 === parseInt(pageIndex),
-                };
-                return (
-                  <PaginationItem
-                    {...itemProps}
-                    key={"pagination-item-" + index}
-                  />
-                );
-              })}
-              <Pagination.Next
-                onClick={() => onPageChange(parseInt(pageIndex) + 1)}
-                disabled={parseInt(pageIndex) === pagesCount}
-              >
-                <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
-              </Pagination.Next>
-              <Pagination.Next
-                onClick={() => onPageChange(pagesCount)}
-                disabled={parseInt(pageIndex) === pagesCount}
-              >
-                <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
-              </Pagination.Next>
-              <></>
-            </Pagination>
-          </Nav>
+        {paginationProps && currentPageSize < maxRows && (
+          <PaginationComponent
+            {...paginationProps}
+            pageIndex={pageIndex}
+            pagesCount={pagesCount}
+          ></PaginationComponent>
         )}
 
-        {counterEnabled && (
+        {counterProps && (
           <small className="fw-bold ps-3 pt-4">
             Showing <b>{currentPageSize}</b> out of <b>{maxRows}</b> entries
           </small>
         )}
       </Card.Footer>
+    );
+  }
+);
+const PaginationComponent = React.memo(
+  ({ onPageChange, pageIndex, pagesCount }) => {
+    const currentPage = parseInt(pageIndex);
+    const pageOffset =
+      currentPage === 2
+        ? 1
+        : currentPage === 1
+        ? 2
+        : pagesCount + 1 === currentPage
+        ? -2
+        : pagesCount === currentPage
+        ? -1
+        : 0;
+    const pages =
+      pagesCount >= 5
+        ? [
+            currentPage - 2 + pageOffset,
+            currentPage - 1 + pageOffset,
+            currentPage + pageOffset,
+            currentPage + 1 + pageOffset,
+            currentPage + 2 + pageOffset,
+          ]
+        : Array(pagesCount + 1)
+            .fill()
+            .map((_, index) => index + 1);
+    return (
+      <Nav className="pt-4">
+        <Pagination className="mb-2 mb-lg-0 d-flex flex-wrap">
+          <Pagination.Prev
+            onClick={() => onPageChange(0)}
+            disabled={parseInt(pageIndex) === 1}
+          >
+            <FontAwesomeIcon icon={faAngleDoubleLeft}></FontAwesomeIcon>
+          </Pagination.Prev>
+          <Pagination.Prev
+            onClick={() => onPageChange(parseInt(pageIndex - 2))}
+            disabled={parseInt(pageIndex) === 1}
+          >
+            <FontAwesomeIcon icon={faAngleLeft}></FontAwesomeIcon>
+          </Pagination.Prev>
+          {pages.map((index) => {
+            const itemProps = {
+              page: index,
+              gotoPage: (p) => onPageChange(p - 1),
+              active: currentPage === index,
+            };
+            return (
+              <PaginationItem {...itemProps} key={"pagination-item-" + index} />
+            );
+          })}
+          <Pagination.Next
+            onClick={() => onPageChange(parseInt(pageIndex))}
+            disabled={parseInt(pageIndex) - 1 === pagesCount}
+          >
+            <FontAwesomeIcon icon={faAngleRight}></FontAwesomeIcon>
+          </Pagination.Next>
+          <Pagination.Next
+            onClick={() => onPageChange(pagesCount)}
+            disabled={parseInt(pageIndex) - 1 === pagesCount}
+          >
+            <FontAwesomeIcon icon={faAngleDoubleRight}></FontAwesomeIcon>
+          </Pagination.Next>
+          <></>
+        </Pagination>
+      </Nav>
     );
   }
 );

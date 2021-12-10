@@ -32,7 +32,7 @@ const Signin = () => {
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const history = useNavigate();
+  const navigate = useNavigate();
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -40,7 +40,7 @@ const Signin = () => {
       setError("");
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
-      history.push("/");
+      navigate("/");
     } catch {
       setError("Failed to log in");
     }

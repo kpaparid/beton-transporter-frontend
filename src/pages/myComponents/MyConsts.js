@@ -14,14 +14,18 @@ import {
   loadWorkHoursPage,
 } from "../../api/apiMappers";
 import { getGridTitle } from "./util/labels";
+import { useAuth } from "../../contexts/AuthContext";
+import { YearSelectorDropdown } from "./TextArea/YearPicker";
 // dark 0
 // #485354  1
 // #037070  3
 // #4B5757  2
 // #5DA3A3  4
 // #DDFFFF  5
-export const API = "http://localhost:3034/";
+// export const API = "http://localhost:8090/";
+export const API2 = "http://localhost:3034/";
 const primaryVariant = "#037070";
+export const dateFormat = "YYYY.MM.DD";
 
 const store = createReduxStore2();
 const useActiveElement = () => {
@@ -142,9 +146,17 @@ function mapData(data) {
 function useLoadData(tableName, actions, meta) {
   const [stateAPIStatus, setAPIStatus] = useState("loading");
   const dispatch = useDispatch();
+  const { currentUser } = useAuth();
+
   useEffect(() => {
     console.log("loading");
     setAPIStatus("loading");
+
+    const header = new Headers({
+      Authorization: "Basic " + currentUser?.accessToken,
+      "Content-Type": "application/x-www-form-urlencoded",
+    });
+
     switch (tableName) {
       case "workHoursTable":
         loadWorkHoursPage(actions, dispatch, meta).then(() =>
@@ -152,37 +164,46 @@ function useLoadData(tableName, actions, meta) {
         );
         break;
       case "toursTable":
-        loadToursPage(actions, dispatch).then(() => setAPIStatus("success"));
+        loadToursPage(actions, dispatch, header).then(() =>
+          setAPIStatus("success")
+        );
         break;
       case "overviewTable":
-        loadOverviewPage(actions, dispatch).then(() => setAPIStatus("success"));
+        loadOverviewPage(actions, dispatch, header).then(() =>
+          setAPIStatus("success")
+        );
         break;
       default:
         break;
     }
-  }, [dispatch, meta, tableName, actions]);
+  }, [dispatch, meta, tableName, actions, currentUser]);
 
   return stateAPIStatus;
 }
 
-const TitleComponent = memo(({ entityId, selectDate, ...props }) => {
+const TitleComponent = memo(({ entityId, selectTableDate, ...props }) => {
   const title = getGridTitle(entityId);
-  const date = useSelector(selectDate);
+  const tableDate = useSelector(selectTableDate);
 
-  if (
-    entityId === "workHours" ||
+  return entityId === "workHours" ||
     entityId === "tours" ||
-    entityId === "workHoursByDate"
-  ) {
-    return <MonthSelectorDropdown {...props} title={title} date={date} />;
-  } else
-    return (
-      <Button split variant="transparent" className="btn-title">
-        {/* {title} */}
-        <h5> {title} </h5>
-        {/* <h5 className="m-0 py-0 px-2"> {title} </h5> */}
-      </Button>
-    );
+    entityId === "workHoursByDate" ? (
+    <MonthSelectorDropdown
+      {...props}
+      title={title}
+      date={moment(tableDate).format("YYYY.MM")}
+    />
+  ) : entityId === "vacationsOverview" ? (
+    <YearSelectorDropdown
+      {...props}
+      title={title}
+      date={moment(tableDate).format("YYYY")}
+    />
+  ) : (
+    <Button split variant="transparent" className="btn-title">
+      <h5> {title} </h5>
+    </Button>
+  );
 }, isequal);
 
 const grids = {

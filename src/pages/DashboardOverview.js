@@ -57,15 +57,15 @@ export const DashBoardOverview = memo(() => {
   const dateLastMonth = moment().subtract(1, "months").format("YYYY/MM");
   const dateTwoMonthsAgo = moment().subtract(2, "months").format("YYYY/MM");
   const salesCurrentMonth = useMemo(
-    () => sales && sales.value.find((e) => e.date === dateCurrentMonth).sales,
+    () => sales?.value.find((e) => e.date === dateCurrentMonth)?.sales,
     [dateCurrentMonth, sales]
   );
   const salesLastMonth = useMemo(
-    () => sales && sales.value.find((e) => e.date === dateLastMonth).sales,
+    () => sales?.value?.find((e) => e.date === dateLastMonth)?.sales,
     [dateLastMonth, sales]
   );
   const cbmCurrentMonth = useMemo(
-    () => cbm && cbm.value.find((e) => e.date === dateCurrentMonth).cbm,
+    () => cbm?.value?.find((e) => e.date === dateCurrentMonth)?.cbm,
     [dateCurrentMonth, cbm]
   );
 

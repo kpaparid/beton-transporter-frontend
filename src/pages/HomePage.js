@@ -52,7 +52,7 @@ import Tooltips from "./components/Tooltips";
 import Toasts from "./components/Toasts";
 import { AuthProvider, useAuth } from "./../contexts/AuthContext";
 
-const RouteWithLoader = ({ component: Component, ...rest }) => {
+const RouteWithLoader = ({ children }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -61,18 +61,13 @@ const RouteWithLoader = ({ component: Component, ...rest }) => {
   }, []);
 
   return (
-    <Route
-      {...rest}
-      render={(props) => (
-        <>
-          <Preloader show={loaded ? false : true} /> <Component {...props} />
-        </>
-      )}
-    />
+    <>
+      <Preloader show={loaded ? false : true} />
+      {children}
+    </>
   );
 };
-
-const RouteWithSidebar = ({ component: Component, ...rest }) => {
+const RouteWithSidebar = ({ children }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -94,56 +89,27 @@ const RouteWithSidebar = ({ component: Component, ...rest }) => {
   };
 
   return (
-    <Route
-      {...rest}
-      render={(props) => (
-        <>
-          <Preloader show={loaded ? false : true} />
-          <Sidebar />
+    <>
+      <Preloader show={loaded ? false : true} />
+      <Sidebar />
 
-          <main className="content p-0 px-sm-2">
-            <UserNavbar />
-            <Component {...props} />
-            <Footer
-              toggleSettings={toggleSettings}
-              showSettings={showSettings}
-            />
-          </main>
-        </>
-      )}
-    />
+      <main className="content p-0 px-sm-2">
+        <UserNavbar />
+        {children}
+        {/* <Footer toggleSettings={toggleSettings} showSettings={showSettings} /> */}
+      </main>
+    </>
   );
 };
-// function PrivateRoute({
-//   component: Component,
-//   revert = false,
-//   route: CustomRoute,
-//   ...rest
-// }) {
-//   const { currentUser } = useAuth();
-//   return currentUser ? (
-//     <>
-//       <CustomRoute {...rest} component={Component}></CustomRoute>
-//     </>
-//   ) : (
-//     <Navigate to={MyRoutes.Signin.path} />
-//   );
-// }
+
 function PrivateOutlet() {
   const { currentUser } = useAuth();
   return currentUser ? <Outlet /> : <Navigate to={MyRoutes.Signin.path} />;
-  // return <Navigate to={MyRoutes.Signin.path} />;
 }
 const HomePage = () => (
   <AuthProvider>
     <Routes>
-      {/* <Route path="/#" element={<PrivateRoute />}>
-        <Route exact path={MyRoutes.Signup.path} element={<Signup />} />
-      </Route> */}
       <Route path="*" element={<NotFoundPage />}></Route>
-      <Route exact path={MyRoutes.Tours.path} element={<PrivateOutlet />}>
-        <Route exact path={MyRoutes.Tours.path} element={<Tours />} />
-      </Route>
       <Route exact path={MyRoutes.Signin.path} element={<Signin />} />
       <Route exact path={MyRoutes.NotFound.path} element={<PrivateOutlet />}>
         <Route exact element={<NotFoundPage />} />
@@ -156,6 +122,71 @@ const HomePage = () => (
         path={MyRoutes.NotFound.path}
         element={<NotFoundPage />}
       ></Route>
+      <Route
+        exact
+        path={MyRoutes.DashboardOverview.path}
+        element={<PrivateOutlet />}
+      >
+        <Route
+          exact
+          path={MyRoutes.DashboardOverview.path}
+          element={
+            <RouteWithSidebar>
+              <DashboardOverview />
+            </RouteWithSidebar>
+          }
+        />
+      </Route>
+      <Route exact path={MyRoutes.Tours.path} element={<PrivateOutlet />}>
+        <Route
+          exact
+          path={MyRoutes.Tours.path}
+          element={
+            <RouteWithSidebar>
+              <Tours />
+            </RouteWithSidebar>
+          }
+        />
+      </Route>
+      <Route
+        exact
+        path={MyRoutes.Arbeitszeiten.path}
+        element={<PrivateOutlet />}
+      >
+        <Route
+          exact
+          path={MyRoutes.Arbeitszeiten.path}
+          element={
+            <RouteWithSidebar>
+              <Arbeitszeiten />
+            </RouteWithSidebar>
+          }
+        />
+      </Route>
+
+      <Route exact path={MyRoutes.Nachrichten.path} element={<PrivateOutlet />}>
+        <Route
+          exact
+          path={MyRoutes.Nachrichten.path}
+          element={
+            <RouteWithSidebar>
+              <Nachrichten />
+            </RouteWithSidebar>
+          }
+        />
+      </Route>
+      <Route exact path={MyRoutes.Settings.path} element={<PrivateOutlet />}>
+        <Route
+          exact
+          path={MyRoutes.Settings.path}
+          element={
+            <RouteWithSidebar>
+              <Settings />
+            </RouteWithSidebar>
+          }
+        />
+      </Route>
+
       {/* <PrivateRoute
         route={RouteWithLoader}
         exact

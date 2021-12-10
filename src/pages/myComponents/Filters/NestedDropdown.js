@@ -1,9 +1,25 @@
 import React, { forwardRef, memo } from "react";
-import { ButtonGroup, Button, Form } from "@themesberg/react-bootstrap";
+import {
+  ButtonGroup,
+  Button,
+  Form,
+  useAccordionButton,
+} from "@themesberg/react-bootstrap";
 import { isEqual } from "lodash";
 import { Card } from "react-bootstrap";
 import AccordionComponent from "../../../components/AccordionComponent";
+function CustomToggle({ children, eventKey, onChange, ...rest }) {
+  const decoratedOnClick = useAccordionButton(eventKey, (e) => {
+    e.stopPropagation();
+    onChange(e);
+  });
 
+  return (
+    <CheckboxRow onChange={decoratedOnClick} {...rest}>
+      {children}
+    </CheckboxRow>
+  );
+}
 export const NestedDropdown = memo(
   forwardRef(
     (
@@ -35,14 +51,14 @@ export const NestedDropdown = memo(
             id: index,
             eventKey: "panel-" + index,
             title: (
-              <CheckboxRow
+              <CustomToggle
                 key={"DropdownRow-" + id + "-" + index}
                 checked={checked}
                 onChange={() => onToggleItem(id)}
                 disableCheckBox={disableCheckBox}
               >
                 <span className="h6 mb-0 fw-bold">{text}</span>
-              </CheckboxRow>
+              </CustomToggle>
             ),
             description: !disabled && component({ ...props, selectData }),
             disabled: disabled,

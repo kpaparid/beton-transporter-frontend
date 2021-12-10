@@ -1,32 +1,54 @@
 import { nanoid } from "@reduxjs/toolkit";
 import moment from "moment";
 import { PAGINATION } from "./types";
+const API = process.env.REACT_APP_API_URL;
+
+export const durationFormat = (duration = "0:0") => {
+  const split = duration.split(":");
+  const hours = parseInt(split[0]);
+  const minutes = parseInt(split[1]);
+  return (
+    (hours !== 0 && !isNaN(hours) ? hours + "h" : "") +
+    (!isNaN(hours) && !isNaN(minutes) && hours !== 0 && minutes !== 0
+      ? " "
+      : "") +
+    (!isNaN(minutes) && minutes !== 0 ? minutes + "min" : "")
+  );
+};
+export const calcDurationAndFormat = (arr) => {
+  try {
+    const t1 = moment(arr[0], "HH:mm", true);
+    const t2 = moment(arr[1], "HH:mm", true);
+    const diff = t1.isValid() && t2.isValid() && t2.diff(t1, "minutes");
+    const hours = (diff && parseInt(diff / 60)) || 0;
+    const minutes = (diff && diff % 60) || 0;
+    return hours + ":" + minutes;
+  } catch (error) {
+    return "";
+  }
+};
 
 const toDateFormat = (date) =>
-  moment(date, "YYYY/MM/DD", true).isValid()
-    ? moment(date, "YYYY/MM/DD").format("DD.MM.YYYY")
+  moment(date, "YYYY.MM.DD", true).isValid()
+    ? moment(date, "YYYY.MM.DD").format("DD.MM.YYYY")
     : date;
 const dateToMonth = (date) =>
-  moment(date, "YYYY/MM", true).isValid()
-    ? moment(date, "YYYY/MM").format("MMMM")
+  moment(date, "YYYY.MM", true).isValid()
+    ? moment(date, "YYYY.MM").format("MMMM")
     : date;
 
 const dateToDay = (date) => {
-  return moment(date[0], "YYYY/MM/DD", true).isValid()
-    ? moment(date[0], "YYYY/MM/DD").format("dddd")
+  return moment(date[0], "YYYY.MM.DD", true).isValid()
+    ? moment(date[0], "YYYY.MM.DD").format("dddd")
     : date[0];
 };
 const calcDaysDifference = (arr) => {
-  const t1 = moment(arr[0], "YYYY/MM/DD", true);
-  const t2 = moment(arr[1], "YYYY/MM/DD", true);
-  return t1.isValid() && t2.isValid() ? t2.diff(t1, "days") : "";
+  const t1 = moment(arr[0], "YYYY.MM.DD", true);
+  const t2 = moment(arr[1], "YYYY.MM.DD", true);
+  return t1.isValid() && t2.isValid() ? t2.diff(t1, "days") + 1 : "";
 };
-const calcMinuteDifference = (arr) => {
-  const t1 = moment(arr[0], "HH:mm", true);
-  const t2 = moment(arr[1], "HH:mm", true);
-  return t1.isValid() && t2.isValid() ? t2.diff(t1, "minutes") : "";
-};
-
+export const getGridTableConnections = (entityId) =>
+  gridLabels[entityId].connections;
 export const getGridTitle = (entityId) => gridLabels[entityId].title;
 export const getGridUrl = (entityId) => gridLabels[entityId].url;
 export const getGridMeta = (entityId) => gridLabels[entityId].meta || {};
@@ -59,7 +81,7 @@ export function getLabel(id) {
 
 const gridLabels = {
   tours: {
-    url: "tours",
+    url: API + "tours",
     meta: ["date", "user"],
     widgets: {
       filter: true,
@@ -228,7 +250,8 @@ const gridLabels = {
     },
   },
   workHours: {
-    url: "workhours",
+    connections: ["workHoursBank"],
+    url: API + "work-hours",
     meta: ["date", "user"],
     widgets: {
       filter: true,
@@ -239,14 +262,13 @@ const gridLabels = {
       download: true,
       pagination: PAGINATION.SERVER,
       counter: true,
-      pageSize: 40,
+      pageSize: 20,
       sort: true,
       edit: true,
     },
     title: "Workhours",
     primaryLabels: ["date", "begin", "end", "pause"],
     secondaryLabels: ["day", "duration"],
-    editable: ["date", "begin", "end", "pause"],
     labels: {
       date: {
         nanoid: nanoid(),
@@ -267,6 +289,7 @@ const gridLabels = {
         dependencies: ["date"],
         fn: dateToDay,
         maxWidth: "100px",
+        ignoreSort: true,
       },
 
       begin: {
@@ -292,9 +315,9 @@ const gridLabels = {
         id: "duration",
         text: "Duration",
         type: "nonEditable",
-        measurement: "min",
         dependencies: ["begin", "end"],
-        fn: calcMinuteDifference,
+        fn: calcDurationAndFormat,
+        format: durationFormat,
         maxWidth: "100px",
       },
       pause: {
@@ -310,7 +333,7 @@ const gridLabels = {
     },
   },
   workHoursBank: {
-    url: "workhours-bank",
+    url: API + "work-hours-bank",
     widgets: {
       filter: false,
       add: false,
@@ -325,13 +348,13 @@ const gridLabels = {
       edit: false,
     },
     title: "Workhours Bank",
-    primaryLabels: ["month", "hours"],
+    primaryLabels: ["date", "hours"],
     secondaryLabels: [],
     editable: ["hours"],
     labels: {
-      month: {
+      date: {
         nanoid: nanoid(),
-        id: "month",
+        id: "date",
         text: "Month",
         type: "text",
         format: dateToMonth,
@@ -349,7 +372,8 @@ const gridLabels = {
     },
   },
   absent: {
-    url: "absent",
+    connections: ["vacationsOverview", "vacations"],
+    url: API + "absent-days",
     widgets: {
       filter: false,
       add: true,
@@ -364,37 +388,36 @@ const gridLabels = {
       edit: true,
     },
     title: "Absent",
-    primaryLabels: ["from", "to", "reason"],
+    primaryLabels: ["dateFrom", "dateTo", "reason"],
     secondaryLabels: ["days"],
-    editable: ["from", "to", "reason"],
     labels: {
-      from: {
+      dateFrom: {
         nanoid: nanoid(),
-        id: "from",
+        id: "dateFrom",
         text: "from",
         type: "date",
-        connections: ["days"],
         format: toDateFormat,
-        minWidth: "80px",
+        connections: ["days"],
+        maxWidth: "100px",
       },
-      to: {
+      dateTo: {
         nanoid: nanoid(),
-        id: "to",
+        id: "dateTo",
         text: "to",
         type: "date",
-        connections: ["days"],
         format: toDateFormat,
-        minWidth: "80px",
+        connections: ["days"],
+        maxWidth: "100px",
       },
       days: {
         nanoid: nanoid(),
         id: "days",
         text: "Days",
-        type: "number",
-        dependencies: ["from", "to"],
-        fn: calcDaysDifference,
+        type: "nonEditable",
         maxWidth: "80px",
         minWidth: "50px",
+        dependencies: ["dateFrom", "dateTo"],
+        fn: calcDaysDifference,
       },
       reason: {
         nanoid: nanoid(),
@@ -405,8 +428,8 @@ const gridLabels = {
       },
     },
   },
-  vacations: {
-    url: "vacations",
+  vacationsOverview: {
+    url: API + "absent-days/vacations/rest",
     widgets: {
       filter: false,
       add: false,
@@ -417,9 +440,9 @@ const gridLabels = {
       counter: false,
       pageSize: 5,
       sort: false,
-      edit: true,
+      edit: false,
     },
-    title: "Vacations",
+    title: "Vacations Overview",
     primaryLabels: ["taken", "rest"],
     labels: {
       taken: {
@@ -438,8 +461,9 @@ const gridLabels = {
       },
     },
   },
-  vacationsOverview: {
-    url: "vacations-overview",
+  vacations: {
+    connections: ["vacationsOverview"],
+    url: API + "absent-days",
     widgets: {
       filter: false,
       add: true,
@@ -452,43 +476,43 @@ const gridLabels = {
       sort: true,
       edit: true,
     },
-    title: "Vacations Overview",
+    title: "Vacations",
     footer: ["Total", "", "SUM"],
-    primaryLabels: ["from", "to"],
+    primaryLabels: ["dateFrom", "dateTo", "reason"],
     secondaryLabels: ["days"],
-
     labels: {
-      from: {
+      dateFrom: {
         nanoid: nanoid(),
-        id: "from",
-        text: "From",
+        id: "dateFrom",
+        text: "from",
         type: "date",
-        connections: ["days"],
         format: toDateFormat,
+        connections: ["days"],
         maxWidth: "100px",
       },
-      to: {
+      dateTo: {
         nanoid: nanoid(),
-        id: "to",
-        text: "To",
+        id: "dateTo",
+        text: "to",
         type: "date",
-        connections: ["days"],
         format: toDateFormat,
+        connections: ["days"],
         maxWidth: "100px",
       },
       days: {
         nanoid: nanoid(),
         id: "days",
         text: "Days",
-        type: "text",
-        dependencies: ["from", "to"],
+        type: "nonEditable",
+        maxWidth: "80px",
+        minWidth: "50px",
+        dependencies: ["dateFrom", "dateTo"],
         fn: calcDaysDifference,
-        maxWidth: "100px",
       },
     },
   },
   workHoursByDate: {
-    url: "workhours-byDate",
+    url: API + "workhours-byDate",
     widgets: {
       filter: false,
       add: false,
@@ -521,7 +545,7 @@ const gridLabels = {
     },
   },
   currentVacations: {
-    url: "vacations-overview",
+    url: API + "vacations-overview",
     widgets: {
       filter: false,
       add: false,

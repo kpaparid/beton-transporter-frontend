@@ -24,7 +24,7 @@ const DateSelectorDropdown = memo(
     onBlur,
     inputProps,
     Input,
-    format = "YYYY/MM/DD",
+    format = "YYYY.MM.DD",
     singleDate = false,
     disableMonthSwap = false,
   }) => {
@@ -38,7 +38,7 @@ const DateSelectorDropdown = memo(
     const handleInputChange = useCallback(
       (e) => {
         const v = moment(e.target.value, format, true).isValid()
-          ? moment(e.target.value, format).format("YYYY/MM/DD")
+          ? moment(e.target.value, format).format("YYYY.MM.DD")
           : e.target.value;
         onChange && onChange(v);
       },
@@ -46,8 +46,8 @@ const DateSelectorDropdown = memo(
     );
     const domInput = useCallback(
       ({ value, ...rest }) => {
-        const v = moment(value, "YYYY/MM/DD", true).isValid()
-          ? moment(value, "YYYY/MM/DD").format(format)
+        const v = moment(value, "YYYY.MM.DD", true).isValid()
+          ? moment(value, "YYYY.MM.DD").format(format)
           : value;
         return Input ? (
           <Input {...rest} value={v}></Input>
@@ -195,11 +195,11 @@ const DateSelectorComponent = memo(
     singleDate = false,
     disableMonthSwap = false,
     style,
-    year: initialYear = moment(values[0], "YYYY/MM/DD", true).isValid()
-      ? moment(values[0], "YYYY/MM/DD").format("YYYY")
+    year: initialYear = moment(values[0], "YYYY.MM.DD", true).isValid()
+      ? moment(values[0], "YYYY.MM.DD").format("YYYY")
       : moment().format("YYYY"),
-    month: initialMonth = moment(values[0], "YYYY/MM/DD", true).isValid()
-      ? moment(values[0], "YYYY/MM/DD").format("MM")
+    month: initialMonth = moment(values[0], "YYYY.MM.DD", true).isValid()
+      ? moment(values[0], "YYYY.MM.DD").format("MM")
       : moment().format("MM"),
   }) => {
     const [month, setMonth] = useState(initialMonth);
@@ -211,7 +211,7 @@ const DateSelectorComponent = memo(
     );
     const title = moment(month, "MM").format("MMMM") + " " + year;
     const tableDays = useMemo(
-      () => calcIndexedCalendarDays(month + "/" + year, labels),
+      () => calcIndexedCalendarDays(month + "." + year, labels),
       [month, year, labels]
     );
     const handleIncreaseMonth = useCallback(
@@ -284,7 +284,7 @@ const DateSelectorComponent = memo(
                         singleDate={singleDate}
                         data={row}
                         index={index}
-                        name={year + "/" + month}
+                        name={year + "." + month}
                         onClick={onClick}
                         onMouseOver={onMouseOver}
                         clickedId={values}
@@ -321,7 +321,7 @@ const TableRow = (props) => {
     if (e === null)
       return <td className="border-0 p-1" key={"empty" + index * 7 + i}></td>;
     else {
-      const day = name + "/" + ("0" + e).substr(-2);
+      const day = name + "." + ("0" + e).substr(-2);
       const key = "Btn" + e;
       const from = clickedId[0];
       const to = clickedId[1];
@@ -347,7 +347,7 @@ const TableRow = (props) => {
             onMouseOver={onMouseOver}
             onMouseLeave={onMouseLeave}
             value={e}
-            name={name + "/" + ("0" + e).substr(-2)}
+            name={name + "." + ("0" + e).substr(-2)}
           />
         </td>
       );

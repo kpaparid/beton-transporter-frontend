@@ -12,19 +12,22 @@ import {
   getGridSecondaryLabels,
 } from "../pages/myComponents/util/labels";
 
-import { API } from "../pages/myComponents/MyConsts";
 export function loadOverviewPage(
   { fetchEntityGrid, fetchMeta, addMeta },
-  dispatch
+  dispatch,
+  header
 ) {
   const year = moment().format("YYYY");
   const date = moment().format("YYYY/MM");
   const today = moment().format("YYYY/MM/DD");
   const dateFilter = { date: { eq: [date] } };
   const fetchers = [
-    fetch(API + "sales?&date_gte=2021/01&date_lte=2021/12"),
-    fetch(API + "cbm?&date_gte=" + year + "/01&date_lte=" + year + "/12"),
-    fetch(API + "sales-ByWorkPlant?&date=" + date),
+    fetch("API" + "sales?&date_gte=2021/01&date_lte=2021/12"),
+    fetch(
+      "API" + "cbm?&date_gte=" + year + "/01&date_lte=" + year + "/12",
+      header
+    ),
+    fetch("API" + "sales-ByWorkPlant?&date=" + date),
   ];
   const dispatchers = [
     dispatch(fetchMeta("?id=workPlant")),
@@ -35,6 +38,7 @@ export function loadOverviewPage(
         limit: getGridWidgets("workHoursByDate").pageSize,
         initialFilters: dateFilter,
         initialSort: { id: "hours", order: "desc" },
+        header,
       })
     ),
     dispatch(
@@ -44,6 +48,7 @@ export function loadOverviewPage(
         limit: getGridWidgets("currentVacations").pageSize,
         initialFilters: { from: { lte: today }, to: { gte: today } },
         initialSort: { id: "from", order: "desc" },
+        header,
       })
     ),
   ];
@@ -64,37 +69,58 @@ export function loadOverviewPage(
 }
 
 export function loadToursPage(
-  { fetchEntityGrid, fetchMeta, addMeta },
+  { fetchEntityGrid, fetchMeta, addMeta, header },
   dispatch
 ) {
-  const date = moment().format("YYYY/MM");
+  const date = moment().format;
+  const formattedDate = moment().format("YYYY.MM");
   const initialFilters = {
-    date: { gte: date + "/01", lte: date + "/31" },
+    date: { gte: formattedDate + ".01", lte: formattedDate + ".31" },
   };
   return dispatch(fetchMeta()).then(() =>
     dispatch(
       fetchEntityGrid({
         entityId: "tours",
-        url: "tours",
+        url: getGridUrl("tours"),
         limit: getGridWidgets("tours").pageSize,
         initialFilters,
         initialSort: { id: "date", order: "desc" },
+        header,
+        date,
       })
-    ).then(() => dispatch(addMeta([{ id: "date", value: date }])))
+    )
   );
 }
 export function loadWorkHoursPage(
-  { fetchMeta, fetchEntityGrid, addMeta },
+  { fetchMeta, fetchEntityGrid, addMeta, addTableDate },
   dispatch,
   driver
 ) {
+  const header = "";
   return dispatch(fetchMeta()).then(({ payload }) => {
     const driverName =
       driver || payload.find((e) => e.id === "driver").values[0];
-    const date = moment().format("YYYY/MM");
+    const date = moment().toLocaleString();
+    const formattedDate = moment().format("YYYY.MM");
 
     const driverFilter = { driver: { eq: [driverName] } };
-    const dateFilter = { date: { gte: date + "/01", lte: date + "/31" } };
+    const dateFilter = {
+      date: { gte: formattedDate + ".01", lte: formattedDate + ".31" },
+    };
+    const absentDaysFilter = { reason: { neq: ["vacations"] } };
+    const vacationsFilter = { reason: { eq: ["vacations"] } };
+    const workHoursBankFilter = { year: { eq: ["2021"] } };
+    const vacationsOverviewFilter = { year: { eq: ["2021"] } };
+    const postInitialValueWorkHours = { driver: driverName };
+    const postInitialValueAbsentDays = {
+      driver: driverName,
+      reason: "vacations",
+    };
+    const postInitialValueVacations = {
+      driver: driverName,
+      reason: "vacations",
+    };
+
     return dispatch(
       fetchEntityGrid({
         entityId: "workHours",
@@ -102,6 +128,9 @@ export function loadWorkHoursPage(
         limit: getGridWidgets("workHours").pageSize,
         initialFilters: { ...driverFilter, ...dateFilter },
         initialSort: { id: "date", order: "desc" },
+        postInitialValues: postInitialValueWorkHours,
+        header,
+        date,
       })
     )
       .then(() =>
@@ -110,8 +139,10 @@ export function loadWorkHoursPage(
             entityId: "absent",
             url: getGridUrl("absent"),
             limit: getGridWidgets("absent").pageSize,
-            initialFilters: driverFilter,
-            initialSort: { id: "from", order: "desc" },
+            initialFilters: { ...driverFilter, ...absentDaysFilter },
+            initialSort: { id: "dateFrom", order: "desc" },
+            header,
+            postInitialValues: postInitialValueAbsentDays,
           })
         )
       )
@@ -121,7 +152,10 @@ export function loadWorkHoursPage(
             entityId: "vacations",
             url: getGridUrl("vacations"),
             limit: getGridWidgets("vacations").pageSize,
-            initialFilters: driverFilter,
+            initialFilters: { ...driverFilter, ...vacationsFilter },
+            initialSort: { id: "dateFrom", order: "desc" },
+            header,
+            postInitialValues: postInitialValueVacations,
           })
         )
       )
@@ -131,8 +165,9 @@ export function loadWorkHoursPage(
             entityId: "vacationsOverview",
             url: getGridUrl("vacationsOverview"),
             limit: getGridWidgets("vacationsOverview").pageSize,
-            initialFilters: driverFilter,
-            initialSort: { id: "from", order: "desc" },
+            initialFilters: { ...driverFilter, ...vacationsOverviewFilter },
+            header,
+            date,
           })
         )
       )
@@ -143,23 +178,17 @@ export function loadWorkHoursPage(
             entityId: "workHoursBank",
             url: getGridUrl("workHoursBank"),
             limit: getGridWidgets("workHoursBank").pageSize,
-            initialFilters: driverFilter,
-            initialSort: { id: "month", order: "desc" },
+            initialFilters: { ...driverFilter, ...workHoursBankFilter },
+            initialSort: { id: "date", order: "asc" },
+            header,
           })
         )
       )
-      .then(() =>
-        dispatch(
-          addMeta([
-            { id: "date", value: date },
-            { id: "driver", value: driverName },
-          ])
-        )
-      );
+      .then(() => dispatch(addMeta([{ id: "driver", value: driverName }])));
   });
 }
 
-export function normalizeApi({ data, meta }) {
+export function normalizeInitApi({ data, meta }) {
   const mObject = getConnections(data);
   const tableIds = Object.keys(mObject);
 
@@ -183,16 +212,33 @@ export function normalizeApi({ data, meta }) {
     .reduce((a, b) => [...a, ...b], []);
 
   const rowsByTableId = mapRowsToNanoidLabels(mObject, nanoidLabelsTable);
-  const rows = tableIds
-    .map((r) => rowsByTableId[r].concat(addRow[r]))
-    .reduce((a, b) => [...a, ...b]);
 
-  const tables = getTable(mObject, labelsByTableId, meta, addRow);
+  const tables = getTable(
+    mObject,
+    labelsByTableId,
+    meta,
+    addRow,
+    rowsByTableId
+  );
 
   const modes = tableIds.map((id) => ({ id: id, value: "idle" }));
   return {
     labels,
-    rows,
+    tables,
+    modes,
+  };
+}
+export function normalizeApi({ data, meta }) {
+  const mObject = getConnections(data);
+  const tableIds = Object.keys(mObject);
+
+  const nanoidLabelsTable = getNanoidLabelsTable(mObject);
+  const rowsByTableId = mapRowsToNanoidLabels(mObject, nanoidLabelsTable);
+
+  const tables = updateTableRows(mObject, meta, rowsByTableId);
+
+  const modes = tableIds.map((id) => ({ id: id, value: "idle" }));
+  return {
     tables,
     modes,
   };
@@ -202,7 +248,7 @@ export function getConnections(m) {
   return tableIds
     .map((tableId) => {
       return {
-        [tableId]: m[tableId].map(({ id, ...rest }) => {
+        [tableId]: m[tableId].map(({ id = nanoid(), ...rest }) => {
           const allLabels = getGridLabels(tableId);
           const primaryLabels = Object.keys(rest).filter((l) =>
             getGridPrimaryLabels(tableId).includes(l)
@@ -224,7 +270,7 @@ export function getConnections(m) {
             const dependantValues = allLabels[b].dependencies.map(
               (label) => rest[label]
             );
-            return { ...a, [b]: calcValue(dependantValues) };
+            return { ...a, [b]: rest[b] || calcValue(dependantValues) };
           }, {});
           return {
             id,
@@ -294,9 +340,15 @@ export function mapRowsToNanoidLabels(mObject, nanoidsByLabelIdByTableId) {
     }))
     .reduce((a, b) => ({ ...a, ...b }), {});
 }
-export function getTable(mObject, labelsByTableId, meta, addRow) {
+export function getTable(
+  mObject,
+  labelsByTableId,
+  meta,
+  addRow,
+  rowsByTableId
+) {
   return Object.keys(mObject).map((tableId) => {
-    const tableRowsIds = mObject[tableId].map(({ id }) => id);
+    const tableRowsIds = rowsByTableId[tableId].map(({ id }) => id);
     const tableLabelIds = labelsByTableId[tableId].map((l) => l.id);
     const nanoids = labelsByTableId[tableId].reduce(
       (a, b) => ({ ...a, [b.idx]: b.id }),
@@ -305,27 +357,42 @@ export function getTable(mObject, labelsByTableId, meta, addRow) {
     return {
       id: tableId,
       labels: tableLabelIds,
-      rows: tableRowsIds,
+      sortedRowsIds: rowsByTableId[tableId].map(({ id }) => id),
+      rows: rowsByTableId[tableId].reduce(
+        (a, b) => ({ ...a, [b.id]: { ...b } }),
+        {}
+      ),
       selectedRows: getGridWidgets(tableId).massEdit ? tableRowsIds : [],
       selectedLabels: tableLabelIds,
       nanoids: nanoids,
-      addRow: addRow[tableId].id,
+      addRow: { [addRow[tableId].id]: addRow[tableId] },
+      ...meta,
+    };
+  });
+}
+export function updateTableRows(mObject, meta, rowsByTableId) {
+  return Object.keys(mObject).map((tableId) => {
+    return {
+      id: tableId,
+      sortedRowsIds: rowsByTableId[tableId].map(({ id }) => id),
+      rows: rowsByTableId[tableId].reduce(
+        (a, b) => ({ ...a, [b.id]: { ...b } }),
+        {}
+      ),
       ...meta,
     };
   });
 }
 export function mapPromiseData(data, entityId) {
   const values = Object.values(data);
-  return entityId === "vacations2"
+  return entityId === "vacationsOverview"
     ? {
-        vacations: [
+        vacationsOverview: [
           {
             id: nanoid(),
-            rest: values[0].rest,
-            taken: values[0].taken,
+            ...data,
           },
         ],
-        vacationsOverview: values[0].overview,
       }
     : { [entityId]: values };
 }
@@ -338,6 +405,15 @@ export function calcSort(oldSort, id) {
     : { id, order: "asc" };
 }
 export function sortToUrl(sort, initialSort) {
+  return sort && sort.order
+    ? "&sort=" + sort.id + "," + sort.order
+    : (initialSort &&
+        initialSort.id &&
+        initialSort.order &&
+        "&sort=" + initialSort.id + "," + initialSort.order) ||
+        "";
+}
+export function sortToUrl2(sort, initialSort) {
   return sort && sort.order
     ? "&_sort=" + sort.id + "&_order=" + sort.order
     : (initialSort &&
@@ -383,29 +459,24 @@ export function filtersToUrl(filters, initialFilters) {
     ? Object.entries(filters).reduce((a, b) => {
         const idx = b[0];
         const { neq, gte, lte, eq } = b[1];
+
         const eqLink =
           eq && eq.length !== 0
-            ? eq.reduce((c, d) => c + "&" + idx + "=" + d, "")
+            ? "&" + idx + "=" + eq.join(",")
             : (initialFilters &&
                 initialFilters[idx] &&
                 initialFilters[idx].eq &&
                 initialFilters[idx].eq.length !== 0 &&
-                initialFilters[idx].eq.reduce(
-                  (c, d) => c + "&" + idx + "=" + d,
-                  ""
-                )) ||
+                "&" + idx + "=" + initialFilters[idx].eq.join(",")) ||
               "";
         const neqLink =
           neq && neq.length !== 0
-            ? neq.reduce((c, d) => c + "&" + idx + "_ne=" + d, "")
+            ? "&" + idx + "_ne=" + neq.join(",")
             : (initialFilters &&
                 initialFilters[idx] &&
                 initialFilters[idx].neq &&
                 initialFilters[idx].neq.length !== 0 &&
-                initialFilters[idx].neq.reduce(
-                  (c, d) => c + "&" + idx + "_ne=" + d,
-                  ""
-                )) ||
+                "&" + idx + "_ne=" + initialFilters[idx].neq.join(",")) ||
               "";
         const gteLink = gte
           ? "&" + idx + "_gte=" + gte
@@ -427,6 +498,14 @@ export function filtersToUrl(filters, initialFilters) {
 }
 
 export function parsePagination({ res, page, limit }) {
+  return {
+    rowsCount: res.totalElements,
+    page: page + 1,
+    limit,
+    pagesCount: res.totalPages - 1,
+  };
+}
+export function parseJsonServerPagination({ res, page, limit }) {
   return {
     paginationLinks:
       res.headers.get("Link") && parseLinkHeader(res.headers.get("Link")),

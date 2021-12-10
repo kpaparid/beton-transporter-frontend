@@ -113,7 +113,7 @@ export const LazyInput = memo(
 
           case "date":
             const v = moment(value, "DD.MM.YYYY", true).isValid()
-              ? moment(value, "DD.MM.YYYY").format("YYYY/MM/DD")
+              ? moment(value, "DD.MM.YYYY").format("YYYY.MM.DD")
               : value;
             return (
               <DateSelectorDropdown
@@ -129,7 +129,7 @@ export const LazyInput = memo(
           case "nonEditable":
             return (
               <div className={"d-block text-center disabled" + className}>
-                {value}
+                {value || ""}
               </div>
             );
           default:
@@ -143,7 +143,7 @@ export const LazyInput = memo(
                   type={type === "number" ? "number" : "text"}
                   // {...rest}
 
-                  value={value}
+                  value={value || ""}
                   onChange={handleTextAreaChange}
                   ref={domRef}
                   style={{ minWidth, maxWidth }}

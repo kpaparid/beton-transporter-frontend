@@ -1,6 +1,7 @@
 FROM node:latest
 WORKDIR /app
 COPY package.json ./
-RUN npm install
+COPY yarn.lock /app
+RUN yarn install
 COPY . .
 CMD ["npm", "start"]

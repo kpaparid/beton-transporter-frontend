@@ -5,8 +5,14 @@ import moment from "moment";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { isEqual } from "lodash";
+import { dateFormat } from "../MyConsts";
 
-export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
+export const MonthSelectorDropdown = ({
+  date,
+  title,
+  format = dateFormat,
+  ...rest
+}) => {
   return (
     <>
       <Dropdown>
@@ -17,7 +23,7 @@ export const MonthSelectorDropdown = ({ date, title, ...rest }) => {
           // style={{ backgroundColor: "#f5f8fb" }}
         >
           <h5 className="text-wrap text-start">
-            {title} {moment(date, "YYYY/MM").format("MMMM YYYY")}
+            {title} {moment(date, format).format("MMMM YYYY")}
           </h5>
         </Dropdown.Toggle>
 
@@ -49,18 +55,18 @@ export const MonthSelector = (props) => {
   const { date, onChange } = props;
 
   // const newDate = moment(date, "MM/YYYY").format("YYYY");
-  const [year, setYear] = useState(moment(date, "YYYY/MM").format("YYYY"));
-  const [month, setMonth] = useState(moment(date, "YYYY/MM").format("MMM"));
+  const [year, setYear] = useState(moment(date, "YYYY.MM").format("YYYY"));
+  const [month, setMonth] = useState(moment(date, "YYYY.MM").format("MMM"));
 
   useEffect(() => {
-    setYear(moment(date, "YYYY/MM").format("YYYY"));
-    setMonth(moment(date, "YYYY/MM").format("MMM"));
+    setYear(moment(date, "YYYY.MM").format("YYYY"));
+    setMonth(moment(date, "YYYY.MM").format("MMM"));
   }, [date]);
 
   const handlerMonthChange = useCallback(
     (m) => {
       console.log("new month", m);
-      const change = moment(m + "/" + year, "MMM/YYYY").format("YYYY/MM");
+      const change = moment(m + "." + year, "MMM.YYYY").format("YYYY.MM");
       console.log(change);
       onChange && onChange(change);
     },
@@ -70,14 +76,14 @@ export const MonthSelector = (props) => {
     (y) => {
       onChange && y === 1
         ? onChange(
-            moment(month + "/" + year, "MMM/YYYY")
+            moment(month + "." + year, "MMM.YYYY")
               .add(1, "years")
-              .format("YYYY/MM")
+              .format("YYYY.MM")
           )
         : onChange(
-            moment(month + "/" + year, "MMM/YYYY")
+            moment(month + "." + year, "MMM.YYYY")
               .subtract(1, "years")
-              .format("YYYY/MM")
+              .format("YYYY.MM")
           );
     },
     [month, year, onChange]

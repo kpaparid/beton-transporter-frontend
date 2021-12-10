@@ -36,7 +36,6 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 
 ReactDOM.render(
-  //
   <Provider store={store}>
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <HashRouter>
@@ -45,6 +44,5 @@ ReactDOM.render(
       </HashRouter>
     </LocalizationProvider>
   </Provider>,
-  // </LocalizationProvider>
   document.getElementById("root")
 );
