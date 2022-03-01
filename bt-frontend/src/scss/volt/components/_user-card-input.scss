@@ -1,0 +1,195 @@
+.Toastify .user-messenger-notification {
+  .Toastify__toast {
+    background-color: $darker-nonary;
+    color: $senary;
+  }
+  .Toastify__progress-bar {
+    background: transparent;
+    background-color: $darker-senary;
+  }
+  .Toastify__close-button {
+    color: $senary;
+  }
+  .Toastify__toast-body > div:last-child {
+    width: 100%;
+  }
+}
+.user-messenger-card {
+  .message .btn-nonary {
+    &:focus,
+    &:hover {
+      background-color: $nonary !important;
+      color: $senary !important;
+    }
+  }
+  .contact.btn-nonary {
+    .time,
+    .message {
+      color: $darker-senary !important;
+    }
+    &:focus,
+    &:hover {
+      .time,
+      .message {
+        color: $nonary !important;
+      }
+    }
+  }
+}
+
+.user-modal {
+  background-color: $senary;
+  color: $senary;
+  .modal-content {
+    background-color: $senary;
+  }
+  .modal-content.time-picker-modal-content {
+    background-color: $senary;
+    .title-wrapper {
+      border-bottom: 2px solid $senary;
+      padding-left: 25%;
+      padding-right: 25%;
+    }
+  }
+  .modal-header {
+    background-color: $darker-nonary;
+    margin: 4px;
+    margin-bottom: 0;
+    border: 0;
+    .modal-title {
+      color: $senary;
+    }
+  }
+  .modal-body {
+    background-color: $darker-nonary;
+    border: 0;
+    margin: 0 4px 0 4px;
+  }
+  .modal-footer {
+    background-color: $darker-nonary;
+    border: 0;
+    margin: 4px;
+    margin-top: 0;
+  }
+}
+
+.btn-senary {
+  &:hover {
+    background-color: #ff4f36 !important;
+    border-color: #ff4f36 !important;
+  }
+  &:focus,
+  &:active {
+    background-color: $senary !important;
+    border-color: $senary !important;
+  }
+}
+.user-card.confirmed .accordion-item {
+  background-color: #161c3b !important;
+}
+.user-card {
+  .accordion-header {
+    .accordion-button {
+      padding-bottom: 5px;
+    }
+  }
+  .accordion-button::after {
+    height: 0;
+    width: 0;
+  }
+  .accordion-button {
+    background-color: transparent;
+  }
+  .dropdown-menu {
+    inset: 50% 0px auto 50% !important;
+    background-color: $senary;
+    overflow: hidden;
+    border: 0.2rem solid $senary !important;
+    background-clip: unset !important;
+    padding: 0;
+    box-shadow: 0 0.5rem 2rem rgb(46 54 80);
+    .dropdown-item {
+      color: $senary !important;
+      background-color: #161c3b !important;
+      width: auto;
+      font-weight: 700;
+      border-bottom: 0;
+      margin-bottom: 2px;
+      &:hover,
+      &.active {
+        background-color: $senary !important;
+        color: $nonary !important;
+      }
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+  .time-selector-dropdown .dropdown-menu {
+    transform: translate3d(-125px, -150px, 0) !important ;
+  }
+  .normal-selector-dropdown .dropdown-menu {
+    transform: none !important;
+    top: 100% !important;
+    left: 0 !important;
+  }
+  .custom-selector-dropdown .dropdown-menu {
+    transform: none !important;
+    top: 100% !important;
+    left: 0 !important;
+    border: 0 !important;
+  }
+
+  .my-card {
+    border: none !important;
+    background-color: transparent !important;
+    .card-header {
+      color: $senary;
+      background-color: $nonary !important;
+      border-radius: 0;
+      border: 0;
+      margin-bottom: 2px;
+    }
+    .card-body {
+      background-color: #161c3b;
+      .btn-wrapper {
+        border-color: $senary !important;
+      }
+      .btn {
+        background-color: $nonary !important;
+        color: $senary !important;
+        &:hover {
+          background-color: $senary !important;
+          color: $nonary !important;
+        }
+      }
+      .btn.active {
+        background-color: $senary !important;
+        color: $nonary !important;
+      }
+    }
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+  input,
+  textarea {
+    background-color: transparent;
+    border: 0;
+    resize: none;
+    min-height: 0 !important;
+    background-color: $white;
+    &:focus-visible {
+      outline: none;
+      // font-weight: inherit;
+    }
+    &:focus {
+      background-color: $white;
+    }
+  }
+}

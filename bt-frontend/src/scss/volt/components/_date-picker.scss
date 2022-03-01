@@ -1,0 +1,144 @@
+.date-picker-dropdown {
+  .dropdown-toggle:first-child {
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background-color: transparent !important;
+  }
+}
+
+.date-picker-modal {
+  .modal-dialog {
+    justify-content: center;
+  }
+  .modal-content {
+    background-color: $senary;
+    width: fit-content;
+  }
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    background-color: $darker-nonary;
+    border: 0;
+  }
+  .card-body {
+    padding: 0 !important;
+    border-radius: 0rem !important;
+  }
+  .title-wrapper {
+    color: $senary;
+    border-bottom: 2px solid $senary;
+    padding-left: 25%;
+    padding-right: 25%;
+  }
+  .date-picker-card {
+    border: 0;
+  }
+}
+// .date-picker {
+//   .swiper-wrapper {
+//     align-items: center;
+//   }
+// }
+
+.date-picker-card {
+  background-color: transparent;
+  cursor: default;
+  max-width: 320px;
+  height: 360px;
+  width: 100%;
+  .days-label {
+    background-color: $gray-500;
+  }
+  .card-body {
+    border-bottom-right-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    tbody tr:first-child {
+      td {
+        padding-top: 15px !important;
+      }
+    }
+  }
+}
+
+.date-picker-dark {
+  .date-picker-card {
+    .card-header {
+      background-color: darken($nonary, 5%) !important;
+      h5 {
+        color: $senary;
+      }
+      button {
+        background-color: transparent !important;
+        color: $senary !important;
+      }
+    }
+    .card-body {
+      background-color: darken($nonary, 5%) !important;
+      .day-btn,
+      th {
+        background-color: $nonary !important;
+        color: $senary !important;
+        border-color: $senary !important;
+      }
+    }
+  }
+}
+.date-picker-darker {
+  .date-picker-card {
+    .days-label {
+      background-color: transparent;
+    }
+    th {
+      border-top: 1px solid !important;
+    }
+    .card-header {
+      background-color: $darker-nonary !important;
+      border: 0 !important;
+      h5 {
+        color: $senary;
+      }
+      button {
+        background-color: transparent !important;
+        color: $senary !important;
+      }
+    }
+    .card-body {
+      border: 0 !important;
+      padding: 0;
+      background-color: $darker-nonary !important;
+      .day-btn,
+      th {
+        color: $senary !important;
+        border-color: $senary !important;
+      }
+      .date-rows {
+        .btn-senary {
+          color: $nonary !important;
+        }
+        .btn-secondary,
+        .btn-light-blue,
+        .btn-quinary,
+        .btn-septenary,
+        .btn-primary {
+          background-color: $senary !important;
+          color: $nonary !important;
+        }
+        .btn-tertiary {
+          background-color: $nonary !important;
+          color: $senary !important;
+          border: 1px solid $senary !important;
+        }
+        .btn-light {
+          background-color: $nonary !important;
+          color: $senary !important;
+        }
+      }
+    }
+  }
+}
+.date-picker-overview {
+  .card {
+    border: 0;
+  }
+}

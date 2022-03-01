@@ -1,0 +1,12 @@
+.address-picker {
+  .dropdown-item,
+  input,
+  textarea {
+    font-size: 14px;
+    color: $dark;
+  }
+
+  .dropdown-item:hover {
+    background-color: $mega-light-blue;
+  }
+}

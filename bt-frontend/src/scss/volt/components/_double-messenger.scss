@@ -1,0 +1,151 @@
+.double-messenger {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  .contact {
+    .unread-count-active {
+      .time {
+        color: white !important;
+      }
+    }
+    .message,
+    .time {
+      color: $gray-500;
+    }
+    &.btn-primary {
+      &:focus {
+        background-color: $primary !important;
+      }
+      .contact-avatar div {
+        background-color: $secondary !important;
+      }
+    }
+  }
+  .contact-avatar {
+    height: 40px;
+    width: 40px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .messenger-left {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .card-header {
+      border-right: 1px solid $border-gray;
+    }
+    .card-body {
+      min-width: 370px;
+      overflow: hidden;
+      border-right: 1px solid $border-gray;
+    }
+  }
+  .card-header {
+    min-height: 70px;
+    display: flex;
+    flex-wrap: nowrap;
+    border-radius: 0;
+    align-items: center;
+    background-color: $gray-500 !important;
+    color: $primary;
+  }
+  .card-footer {
+    min-height: 60px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .track-vertical {
+    right: 0px;
+    bottom: 2px;
+    top: 2px;
+    border-radius: 3px;
+  }
+  .messenger-right {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    .card-body {
+      display: flex;
+      flex-direction: column-reverse;
+      flex-wrap: nowrap;
+      align-items: center;
+      border-radius: 0;
+      height: 0;
+      overflow: auto;
+      .message {
+        width: 100%;
+        display: flex;
+        .btn-secondary {
+          background-color: #32485e !important;
+          .time {
+            color: $gray-500 !important;
+          }
+        }
+        .btn {
+          max-width: 80%;
+          display: flex;
+          align-items: flex-end;
+          .time span {
+            font-size: 13px;
+            position: relative;
+            bottom: -9px;
+          }
+        }
+      }
+      .date-bar {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        color: $secondary;
+        .bar {
+          margin-bottom: 12px;
+          border-bottom: 1px solid $secondary;
+          flex-grow: 1;
+        }
+        .date {
+          text-align: center;
+        }
+      }
+    }
+    .card-footer {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      border-radius: 0;
+      justify-content: space-around;
+      height: 60px;
+      .textarea-wrapper {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-radius: 0.5rem;
+        flex: 1 1 auto;
+        textarea {
+          resize: none;
+          height: 36px;
+          line-height: 28px;
+          outline: none;
+          width: 100%;
+          border: 0;
+          background-color: transparent;
+          color: $primary;
+          box-shadow: none;
+        }
+      }
+      .send-btn {
+        height: 32px;
+        width: 32px;
+        border-radius: 50%;
+        box-shadow: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,160 @@
+// Contextual backgrounds
+
+@mixin date-picker-bg-btn-variant($parent, $color) {
+  #{$parent} {
+    .date-picker-card {
+      .card-header {
+        // background-color: $darker-nonary !important;
+
+        button {
+          background-color: transparent !important;
+        }
+      }
+      .card-body {
+        // background-color: $darker-nonary !important;
+        .table-days,
+        .day-btn th {
+          background-color: $color;
+        }
+        .day-btn.btn-primary,
+        .day-btn.btn-light-blue {
+          color: $color !important;
+        }
+        .day-btn,
+        th {
+          background-color: $color !important;
+        }
+      }
+    }
+  }
+}
+@mixin date-picker-bg-variant($parent, $color) {
+  #{$parent} {
+    .date-picker-card {
+      .card-header {
+        background-color: $color !important;
+
+        button {
+          background-color: transparent !important;
+        }
+      }
+      .card-body {
+        background-color: $color !important;
+      }
+    }
+  }
+}
+@mixin date-picker-text-variant($parent, $color) {
+  #{$parent} {
+    .date-picker-card {
+      .card-header {
+        h5 {
+          color: $color;
+        }
+        button {
+          color: $color !important;
+        }
+      }
+      .card-body {
+        .table-days,
+        .day-btn th {
+          color: $color;
+        }
+        .day-btn.btn-primary,
+        .day-btn.btn-light-blue {
+          background-color: $color !important;
+        }
+        .day-btn,
+        th {
+          color: $color !important;
+          border-color: $color !important;
+        }
+      }
+    }
+  }
+}
+
+@mixin btn-variant($parent, $color) {
+  #{$parent} {
+    @if $color == $inverse {
+      background-color: $color !important;
+      border-color: $color !important;
+      &:hover {
+        background-color: $very-light-tertiary !important;
+        color: $dark;
+        border-color: $very-light-tertiary !important;
+      }
+      &:focus {
+        background-color: $very-light-tertiary !important;
+        border-color: $very-light-tertiary !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
+          0 1px 1px rgb(46 54 80 / 8%), 0 0 0 0.08rem rgb($light-tertiary, 50%);
+      }
+    } @else if $color == $primary {
+      background-color: $color !important;
+      &:hover {
+        color: white;
+        background-color: lighten($color, 20%) !important;
+        border-color: lighten($color, 20%) !important;
+      }
+      &:focus {
+        background-color: lighten($color, 20%) !important;
+        border-color: lighten($color, 20%) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
+          0 1px 1px rgb(46 54 80 / 8%), 0 0 0 0.08rem rgb($color, 50%);
+      }
+    } @else if $color == $nonary {
+      background-color: $color !important;
+      color: $senary !important;
+      &:focus,
+      &:hover {
+        background-color: $senary !important;
+        border-color: $senary !important;
+        color: $nonary !important;
+      }
+    } @else if $color == $senary {
+      background-color: $color !important;
+      color: $nonary !important;
+    } @else {
+      background-color: $color !important;
+      &:hover {
+        background-color: darken($color, 20%) !important;
+        border-color: darken($color, 20%) !important;
+      }
+      &:focus {
+        background-color: darken($color, 20%) !important;
+        border-color: darken($color, 20%) !important;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%),
+          0 1px 1px rgb(46 54 80 / 8%), 0 0 0 0.08rem rgb($color, 50%);
+      }
+    }
+  }
+}
+
+@mixin bg-variant($parent, $color) {
+  #{$parent} {
+    background-color: $color !important;
+  }
+  a#{$parent},
+  button#{$parent} {
+    @include hover-focus {
+      background-color: lighten($color, 100%) !important;
+    }
+  }
+}
+
+@mixin bg-gradient-variant($parent, $color) {
+  #{$parent} {
+    background: linear-gradient(
+      87deg,
+      $color 0,
+      saturate($color, 10%) 100%
+    ) !important;
+  }
+}
+
+@mixin background-image($background-repeat, $background-size) {
+  background-repeat: $background-repeat;
+  background-position: top center;
+  background-size: $background-size;
+}

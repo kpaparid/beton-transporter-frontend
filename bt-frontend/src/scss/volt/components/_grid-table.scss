@@ -1,0 +1,92 @@
+// .grid-table {
+//   .card-header:first-child {
+//     min-height: 85px;
+//   }
+//   & > .card-body {
+//     height: calc(100% - 85px);
+//   }
+// }
+.date-picker-grid-table,
+.time-picker-grid-table {
+  input {
+    font-size: 14px;
+  }
+}
+
+.date-picker-grid-table-dropdown {
+  .btn-quinary {
+    background-color: $very-light-blue !important;
+  }
+  .date-picker-card {
+    border: 0 !important;
+    box-shadow: 0 2px 18px rgb(0 0 0 / 50%) !important;
+  }
+}
+.time-picker-grid-table-dropdown {
+  // .time-picker-card {
+  //   border: 0 !important;
+  //   box-shadow: 0 2px 18px rgb(0 0 0 / 50%) !important;
+  // }
+  // .btn-wrapper .btn-light:hover {
+  //   background-color: $very-light-blue !important;
+  //   border-color: $very-light-blue !important;
+  // }
+  // .btn-wrapper .btn-primary:focus {
+  //   background-color: $primary !important;
+  //   border-color: $primary !important;
+  // }
+}
+.grid-table-filter-dropdown {
+  box-shadow: 0 2px 18px rgb(0 0 0 / 50%) !important;
+  border: 0;
+  .date-picker {
+    .btn-quinary {
+      background-color: $very-light-blue !important;
+    }
+    .btn-secondary {
+      background-color: $primary !important;
+      &:hover {
+        background-color: $light-blue !important;
+      }
+    }
+    .date-picker-card {
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+  }
+  .card-body:last-child {
+    max-height: 700px;
+    overflow: auto;
+  }
+  .accordion-item:first-of-type {
+    border-radius: 0 !important;
+    .accordion-button {
+      border-radius: 0 !important;
+    }
+  }
+  .accordion-body .my-card .card-body {
+    background-color: white !important;
+  }
+  .accordion-body {
+    background-color: #e7ebef;
+  }
+  .date-picker-card {
+    max-width: none;
+    background-color: white;
+  }
+  .checkbox-filter-card .form-check-input:disabled {
+    opacity: 1;
+  }
+  .checkbox-filter-card .card-header button {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+  .btn-wrapper .btn-light:hover {
+    background-color: $very-light-blue !important;
+    border-color: $very-light-blue !important;
+  }
+  .btn-wrapper .btn-primary:focus {
+    background-color: $primary !important;
+    border-color: $primary !important;
+  }
+}

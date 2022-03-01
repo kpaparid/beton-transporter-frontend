@@ -1,0 +1,711 @@
+/**
+ * = Backgrounds
+*/
+
+.user-settings {
+  .card-body input {
+    color: $senary !important;
+    text-align: center;
+  }
+}
+
+.modal-dialog.dark-modal {
+  background-color: rgba(black, 0.5);
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  .modal-body {
+    background-color: transparent;
+  }
+}
+
+.card-message {
+  .accordion-body {
+    background-color: $primary;
+  }
+  .emoji-group {
+    padding-right: 0 !important;
+  }
+  .emoji-picker-react .content-wrapper {
+    overflow-x: hidden !important;
+  }
+  .emoji-categories {
+    display: none !important;
+  }
+  .emoji-picker-react .emoji-scroll-wrapper {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: absolute;
+    height: 100%;
+    box-sizing: border-box;
+    padding-right: 17px;
+    width: 100%;
+    box-sizing: content-box;
+  }
+
+  .emoji-picker-react {
+    background-color: $primary;
+    box-shadow: none;
+  }
+  .emoji-picker-react .emoji-group:before {
+    background-color: $primary;
+    color: white;
+  }
+  .emoji-search {
+    background-color: $primary;
+    color: white;
+  }
+  .messenger-side-header {
+    background-color: $primary;
+    border-top-left-radius: 0.4375rem;
+  }
+  .timestamp {
+    font-size: 13px;
+  }
+  .btn.active {
+    background-color: $light-blue !important;
+  }
+  .btn:hover {
+    background-color: $darker-blue !important;
+  }
+  .smile {
+    color: $primary !important;
+    background-color: $white !important;
+    &:hover,
+    &:focus {
+      color: $darker-blue !important;
+      background-color: $white !important;
+    }
+    .active {
+      color: $darker-blue !important;
+      background-color: $white !important;
+    }
+  }
+  .card-header,
+  .card-footer {
+    background-color: $primary !important;
+    .btn {
+      box-shadow: none;
+      &:hover {
+        box-shadow: none;
+        border-color: white !important;
+      }
+    }
+    textarea {
+      background-color: $gray-500;
+      outline: none;
+    }
+
+    h5 {
+      color: white;
+      margin: 0;
+    }
+    span {
+      color: white;
+    }
+  }
+  .card-body {
+    background-color: $gray-500;
+  }
+  .recipient {
+    .box {
+      justify-content: start;
+    }
+    .text-box {
+      color: white;
+      background-color: $light-blue;
+      text-align: start;
+    }
+    justify-content: start;
+  }
+  .sender {
+    .box {
+      justify-content: end;
+    }
+    .text-box {
+      color: $primary;
+      background-color: $very-light-tertiary;
+      text-align: end;
+    }
+    justify-content: end;
+  }
+}
+
+.ct-chart {
+  .ct-labels {
+    .ct-label.ct-vertical {
+      // background-color: red;
+      width: 50px !important;
+      text-align: center;
+    }
+  }
+}
+
+.ct-line {
+  stroke-width: 2px !important;
+}
+.ct-line,
+.ct-point {
+  stroke: $darker-blue !important;
+}
+.ct-area {
+  fill: $secondary !important;
+}
+.ct-label.ct-horizontal {
+  position: fixed;
+  left: -10px;
+}
+.badge-wrapper {
+  .btn-light {
+    &:hover,
+    &:focus {
+      background-color: $light !important;
+    }
+  }
+}
+.my-card {
+  border: 0;
+  background-color: transparent;
+  .card-body {
+    border: 0.0625rem solid rgba(46, 54, 80, 0.125);
+  }
+  .card-header {
+    border: 0.00625rem solid rgba($secondary, 0.125);
+    border-top: 0.5rem;
+    padding: 1rem;
+    > :first-child {
+      align-items: center !important;
+    }
+    background-color: $secondary !important;
+    color: white;
+    h5 {
+      color: white;
+      margin: 0;
+    }
+  }
+  .card-header.card-btn {
+    padding: 0rem;
+    > :first-child {
+      width: 100%;
+      padding: 1rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  .my-btn.active {
+    border: none !important;
+    box-shadow: none;
+    background-color: $primary !important;
+    color: white !important;
+    &:focus,
+    &:active {
+      background-color: $primary !important;
+    }
+    &:hover {
+      background-color: $secondary !important;
+      border-color: $secondary !important;
+    }
+  }
+  .my-btn {
+    color: $primary !important;
+    border: none !important;
+    box-shadow: none;
+    background-color: $light !important;
+    &:hover {
+      background-color: $light-tertiary !important;
+      color: $dark;
+      border-color: $light-tertiary !important;
+    }
+  }
+}
+.date-selector {
+  thead {
+    background-color: $gray-500 !important;
+  }
+  tbody {
+    :first-child {
+      td {
+        padding-top: 0.75rem !important;
+      }
+    }
+  }
+  // .btn-primary {
+  //   &:hover {
+  //     background-color: $secondary !important;
+  //     border-color: $secondary !important;
+  //     color: $white;
+  //   }
+  // }
+  .btn-light {
+    &:hover {
+      background-color: lighten($tertiary, 15%) !important;
+      color: $dark;
+      border-color: lighten($tertiary, 15%) !important;
+    }
+  }
+}
+.month-selector {
+  .btn-month.btn-primary {
+    &:hover {
+      background-color: $secondary !important;
+      border-color: $secondary !important;
+    }
+  }
+  .btn-month.btn-light {
+    &:hover {
+      background-color: lighten($tertiary, 15%) !important;
+      color: $dark;
+      border-color: lighten($tertiary, 15%) !important;
+    }
+  }
+  .btn-arrow-left,
+  .btn-arrow-right {
+    &:hover {
+      background-color: lighten($tertiary, 15%) !important;
+      color: $dark;
+      border-color: lighten($tertiary, 15%) !important;
+    }
+    &:focus {
+      background-color: $primary !important;
+      color: $white;
+      border-color: $primary !important;
+    }
+  }
+}
+.select_user__control {
+  border: $border !important;
+  .select_user__menu {
+    margin: 0 !important;
+  }
+  .select_user__indicator-separator {
+    background-color: $gray-500 !important;
+  }
+
+  .select_user__indicator {
+    color: $gray-600 !important;
+  }
+  .select_user__single-value {
+    color: $gray-700 !important;
+  }
+  &:hover {
+    border-color: $light-blue !important;
+    .select_user__single-value {
+      color: $light-blue !important;
+    }
+    .select_user__indicator-separator {
+      background-color: $light-blue !important;
+    }
+    .select_user__indicator {
+      color: $light-blue !important;
+    }
+  }
+}
+.checkboxFilterCard {
+  .btn-secondary:hover {
+    .form-check-input {
+      background-color: $tertiary;
+    }
+  }
+  .form-check-input:disabled {
+    opacity: 1;
+  }
+}
+.filter-dropdown {
+  .accordion {
+    width: 400px;
+  }
+  @include media-breakpoint-down(sm) {
+    .grid-table-filter-dropdown.card {
+      height: 100%;
+    }
+    .grid-table-filter-dropdown .card-header:first-child .container {
+      display: flex;
+      justify-content: space-between;
+      &::before {
+        content: "";
+      }
+      .close {
+        border: 0;
+        border-radius: 360px;
+        width: 30px;
+        height: 30px;
+        box-shadow: none;
+        background-color: transparent !important;
+        padding: 0;
+      }
+    }
+    .grid-table-filter-dropdown .card-body:last-child {
+      max-height: none;
+    }
+    .date-picker {
+      display: flex;
+      justify-content: center;
+      .date-picker-card {
+        max-width: 370px;
+      }
+    }
+    .accordion {
+      width: 100% !important;
+    }
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background-color: $primary;
+    transform: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9998 !important;
+    overflow: auto !important;
+    justify-content: center !important;
+  }
+  .accordion-item {
+    .disabled .accordion-button::after {
+      background-image: none !important;
+    }
+  }
+  .checkbox-row {
+    border-bottom: $border;
+    width: 100%;
+    border-radius: 0;
+    padding: 0rem 2rem 0rem 2rem;
+
+    &:hover {
+      background-color: $mega-light-blue !important;
+    }
+    &:focus,
+    &:focus-within,
+    &:active {
+      background-color: lighten($tertiary, 25%) !important;
+      box-shadow: none;
+    }
+    .form-check-input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0 !important;
+    }
+  }
+}
+
+.nested-dropdown .dropdown-menu.show {
+  animation: none !important;
+}
+.mui-slider {
+  color: $primary;
+  .MuiSlider-thumb {
+    border: 0 !important;
+    background-color: $secondary !important;
+    &:hover {
+      box-shadow: 0 0 0 4px rgba($secondary, 0.35) !important;
+    }
+    &:active {
+      background-color: lighten($tertiary, 16%) !important;
+      box-shadow: 0 0 0 4px rgba($tertiary, 0.35) !important;
+      .bar {
+        background-color: $light-blue !important;
+      }
+    }
+  }
+  .bar {
+    background-color: $white !important;
+  }
+  .MuiSlider-track {
+    background-color: lighten($tertiary, 16%);
+    color: lighten($tertiary, 16%);
+  }
+  .MuiInput-root {
+    color: $gray-900 !important;
+  }
+}
+.select_user__control--is-focused {
+  border-color: $light-blue !important;
+  box-shadow: $box-shadow-inset-primary !important;
+}
+.card-dark {
+  .btn-title {
+    background-color: $white !important;
+    color: $black !important;
+    border: 0;
+    box-shadow: none;
+  }
+  .card-table {
+    padding: 0.25rem;
+  }
+  > .card-body {
+    border: none !important;
+    background-color: transparent;
+    padding-top: 0;
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+      border: 1px solid $primary;
+    }
+    .dummy,
+    textarea,
+    input[type="text"],
+    input[type="number"] {
+      background-color: white;
+      text-align: center;
+      resize: none;
+      vertical-align: bottom;
+      padding: 0;
+      border: 1px solid $primary;
+      overflow: hidden;
+      color: #0a3761;
+      &:focus-visible {
+        outline: 0;
+      }
+      &:focus-within {
+        box-shadow: 0 0 0 2.5px rgb(46, 54, 80, 60%);
+      }
+    }
+  }
+  > .card-header {
+    padding: 0.25rem;
+    background-color: transparent;
+    color: black !important;
+    h5,
+    h6,
+    h4,
+    h1 {
+      margin: 0;
+      padding: 1rem !important;
+      font-weight: 600;
+      color: black !important;
+    }
+    .btn-title {
+      &:hover {
+        :first-child {
+          color: $very-light-tertiary !important;
+        }
+      }
+      &:focus:active {
+        box-shadow: none;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      align-items: center;
+      padding-right: 0.565rem;
+
+      button {
+        background-color: transparent !important;
+        border: none;
+        padding: 0;
+        color: $secondary !important;
+        width: 45px;
+        height: 45px;
+        box-shadow: none;
+        &:hover {
+          color: $very-light-tertiary !important;
+        }
+        &:focus {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+  .table {
+    tbody {
+      background-color: white;
+      border: none;
+      tr {
+        border-bottom: $border;
+        background-color: white;
+        &:hover {
+          background-color: lighten($primary, 76%);
+        }
+      }
+      :first-child {
+        td {
+          padding-top: 10px !important;
+        }
+      }
+      td {
+        .fallback {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          &:hover {
+            text-overflow: initial;
+            overflow-x: auto;
+            white-space: pre-wrap;
+          }
+        }
+        border: none;
+      }
+    }
+    thead {
+      background-color: $gray-500;
+      th {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      th.sortable {
+        .sort-arrow {
+          color: $tertiary;
+          width: "15px";
+          height: "15px";
+          .svg {
+            transform: scale(1.2);
+          }
+        }
+        &:hover {
+          .sort-arrow {
+            color: $dark !important;
+          }
+          cursor: pointer;
+          color: $dark !important;
+          background-color: $light-tertiary !important;
+        }
+      }
+    }
+  }
+  tbody .form-check-input[type="checkbox"] {
+    background-color: white;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: $gray-600 !important;
+      filter: brightness(100%) !important;
+    }
+    &:indeterminate,
+    &:checked {
+      background-color: $primary !important;
+    }
+  }
+  thead .form-check-input[type="checkbox"] {
+    background-color: white;
+    border-color: "transparent" !important;
+    &:focus,
+    &:hover,
+    &:active {
+      border-color: $gray-600 !important;
+      border-color: $dark !important;
+    }
+    &:indeterminate,
+    &:checked {
+      background-color: $primary !important;
+    }
+  }
+  .pagination .page-item {
+    .page-link {
+      border: $border;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:hover {
+        background-color: $light-tertiary !important;
+        border-color: $light-tertiary !important;
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba($tertiary, 0.55) !important;
+        }
+      }
+    }
+    &.active .page-link {
+      background-color: $primary !important;
+      border-color: $primary;
+      &:hover {
+        background-color: $primary !important;
+        border-color: $primary !important;
+      }
+      &:focus {
+        box-shadow: 0 0 0 0.2rem $primary !important;
+      }
+    }
+  }
+}
+
+.gradient-primary-secondary {
+  /* background: rgb(0,50,96); */
+  background: linear-gradient(
+    11deg,
+    rgba(0, 50, 96, 1) 0%,
+    rgba(67, 146, 207, 1) 100%,
+    rgba(0, 212, 255, 1) 100%
+  ) !important;
+  h5 {
+    color: white !important;
+    padding: 0.5rem !important;
+  }
+  svg {
+    color: white !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0.5rem !important;
+  }
+  button {
+    // background-color: red;
+    display: flex;
+    padding: 0 !important;
+    margin: 0 0.15rem !important;
+    border-radius: 2rem !important;
+    // &:hover {
+    //   background-color: $secondary !important;
+    // }
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgb(229 233 236) !important;
+    }
+  }
+}
+@each $color, $value in $theme-colors {
+  @include btn-variant(".btn-#{$color}", $value);
+}
+@each $color, $value in $theme-colors {
+  @include date-picker-bg-variant(".date-picker-bg-#{$color}", $value);
+}
+@each $color, $value in $theme-colors {
+  @include date-picker-bg-btn-variant(".date-picker-bg-btn-#{$color}", $value);
+}
+@each $color, $value in $theme-colors {
+  @include date-picker-text-variant(".date-picker-text-#{$color}", $value);
+}
+
+@each $color, $value in $theme-colors {
+  @include bg-gradient-variant(".bg-gradient-#{$color}", $value);
+}
+
+// Backgrounds Overlay
+@each $color, $value in $theme-colors {
+  .overlay-#{$color} {
+    &:before {
+      position: absolute;
+      content: "";
+      background: $value;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0.8;
+      z-index: 0;
+    }
+  }
+}
+
+.section-image {
+  @include background-image(no-repeat, cover);
+}
+
+.bg-secondary-alt {
+  background-color: lighten($secondary, 15%);
+}
+
+.form-bg-image {
+  background-repeat: no-repeat !important;
+  background-position: top center !important;
+}
+
+.fill-soft {
+  fill: $soft;
+}

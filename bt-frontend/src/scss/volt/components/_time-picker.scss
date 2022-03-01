@@ -1,0 +1,37 @@
+.time-picker-modal {
+  .modal-content {
+    // background-color: $senary;
+  }
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    background-color: $darker-nonary;
+    border: 0;
+  }
+  .title-wrapper {
+    color: $senary;
+    border-bottom: 2px solid $senary;
+    padding-left: 25%;
+    padding-right: 25%;
+  }
+}
+.time-picker-dropdown {
+  .dropdown-toggle:first-child {
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background-color: transparent !important;
+  }
+}
+.time-picker-card {
+  border: 0 !important;
+  box-shadow: 0 2px 18px rgb(0 0 0 / 50%) !important;
+  .btn-wrapper .btn-light:hover {
+    background-color: $very-light-blue !important;
+    border-color: $very-light-blue !important;
+  }
+  .btn-wrapper .btn-primary:focus {
+    background-color: $primary !important;
+    border-color: $primary !important;
+  }
+}

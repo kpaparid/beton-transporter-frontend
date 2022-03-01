@@ -1,0 +1,62 @@
+/**
+ * = Accordions
+ */
+
+.accordion-button {
+  text-align: left;
+
+  .btn-check:focus + .btn,
+  .btn:focus {
+    outline: 0;
+    box-shadow: none;
+  }
+
+  &:hover {
+    background-color: $gray-200;
+  }
+}
+
+// Flush accordion items
+//
+// Remove borders and border-radius to keep accordion items edge-to-edge.
+
+.accordion-flush {
+  .accordion-button {
+    background-color: transparent;
+    &:not(.collapsed) {
+      color: $secondary;
+    }
+    &:focus {
+      border-color: $gray-300;
+      box-shadow: none;
+    }
+  }
+  .accordion-collapse {
+    border: 0;
+  }
+}
+.accordion-dark {
+  color: $senary;
+  border-color: $senary !important;
+  .accordion-header .accordion-button {
+    background-color: $nonary;
+    color: $senary;
+  }
+  .accordion-button:after {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fc6f5b'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
+  }
+  .accordion-collapse {
+    background-color: $nonary;
+    border-top: 1px solid $nonary;
+  }
+  .accordion-collapse.show {
+    border-top: 1px solid $senary;
+  }
+  .accordion-item {
+    background-color: $nonary;
+    border: 0;
+  }
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+}
