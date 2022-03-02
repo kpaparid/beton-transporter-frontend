@@ -89,7 +89,7 @@ const RouteWithSidebarPhone = ({ children }) => {
   return (
     <>
       <main
-        className="p-0 h-100 d-flex overflow-auto bg-nonary"
+        className="p-0 h-100 d-flex overflow-auto bg-darker-nonary"
         style={{ flexDirection: "column" }}
       >
         <div className="w-100">
