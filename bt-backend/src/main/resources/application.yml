@@ -9,9 +9,17 @@ spring:
   application:
     name: springsecurityfirebaseauth
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/beton_transport
-    username: root
-    password: my-secret-pw
+    #    url: jdbc:mysql://127.0.0.1:3306/beton_transport
+    #    username: root
+    #    password: my-secret-pw
+
+    url: jdbc:mysql://remotemysql.com/AkHsftJksR
+    username: AkHsftJksR
+    password: 8tQFIubfPt
+
+  #    url: jdbc:mysql://remotemysql.com
+  #      username: AkHsftJksR
+  #      password: gDkqQipfBW
   jpa:
     hibernate:
       ddl-auto: update
