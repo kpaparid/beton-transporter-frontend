@@ -105,14 +105,13 @@ const RouteWithLogoPhone = ({ children }) => {
   return (
     <>
       <main
-        className="p-0 h-100 d-flex overflow-auto"
+        className="p-0 h-100 d-flex overflow-auto bg-darker-nonary"
         style={{ flexDirection: "column" }}
       >
-        <div className="w-100">
+        {/* <div className="w-100">
           <Sidebar2 />
-        </div>
-        {/* <div style={{ flex: "1 1" }}>{children}</div> */}
-        <div>{children}</div>
+        </div> */}
+        <div style={{ flex: "1 1" }}>{children}</div>
       </main>
     </>
   );
