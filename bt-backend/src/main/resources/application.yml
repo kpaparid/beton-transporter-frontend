@@ -16,10 +16,6 @@ spring:
     url: jdbc:mysql://remotemysql.com/AkHsftJksR
     username: AkHsftJksR
     password: 8tQFIubfPt
-
-  #    url: jdbc:mysql://remotemysql.com
-  #      username: AkHsftJksR
-  #      password: gDkqQipfBW
   jpa:
     hibernate:
       ddl-auto: update

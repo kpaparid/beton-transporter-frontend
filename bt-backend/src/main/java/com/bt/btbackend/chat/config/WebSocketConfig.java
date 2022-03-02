@@ -34,7 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/ws")
                 .setAllowedOrigins("http://localhost:3000/")
-                .setAllowedOrigins("https://beton-transporter.herokuapp.com/")
+//                .setAllowedOrigins("https://modest-morse-7f9546.netlify.app")
 //                .setAllowedOrigins(restSecProps.getAllowedOrigins())
                 .withSockJS();
     }
