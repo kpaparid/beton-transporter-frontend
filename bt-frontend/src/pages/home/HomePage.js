@@ -95,7 +95,8 @@ const RouteWithSidebarPhone = ({ children }) => {
         <div className="w-100">
           <Sidebar3 />
         </div>
-        <div style={{ flex: "1 1" }}>{children}</div>
+        {/* <div style={{ flex: "1 1" }}>{children}</div> */}
+        <div>{children}</div>
       </main>
     </>
   );
@@ -110,7 +111,8 @@ const RouteWithLogoPhone = ({ children }) => {
         <div className="w-100">
           <Sidebar2 />
         </div>
-        <div style={{ flex: "1 1" }}>{children}</div>
+        {/* <div style={{ flex: "1 1" }}>{children}</div> */}
+        <div>{children}</div>
       </main>
     </>
   );
