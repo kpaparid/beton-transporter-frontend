@@ -58,7 +58,7 @@ public class SettingsController {
 
     }
 //    @IsAdmin
-    @IsUserPlus
+//    @IsUserPlus
 @PutMapping()
 ResponseEntity<Object> addOne(@RequestBody SettingsDao entity ) {
     try {

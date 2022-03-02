@@ -11,7 +11,8 @@ const useLoader = (stateAPIStatus) => {
   if (stateAPIStatus === "success") {
     return <DashBoardComponent />;
   } else if (stateAPIStatus === "error") {
-    return navigate("/500");
+    navigate("/500");
+    return <ComponentPreLoader show={true} />;
   } else {
     return (
       <div className="d-flex h-100 align-items-center">

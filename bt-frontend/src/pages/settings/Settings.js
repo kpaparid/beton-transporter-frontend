@@ -20,7 +20,8 @@ const useLoader = (stateAPIStatus) => {
   if (stateAPIStatus === "success") {
     return <SettingsComponent />;
   } else if (stateAPIStatus === "error") {
-    return navigate("/500");
+    navigate("/500");
+    return <ComponentPreLoader show={true} />;
   } else {
     return (
       <div className="d-flex h-100 align-items-center">
@@ -41,7 +42,7 @@ const SettingsComponent = memo(() => {
   const [addToursSettings, setAddToursSettings] = useState();
   useEffect(() => {
     fetchAddToursSettings().then((res) =>
-      setAddToursSettings(JSON.parse(res.data[0].values[0]))
+      setAddToursSettings(JSON.parse(res.data[0]?.values[0]))
     );
   }, [fetchAddToursSettings]);
 
