@@ -22,7 +22,7 @@ export function useServices() {
   const postSettings = useCallback(
     (data) => {
       const options = {
-        url: API + "/settings",
+        url: API + "settings",
         body: JSON.stringify(data),
         method: "PUT",
       };
@@ -33,7 +33,7 @@ export function useServices() {
   const registerUsers = useCallback(
     (data) => {
       const options = {
-        url: API + "/users",
+        url: API + "users",
         body: JSON.stringify(data),
         method: "POST",
       };
@@ -139,7 +139,7 @@ export function useServices() {
   const postTour = useCallback(
     (data) => {
       const options = {
-        url: API + "/tours",
+        url: API + "tours",
         method: "PUT",
         body: JSON.stringify(data),
       };
@@ -484,7 +484,7 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
     const API = process.env.REACT_APP_API_URL;
     const Stomp = require("stompjs");
     var SockJS = require("sockjs-client");
-    var socket = new SockJS(API + "/ws");
+    var socket = new SockJS(API + "ws");
     stompClient = Stomp.over(socket);
     stompClient.connect(
       {},

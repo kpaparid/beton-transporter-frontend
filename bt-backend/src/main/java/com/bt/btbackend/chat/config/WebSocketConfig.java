@@ -33,7 +33,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setAllowedOrigins("*")
+                .setAllowedOrigins("http://localhost:3000/")
+                .setAllowedOrigins("https://beton-transporter.herokuapp.com/")
 //                .setAllowedOrigins(restSecProps.getAllowedOrigins())
                 .withSockJS();
     }
