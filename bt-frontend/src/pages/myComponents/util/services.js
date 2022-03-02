@@ -12,16 +12,17 @@ import {
 
 export function useServices() {
   const { authenticatedFetch, currentUser } = useAuth();
+  const API = process.env.REACT_APP_API_URL;
   const fetchAddToursSettings = useCallback(() => {
     const options = {
-      url: "http://localhost:8090/settings?id=add-tours",
+      url: API + "settings?id=add-tours",
     };
     return authenticatedFetch(options);
   }, [authenticatedFetch]);
   const postSettings = useCallback(
     (data) => {
       const options = {
-        url: "http://localhost:8090/settings",
+        url: API + "/settings",
         body: JSON.stringify(data),
         method: "PUT",
       };
@@ -32,7 +33,7 @@ export function useServices() {
   const registerUsers = useCallback(
     (data) => {
       const options = {
-        url: "http://localhost:8090/users",
+        url: API + "/users",
         body: JSON.stringify(data),
         method: "POST",
       };
@@ -44,7 +45,8 @@ export function useServices() {
     (driver) => {
       const options = {
         url:
-          "http://localhost:8090/tours?driver=" +
+          API +
+          "tours?driver=" +
           driver +
           "&date=" +
           moment().format("YYYY.MM.DD"),
@@ -57,7 +59,8 @@ export function useServices() {
     (driver, from, to) => {
       const options = {
         url:
-          "http://localhost:8090/work-hours?size=500&driver=" +
+          API +
+          "work-hours?size=500&driver=" +
           driver +
           "&date_gte=" +
           from +
@@ -78,7 +81,8 @@ export function useServices() {
     (driver, page = 0) => {
       const options = {
         url:
-          "http://localhost:8090/tours?sort=date,desc&size=20&page=" +
+          API +
+          "tours?sort=date,desc&size=20&page=" +
           page +
           "&driver=" +
           driver,
@@ -97,7 +101,8 @@ export function useServices() {
     (driver) => {
       const options = {
         url:
-          "http://localhost:8090/work-hours?driver=" +
+          API +
+          "work-hours?driver=" +
           driver +
           "&date=" +
           moment().format("YYYY.MM.DD"),
@@ -111,7 +116,8 @@ export function useServices() {
       const date = moment().format("YYYY.MM.DD");
       const options = {
         url:
-          "http://localhost:8090/absent-days?sort=dateFrom,desc&size=500&page=0&reason=vacations&driver=" +
+          API +
+          "absent-days?sort=dateFrom,desc&size=500&page=0&reason=vacations&driver=" +
           driver +
           "&dateFrom_gte=" +
           date,
@@ -123,7 +129,8 @@ export function useServices() {
   const fetchUserConfirmedVacations = useCallback(() => {
     const options = {
       url:
-        "http://localhost:8090/absent-days?driver=" +
+        API +
+        "absent-days?driver=" +
         currentUser?.uid +
         "&size=500&verified=1&reason=vacations&sort=dateFrom,desc",
     };
@@ -132,7 +139,7 @@ export function useServices() {
   const postTour = useCallback(
     (data) => {
       const options = {
-        url: "http://localhost:8090/tours",
+        url: API + "/tours",
         method: "PUT",
         body: JSON.stringify(data),
       };
@@ -143,7 +150,7 @@ export function useServices() {
   const postWorkHour = useCallback(
     (data) => {
       const options = {
-        url: "http://localhost:8090/work-hours",
+        url: API + "work-hours",
         method: "PUT",
         body: JSON.stringify(data),
       };
@@ -154,7 +161,7 @@ export function useServices() {
   const postVacations = useCallback(
     (data) => {
       const options = {
-        url: "http://localhost:8090/absent-days",
+        url: API + "absent-days",
         method: "PUT",
         body: JSON.stringify(data),
       };
@@ -166,7 +173,7 @@ export function useServices() {
     (id) => {
       const options = {
         method: "DELETE",
-        url: "http://localhost:8090/tours/" + id,
+        url: API + "tours/" + id,
       };
       return authenticatedFetch(options);
     },
@@ -176,7 +183,7 @@ export function useServices() {
     (id) => {
       const options = {
         method: "DELETE",
-        url: "http://localhost:8090/work-hours/" + id,
+        url: API + "work-hours/" + id,
       };
       return authenticatedFetch(options);
     },
@@ -186,20 +193,20 @@ export function useServices() {
     (id) => {
       const options = {
         method: "DELETE",
-        url: "http://localhost:8090/absent-days/" + id,
+        url: API + "absent-days/" + id,
       };
       return authenticatedFetch(options);
     },
     [authenticatedFetch]
   );
   const fetchUsers = useCallback(() => {
-    const options = { url: "http://localhost:8090/users/all" };
+    const options = { url: API + "users/all" };
     return authenticatedFetch(options);
   }, [authenticatedFetch]);
 
   const fetchSettings = useCallback(() => {
     const options = {
-      url: "http://localhost:8090/settings",
+      url: API + "settings",
     };
     return authenticatedFetch(options);
   }, [authenticatedFetch]);
@@ -474,9 +481,10 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
   }, []);
 
   const connect = useCallback(() => {
+    const API = process.env.REACT_APP_API_URL;
     const Stomp = require("stompjs");
     var SockJS = require("sockjs-client");
-    var socket = new SockJS("http://localhost:8090/ws");
+    var socket = new SockJS(API + "/ws");
     stompClient = Stomp.over(socket);
     stompClient.connect(
       {},

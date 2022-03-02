@@ -93,6 +93,7 @@ export function loadOverviewPage(
   dispatch,
   header
 ) {
+  const API = process.env.REACT_APP_API_URL;
   const date = moment().format("YYYY.MM");
   const dateFilter = { date: { eq: [date] } };
   const requestOptions = {
@@ -100,27 +101,25 @@ export function loadOverviewPage(
     headers: header,
   };
   const cbmFetchers = [
+    fetch(API + "tours/cbm?date=" + moment().format("YYYY.MM"), requestOptions),
     fetch(
-      "http://localhost:8090/tours/cbm?date=" + moment().format("YYYY.MM"),
-      requestOptions
-    ),
-    fetch(
-      "http://localhost:8090/tours/cbm?date=" +
+      API +
+        "tours/cbm?date=" +
         moment().subtract(1, "months").format("YYYY.MM"),
       requestOptions
     ),
     fetch(
-      "http://localhost:8090/tours/cbm?date=" +
+      API +
+        "tours/cbm?date=" +
         moment().subtract(2, "months").format("YYYY.MM"),
       requestOptions
     ),
     fetch(
-      "http://localhost:8090/tours/cbm-by-work-plant?date=" +
-        moment().format("YYYY"),
+      API + "tours/cbm-by-work-plant?date=" + moment().format("YYYY"),
       requestOptions
     ),
     fetch(
-      "http://localhost:8090/tours/cbm-year/?date=" + moment().format("YYYY"),
+      API + "tours/cbm-year/?date=" + moment().format("YYYY"),
       requestOptions
     ),
   ];

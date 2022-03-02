@@ -22,9 +22,6 @@ import React, {
 } from "react";
 import { Portal } from "react-portal";
 import { auth } from "../firebase";
-
-// const BACKEND = "http://localhost:8090/public";
-// const CHAT_SERVICE = "http://localhost:8090/messenger";
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -184,7 +181,7 @@ export function AuthProvider({ children }) {
             return res;
           });
         })
-        .catch(() => {
+        .catch((e) => {
           return Promise.reject();
         });
     });

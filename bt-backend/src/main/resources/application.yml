@@ -42,6 +42,7 @@ security:
   allowed-origins:
     - https://${DOMAIN}
     - http://localhost:3000
+    - https://modest-morse-7f9546.netlify.app
   allowed-methods:
     - GET
     - POST
