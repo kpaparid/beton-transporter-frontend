@@ -95,8 +95,8 @@ const RouteWithSidebarPhone = ({ children }) => {
         <div className="w-100">
           <Sidebar3 />
         </div>
-        {/* <div style={{ flex: "1 1" }}>{children}</div> */}
-        <div>{children}</div>
+        <div style={{ flex: "1 1" }}>{children}</div>
+        {/* <div>{children}</div> */}
       </main>
     </>
   );
@@ -108,9 +108,9 @@ const RouteWithLogoPhone = ({ children }) => {
         className="p-0 h-100 d-flex overflow-auto bg-darker-nonary"
         style={{ flexDirection: "column" }}
       >
-        {/* <div className="w-100">
+        <div className="w-100">
           <Sidebar2 />
-        </div> */}
+        </div>
         <div style={{ flex: "1 1" }}>{children}</div>
       </main>
     </>

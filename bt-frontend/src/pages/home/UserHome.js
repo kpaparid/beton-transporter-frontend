@@ -94,7 +94,7 @@ const UserHome = ({ onClick, maxWidth = "500px" }) => {
       >
         <div
           className={"w-100 p-3"}
-          style={{ padding: "0", maxWidth: maxWidth, minHeight: "350px" }}
+          style={{ padding: "0", maxWidth: maxWidth }}
         >
           <div className="d-flex flex-wrap justify-content-center">
             <NavItem
