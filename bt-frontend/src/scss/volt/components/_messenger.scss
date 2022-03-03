@@ -1,0 +1,342 @@
+.messenger {
+  .message.sent {
+    justify-content: flex-end;
+    .btn {
+      text-align: end;
+    }
+    .time {
+      color: white;
+    }
+  }
+  .message.received {
+    justify-content: flex-start;
+    .btn {
+      text-align: start;
+    }
+  }
+  .wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    overflow: hidden;
+    border-radius: 0.5rem;
+  }
+
+  .contact-avatar {
+    height: 40px;
+    width: 40px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .messenger-left {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .card-body {
+      min-width: 370px;
+      overflow: hidden;
+    }
+  }
+  .card-header {
+    min-height: 70px;
+    display: flex;
+    flex-wrap: nowrap;
+    border-radius: 0;
+    align-items: center;
+  }
+  .card-footer {
+    min-height: 60px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .track-vertical {
+    right: 0px;
+    bottom: 2px;
+    top: 2px;
+    border-radius: 3px;
+  }
+  .messenger-right {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    .card-body {
+      display: flex;
+      flex-direction: column-reverse;
+      flex-wrap: nowrap;
+      align-items: center;
+      border-radius: 0;
+      height: 0;
+      overflow: auto;
+      .message {
+        width: 100%;
+        display: flex;
+        .btn {
+          max-width: 80%;
+          display: flex;
+          align-items: flex-end;
+          .time span {
+            font-size: 13px;
+            position: relative;
+            bottom: -9px;
+          }
+        }
+      }
+      .date-bar {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        .bar {
+          margin-bottom: 12px;
+          flex-grow: 1;
+        }
+        .date {
+          text-align: center;
+        }
+      }
+    }
+    .card-footer {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      border-radius: 0;
+      justify-content: space-around;
+      height: 60px;
+      .textarea-wrapper {
+        display: flex;
+        align-items: center;
+        border-radius: 0.5rem;
+        flex: 1 1 auto;
+        textarea {
+          resize: none;
+          height: 36px;
+          line-height: 28px;
+          outline: none;
+          width: 100%;
+          border: 0;
+          background-color: transparent;
+          box-shadow: none;
+        }
+      }
+      .send-btn {
+        height: 32px;
+        width: 32px;
+        border-radius: 50%;
+        box-shadow: none;
+      }
+    }
+  }
+}
+.messenger-light {
+  background-color: $gray-500;
+  .unread-count {
+    background-color: $primary;
+    color: white;
+  }
+  .contact {
+    .unread-count-active {
+      .time {
+        color: white !important;
+      }
+    }
+    .message,
+    .time {
+      color: $gray-500;
+    }
+    .contact-avatar .fallback-icon {
+      background-color: $primary;
+      color: white;
+    }
+    &.btn-primary {
+      &:focus {
+        background-color: $primary !important;
+      }
+      .contact-avatar div {
+        background-color: $secondary !important;
+      }
+    }
+  }
+
+  .messenger-left {
+    background-color: $gray-500;
+    .card-header {
+      border-right: 1px solid $border-gray;
+    }
+    .card-body {
+      border-right: 1px solid $border-gray;
+    }
+  }
+  .card-header {
+    background-color: $gray-500 !important;
+    color: $primary;
+    .fallback-icon {
+      background-color: $primary;
+      color: $white;
+    }
+  }
+  .messenger-right {
+    background-color: $gray-500;
+    .fallback-body {
+      background-color: $gray-300;
+    }
+    .card-body {
+      background-color: $gray-400;
+      .message.sent .btn-secondary {
+        background-color: #32485e !important;
+        .time {
+          color: $gray-500 !important;
+        }
+      }
+      .message.received .btn-secondary {
+        background-color: $gray-500 !important;
+        border: $border-gray;
+        color: $primary;
+        .time {
+          color: $primary !important;
+        }
+      }
+
+      .date-bar {
+        color: $secondary;
+        .bar {
+          border-bottom: 1px solid $secondary;
+        }
+      }
+    }
+    .card-footer {
+      .textarea-wrapper {
+        background-color: white;
+      }
+    }
+  }
+  .textarea-wrapper textarea {
+    background-color: transparent;
+    color: $primary;
+  }
+}
+
+.messenger-dark {
+  background-color: $darker-nonary;
+  .unread-count {
+    background-color: $darker-senary;
+    color: $darker-nonary;
+  }
+  .contact {
+    &.btn-secondary {
+      background-color: $nonary !important;
+      color: $senary;
+      border: 0;
+      .message,
+      .time {
+        color: $darker-senary;
+      }
+    }
+    .contact-avatar .fallback-icon {
+      background-color: $senary;
+      color: $darker-nonary;
+    }
+    &.btn-primary {
+      box-shadow: none;
+      border: 0;
+      background-color: $senary !important;
+      color: $darker-nonary;
+      .message,
+      .time {
+        color: $darker-nonary;
+      }
+      &:focus {
+        background-color: $senary !important;
+      }
+      .contact-avatar div {
+        background-color: $nonary !important;
+        color: $senary;
+      }
+    }
+  }
+  .track-vertical div:first-child {
+    background-color: $nonary !important;
+  }
+  .card-header {
+    border-bottom: 1px solid $darker-nonary;
+  }
+  .messenger-left {
+    background-color: $darker-nonary;
+    .card-header {
+      border-right: 1px solid $nonary;
+    }
+    .card-body {
+      border-right: 1px solid $nonary;
+    }
+    .card-footer {
+      display: none;
+    }
+  }
+  .card-header {
+    background-color: $nonary !important;
+    color: $senary;
+    .fallback-icon {
+      background-color: $senary;
+      color: $darker-nonary;
+    }
+  }
+  .messenger-right {
+    background-color: $darker-nonary;
+    .fallback-body {
+      background-color: $darker-nonary;
+      div {
+        border: 0.25em solid $senary;
+        border-right-color: transparent;
+      }
+    }
+    .card-body {
+      background-color: $darker-nonary;
+      .message.sent .btn-secondary {
+        background-color: $senary !important;
+        color: $darker-nonary;
+        border-color: $darker-senary;
+        .time {
+          color: $nonary;
+        }
+      }
+      .message.received .btn-secondary {
+        background-color: $nonary !important;
+        border-color: $nonary;
+        color: $senary;
+        .time {
+          color: $darker-senary !important;
+        }
+      }
+
+      .date-bar {
+        color: $senary;
+        .bar {
+          border-bottom: 1px solid $senary;
+        }
+      }
+    }
+    .card-footer {
+      border: 0;
+      .textarea-wrapper {
+        background-color: $nonary;
+        color: $senary;
+      }
+    }
+  }
+  .textarea-wrapper textarea {
+    background-color: transparent;
+    color: $senary;
+  }
+  .send-btn {
+    border: 0;
+    background-color: $nonary !important;
+    color: $senary;
+  }
+}
+.messenger-fullscreen .messenger .wrapper {
+  border-radius: 0;
+}

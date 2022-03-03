@@ -33,7 +33,7 @@ const AddWorkHours = () => {
           console.log(er);
         });
     },
-    [postWorkHour, currentUser?.uid]
+    [postWorkHour, currentUser?.uid, navigate]
   );
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const AddWorkHours = () => {
       setValue("date", moment().format("YYYY.MM.DD"));
       setValue("driver", currentUser.displayName || currentUser.email);
     }
-  }, [currentUser, state]);
+  }, [currentUser, state, register, setValue]);
 
   return (
     <>

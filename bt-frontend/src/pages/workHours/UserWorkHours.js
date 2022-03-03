@@ -1,6 +1,6 @@
 import { faEdit, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Accordion, Button, Card } from "@themesberg/react-bootstrap";
+import { Accordion, Button, Card, Spinner } from "@themesberg/react-bootstrap";
 import { useCallback, useEffect, useState } from "react";
 import { ButtonGroup, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -99,7 +99,11 @@ const UserWorkHours = () => {
                 </Button>
               </div>
             </AccordionCard>
-          ))}
+          )) || (
+            <div className="d-flex justify-content-center pt-2">
+              <Spinner variant="senary" animation="border" />
+            </div>
+          )}
         </div>
       </div>
       <Modal

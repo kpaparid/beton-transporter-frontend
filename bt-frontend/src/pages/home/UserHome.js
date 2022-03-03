@@ -47,7 +47,7 @@ const UserHome = ({ onClick, maxWidth = "500px" }) => {
     });
   }, [currentUser.uid, findUnreadCount, findUnreadCount, fetchUsers, contacts]);
 
-  const chat = useConnectChat({ uid: currentUser.uid, onMessageReceived });
+  useConnectChat({ uid: currentUser.uid, onMessageReceived });
   const NavItem = (props) => {
     const { title, link, target, icon, image, className = "" } = props;
     // const navItemClassName = link === pathname ? "active" : "";

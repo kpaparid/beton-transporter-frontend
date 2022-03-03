@@ -101,17 +101,14 @@ const RouteWithSidebarPhone = ({ children }) => {
     </>
   );
 };
-const RouteWithLogoPhone = ({ children }) => {
+const RouteWithoutSiderBar = ({ children }) => {
   return (
     <>
       <main
         className="p-0 h-100 d-flex overflow-auto bg-darker-nonary"
         style={{ flexDirection: "column" }}
       >
-        <div className="w-100">
-          <Sidebar2 />
-        </div>
-        <div style={{ flex: "1 1" }}>{children}</div>
+        <div className="h-100">{children}</div>
       </main>
     </>
   );
@@ -182,9 +179,9 @@ const HomePage = () => (
           exact
           path={MyRoutes.UserHome.path}
           element={
-            <RouteWithLogoPhone>
+            <RouteWithoutSiderBar>
               <UserHome />
-            </RouteWithLogoPhone>
+            </RouteWithoutSiderBar>
           }
         />
       </Route>
@@ -378,9 +375,9 @@ const HomePage = () => (
           exact
           path={MyRoutes.UserChat.path}
           element={
-            <RouteWithSidebarPhone>
+            <RouteWithoutSiderBar>
               <UserChat />
-            </RouteWithSidebarPhone>
+            </RouteWithoutSiderBar>
           }
         />
       </Route>

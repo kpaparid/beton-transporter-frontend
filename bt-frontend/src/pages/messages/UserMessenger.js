@@ -1,12 +1,10 @@
-import { Card, Button } from "@themesberg/react-bootstrap";
+import { Button, Card } from "@themesberg/react-bootstrap";
 import moment from "moment";
 import { useEffect } from "react";
 import { Image, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { RecoilRoot } from "recoil";
-import { useAuth } from "../../contexts/AuthContext";
 import { MyRoutes } from "../../routes";
-import { useChatServices, useConnectChat } from "../myComponents/util/services";
+import { useChatServices } from "../myComponents/util/services";
 
 const UserMessenger = () => {
   const { contacts } = useChatServices();
@@ -18,7 +16,7 @@ const UserMessenger = () => {
   return (
     <>
       <div className="col-12 h-100 bg-darker-nonary">
-        <div className="py-4 d-flex flex-wrap h-100 align-content-center">
+        <div className="d-flex flex-wrap h-100 align-content-center">
           <div
             className="container-fluid p-0 h-100"
             style={{ maxWidth: "600px" }}
@@ -53,7 +51,7 @@ export const MessengerList = ({ contacts }) => {
 const ContactsList = ({ contacts }) => {
   return (
     <>
-      <div className="d-flex flex-column btn-group-vertical">
+      <div className="d-flex flex-column btn-group-vertical px-2">
         {(contacts &&
           contacts.map((c) => <Contact key={c.uid}>{c}</Contact>)) || (
           <Spinner></Spinner>
@@ -82,12 +80,21 @@ const ContactContent = ({ name, email, message, photoUrl, unreadCount }) => {
   const content = message?.content;
   return (
     <>
-      <div className="d-flex flex-nowrap align-items-center">
-        <ContactPhoto photoUrl={photoUrl} name={fname} />
-        <div className="ps-4 text-start d-flex flex-fill flex-column flex-nowrap overflowX-hidden">
-          <div className="fw-bolder text-truncate">{fname}</div>
-          <div className="message">{content}</div>
+      <div className="d-flex flex-nowrap align-items-center justify-content-between">
+        <div
+          className="d-flex flex-nowrap"
+          style={{ maxWidth: "calc(100% - 95px)" }}
+        >
+          <ContactPhoto photoUrl={photoUrl} name={fname} />
+          <div
+            className="ps-3 text-start d-flex flex-column flex-nowrap overflowX-hidden"
+            style={{ maxWidth: "calc(100% - 30px)" }}
+          >
+            <div className="fw-bolder text-truncate">{fname}</div>
+            <div className="message text-truncate">{content}</div>
+          </div>
         </div>
+
         <div className="d-flex align-items-end flex-column">
           <div className="time">{formattedTime}</div>
           {unreadCount !== 0 && (

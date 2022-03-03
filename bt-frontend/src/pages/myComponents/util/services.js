@@ -1,7 +1,7 @@
 import { debounce } from "lodash";
 import moment from "moment";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { useAuth } from "../../../contexts/AuthContext";
 import {
   chatActiveContact,
@@ -255,8 +255,10 @@ export function useChatServices(
     initialActiveContact && setActiveContact(initialActiveContact);
     return () => {
       sessionStorage.removeItem("recoil-persist");
+      setActiveContact(contacts[0]);
+      stompClient = null;
     };
-  }, []);
+  }, [initialActiveContact, setActiveContact]);
 
   const updateContacts = useCallback(
     (users) => {
@@ -302,13 +304,7 @@ export function useChatServices(
   const handleOnConnected = useCallback(() => {
     loadContacts().then((contacts) => {
       if (initializeContactOnLoad) {
-        const c = [...contacts]
-          .filter((c) => c.uid !== currentUser.uid)
-          .sort((a, b) =>
-            moment(a?.message?.timestamp).isBefore(b?.message?.timestamp)
-              ? 1
-              : 0
-          );
+        const c = contacts.filter((c) => c.uid !== currentUser.uid);
         setActiveContact(c[0]);
       }
     });
@@ -461,6 +457,7 @@ export function useChatServices(
 }
 
 export function useConnectChat({ onMessageReceived, uid, onConnected }) {
+  // const [connected, setConnected] = useState(false);
   const handleMessageReceived = useCallback(
     (msg) => {
       onMessageReceived && onMessageReceived(msg);
@@ -468,11 +465,15 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
     [onMessageReceived]
   );
   const handleConnected = useCallback(() => {
-    stompClient.subscribe(
-      "/user/" + uid + "/queue/messages",
-      handleMessageReceived
-    );
-    onConnected && onConnected();
+    try {
+      stompClient?.subscribe(
+        "/user/" + uid + "/queue/messages",
+        handleMessageReceived
+      );
+      stompClient && onConnected && onConnected();
+    } catch (e) {
+      console.log(e);
+    }
   }, [uid, handleMessageReceived, onConnected]);
 
   const onError = useCallback((err) => {
@@ -486,7 +487,7 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
     var SockJS = require("sockjs-client");
     var socket = new SockJS(API + "ws");
     stompClient = Stomp.over(socket);
-    stompClient.connect(
+    stompClient?.connect(
       {},
       function (frame) {
         console.log("Connected: " + frame);
@@ -501,24 +502,33 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
 
   const sendMessage = useCallback(
     (content, senderId, senderName, recipientId, recipientName) => {
-      if (content.trim() !== "") {
-        const message = {
-          senderId,
-          recipientId,
-          senderName,
-          recipientName,
-          content,
-          timestamp: moment().toISOString(),
-        };
-        stompClient.send("/app/chat", {}, JSON.stringify(message));
-        return message;
+      try {
+        if (content.trim() !== "") {
+          const message = {
+            senderId,
+            recipientId,
+            senderName,
+            recipientName,
+            content,
+            timestamp: moment().toISOString(),
+          };
+          stompClient?.send("/app/chat", {}, JSON.stringify(message));
+          return message;
+        }
+        return false;
+      } catch (e) {
+        return false;
       }
-      return false;
     },
     []
   );
   const disconnect = useCallback(() => {
-    stompClient?.disconnect();
+    try {
+      stompClient?.connected && stompClient?.disconnect();
+      // setConnected(false);
+    } catch (e) {
+      console.log(e);
+    }
   }, []);
   useEffect(() => {
     uid && connect();

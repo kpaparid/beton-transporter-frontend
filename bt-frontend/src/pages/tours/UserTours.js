@@ -5,7 +5,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Card, Modal } from "@themesberg/react-bootstrap";
+import { Button, Card, Modal, Spinner } from "@themesberg/react-bootstrap";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MyRoutes } from "../../routes";
@@ -69,7 +69,11 @@ const UserTours = () => {
                 <CCard left={t.buildingSite} right={t.arrival} />
               </NormaModal>
             );
-          })}
+          }) || (
+            <div className="d-flex justify-content-center pt-2">
+              <Spinner variant="senary" animation="border" />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { getCustomComponent } from "../../pages/myComponents/util/labels";
-import { ComponentPreLoader } from "../ComponentPreLoader";
+import Preloader from "../Preloader";
 const LazyInput = React.lazy(() => import("../LazyInput"));
 
 const TableCore = memo((props) => {
@@ -307,11 +307,7 @@ const EditableCell = React.memo(
               {formattedValue}
             </div>
             {isEditable && cellProps.type !== "nonEditable" && (
-              <Suspense
-                fallback={
-                  <ComponentPreLoader show logo={false}></ComponentPreLoader>
-                }
-              >
+              <Suspense fallback={<Preloader show logo={false}></Preloader>}>
                 <LazyInput
                   {...rest}
                   value={value}

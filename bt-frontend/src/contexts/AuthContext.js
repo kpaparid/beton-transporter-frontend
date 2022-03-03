@@ -13,6 +13,7 @@ import {
   updatePhoneNumber,
   updateProfile,
 } from "firebase/auth";
+import moment from "moment";
 import React, {
   createContext,
   useCallback,
@@ -186,7 +187,6 @@ export function AuthProvider({ children }) {
         });
     });
   };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);

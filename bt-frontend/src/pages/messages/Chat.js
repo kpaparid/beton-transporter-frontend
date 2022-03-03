@@ -17,18 +17,14 @@ import { toArray } from "react-emoji-render";
 import TextareaAutosize from "react-textarea-autosize";
 import { useAuth } from "../../contexts/AuthContext";
 import { useChatServices } from "../myComponents/util/services";
-const Chat = () => {
+const Chat = ({ active, left = true, variant = "light", radius = "" }) => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    setLoading(true);
-  }, []);
-
   useEffect(() => {
     if (loading) {
       setTimeout(() => {
         setLoading(false);
-      }, 800);
+      }, 700);
     }
   }, [loading]);
   const {
@@ -38,7 +34,7 @@ const Chat = () => {
     messages,
     sendMessage,
     setActiveContactUid,
-  } = useChatServices(null, null, true);
+  } = useChatServices(active, null, true);
   const handleScroll = useMemo(
     () => debounce(loadNextPage, 400),
     [loadNextPage]
@@ -54,50 +50,54 @@ const Chat = () => {
   return (
     <>
       <div className="col-12 h-100">
-        <div className="py-4 d-flex flex-wrap h-100">
+        <div className="py-0 d-flex flex-wrap h-100">
           <div className="container-fluid p-0 h-100">
-            <div className="col-12 h-100 bg-gray-500 rounded">
+            <div
+              className={`col-12 h-100 rounded messenger messenger-${variant}`}
+            >
               <div className="py-0 d-flex flex-wrap h-100">
-                <div className="double-messenger">
-                  <div className="h-100">
-                    <div className="messenger-left">
-                      <CardHeader
-                        name={currentUser.displayName || currentUser.email}
-                        photoUrl={currentUser?.photoURL}
-                      />
+                <div className="wrapper">
+                  {left && (
+                    <div className="h-100">
+                      <div className="messenger-left">
+                        <CardHeader
+                          name={currentUser.displayName || currentUser.email}
+                          photoUrl={currentUser?.photoURL}
+                        />
 
-                      <Card.Body className="p-0">
-                        {contacts ? (
-                          <Scrollbars
-                            autoHeight
-                            autoHeightMax={"100%"}
-                            className="h-100"
-                            renderTrackVertical={(props) => {
-                              return (
-                                <div
-                                  {...props}
-                                  className="track-vertical"
-                                ></div>
-                              );
-                            }}
-                          >
-                            <ContactsList
-                              contacts={contacts}
-                              onClick={handleContactClick}
-                              activeContact={activeContact}
-                            />
-                          </Scrollbars>
-                        ) : (
-                          <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-                            <Spinner animation="border" />
-                          </div>
-                        )}
-                      </Card.Body>
-                      <Card.Footer className="py-2 px-3" />
+                        <Card.Body className="p-0">
+                          {contacts ? (
+                            <Scrollbars
+                              autoHeight
+                              autoHeightMax={"100%"}
+                              className="h-100"
+                              renderTrackVertical={(props) => {
+                                return (
+                                  <div
+                                    {...props}
+                                    className="track-vertical"
+                                  ></div>
+                                );
+                              }}
+                            >
+                              <ContactsList
+                                contacts={contacts}
+                                onClick={handleContactClick}
+                                activeContact={activeContact}
+                              />
+                            </Scrollbars>
+                          ) : (
+                            <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+                              <Spinner animation="border" />
+                            </div>
+                          )}
+                        </Card.Body>
+                        <Card.Footer className="py-2 px-3" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <Card bg="gray-500" className="messenger-right">
+                  <Card className="messenger-right">
                     <CardHeader
                       name={activeContact?.name || activeContact.email}
                       photoUrl={activeContact?.photoUrl}
@@ -107,6 +107,7 @@ const Chat = () => {
                       loading={loading}
                       messages={messages}
                       activeUid={activeContact?.uid}
+                      lastMessage={activeContact?.message}
                       onScroll={handleScroll}
                     />
                     <CardFooter sendMessage={sendMessage}></CardFooter>
@@ -123,7 +124,7 @@ const Chat = () => {
 const ContactsList = ({ contacts, activeContact, ...rest }) => {
   return (
     <>
-      <div className="d-flex flex-column bg-gray-500">
+      <div className="d-flex flex-column messages-list">
         {contacts.map((c) => {
           const active = activeContact.uid === c.uid;
           return (
@@ -177,9 +178,9 @@ const ContactContent = ({
           {unreadExists && (
             <div
               style={{ width: "24px", height: "24px", fontSize: "13px" }}
-              className={`unread-count bg-primary rounded-circle text-white d-flex align-items-end`}
+              className={`unread-count rounded-circle d-flex align-items-end`}
             >
-              <span className="w-100 d-flex justify-content-center text-white">
+              <span className="w-100 d-flex justify-content-center">
                 {unreadCount}
               </span>
             </div>
@@ -199,7 +200,7 @@ const ContactPhoto = ({ photoUrl, name }) => {
           resize="contain"
         />
       ) : (
-        <div className="bg-primary text-white rounded-circle fw-bolder user-avatar rounded-circle">
+        <div className="fallback-icon rounded-circle fw-bolder user-avatar rounded-circle">
           {name?.substring(0, 2)}
         </div>
       )}
@@ -220,65 +221,83 @@ const CardHeader = memo(({ name, photoUrl }) => {
     </Card.Header>
   );
 }, isEqual);
-const CardBody = memo(({ messages = [], activeUid, onScroll, loading }) => {
-  const dates = [
-    ...new Set(messages.map((c) => moment(c.timestamp).format("YYYY.MM.DD"))),
-  ];
-  const values = dates.reduce(
-    (a, b) => ({
-      ...a,
-      [b]: messages.filter(
-        (m) => b === moment(m.timestamp).format("YYYY.MM.DD")
-      ),
-    }),
-    {}
-  );
+const CardBody = memo(
+  ({ messages, activeUid, onScroll, lastMessage, loading }) => {
+    const stillRefreshing =
+      loading ||
+      (lastMessage !== null &&
+        messages.length === 0 &&
+        activeUid !== messages[0]?.recipientId &&
+        activeUid !== messages[0]?.senderId);
 
-  const handleScroll = useCallback(
-    (e) => {
-      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-      const top = scrollHeight + scrollTop - clientHeight;
-      if (top <= 10) {
-        onScroll && onScroll();
-      }
-    },
-    [onScroll]
-  );
-  return loading ? (
-    <div className="h-100 bg-gray-300 d-flex flex-fill justify-content-center align-items-center">
-      <Spinner animation="border" />
-    </div>
-  ) : (
-    <Card.Body className="py-2 bg-gray-400 px-3" onScroll={handleScroll}>
-      {dates.map((d) => {
-        return (
-          <React.Fragment key={d}>
-            {values[d].map((m) => (
-              <Message {...m} activeUid={activeUid} key={m.timestamp} />
-            ))}
-            <div className="date-bar py-2 fw-bold">
-              <span className="bar" />
-              <span className="date px-2">{toDateBarFormat(d)}</span>
-              <span className="bar" />
-            </div>
-          </React.Fragment>
-        );
-      })}
-    </Card.Body>
-  );
-}, isEqual);
+    useEffect(() => {
+      const l = lastMessage;
+      const u = activeUid;
+      const k =
+        lastMessage !== null &&
+        messages.length === 0 &&
+        activeUid !== messages[0]?.recipientId &&
+        activeUid !== messages[0]?.senderId;
+      console.log("hi");
+    }, [activeUid, lastMessage]);
+
+    const dates = [
+      ...new Set(messages.map((c) => moment(c.timestamp).format("YYYY.MM.DD"))),
+    ];
+    const values = dates.reduce(
+      (a, b) => ({
+        ...a,
+        [b]: messages.filter(
+          (m) => b === moment(m.timestamp).format("YYYY.MM.DD")
+        ),
+      }),
+      {}
+    );
+
+    const handleScroll = useCallback(
+      (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        const top = scrollHeight + scrollTop - clientHeight;
+        if (top <= 10) {
+          onScroll && onScroll();
+        }
+      },
+      [onScroll]
+    );
+    return stillRefreshing ? (
+      <div className="h-100 fallback-body d-flex flex-fill justify-content-center align-items-center">
+        <Spinner animation="border" />
+      </div>
+    ) : (
+      <Card.Body className="py-2 px-3" onScroll={handleScroll}>
+        {dates.map((d) => {
+          return (
+            <React.Fragment key={d}>
+              {values[d].map((m) => (
+                <Message {...m} activeUid={activeUid} key={m.timestamp} />
+              ))}
+              <div className="date-bar py-2 fw-bold">
+                <span className="bar" />
+                <span className="date px-2">{toDateBarFormat(d)}</span>
+                <span className="bar" />
+              </div>
+            </React.Fragment>
+          );
+        })}
+      </Card.Body>
+    );
+  },
+  isEqual
+);
 
 const Message = memo(({ content, activeUid, recipientId, timestamp }) => {
   const sent = activeUid === recipientId;
-  const variant = sent ? "secondary" : "gray-500";
-  const timeTextVariant = "time " + (sent ? "text-white" : "text-primary");
-  const divClassName = `message py-1 justify-content-${sent ? "end" : "start"}`;
-  const buttonClassName = `${sent ? "text-end" : "text-start"} `;
+  const divClassName = `py-1 message ${sent ? "sent" : "received"}`;
   return (
     <div className={divClassName}>
-      <Button variant={variant} className={buttonClassName}>
+      <Button variant="secondary">
         <div className="text-break text-wrap pe-2">{content}</div>
-        <div className={timeTextVariant}>
+        <div className="time">
           <span>{moment(timestamp).format("HH:mm")}</span>
         </div>
       </Button>
