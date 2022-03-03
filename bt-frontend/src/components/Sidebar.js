@@ -133,7 +133,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon icon={faTimes} />
               </Nav.Link>
             </div>
-            <Nav className="flex-column pt-3 pt-md-0 h-100 d-flex flex-column justify-content-between">
+            <Nav className="h-100 overflow-auto flex-column flex-nowrap pt-3 pt-md-0 h-100 d-flex flex-column justify-content-between">
               <div>
                 <NavItem
                   title="Overview"

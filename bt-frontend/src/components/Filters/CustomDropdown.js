@@ -91,23 +91,17 @@ export const CustomDropdown = forwardRef(
               flip={flip}
               ref={toggleRef}
               className={"m-0 p-0 border border-0 " + menuClassName}
-              // popperConfig={{
-              //   modifiers: [{ name: "offset", options: { offset: [-250, 0] } }],
-              // }}
             >
               {children}
             </Dropdown.Menu>
           </Portal>
         ) : (
           <Dropdown.Menu
-            // popperConfig={{
-            //   modifiers: [{ name: "offset", options: { offset: [-250, 0] } }],
-            // }}
+            flip={flip}
             ref={toggleRef}
-            className={"p-0 border border-0 " + menuClassName}
-            style={{ width }}
+            className={"m-0 p-0 border border-0 " + menuClassName}
           >
-            {{ ...children, props: { ...children.props, onClose } }}
+            {children}
           </Dropdown.Menu>
         )}
       </Dropdown>

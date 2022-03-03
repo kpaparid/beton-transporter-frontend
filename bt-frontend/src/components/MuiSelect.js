@@ -14,6 +14,7 @@ export const OutlinedSelect = memo(({ onChange, value, values }) => {
   return (
     <div style={{ minWidth: "250px" }}>
       <Select
+        isSearchable={false}
         className="basic-select"
         classNamePrefix="select_user"
         value={selectedValue}

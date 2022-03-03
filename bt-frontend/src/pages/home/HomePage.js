@@ -71,11 +71,11 @@ const RouteWithSidebar = ({ children }) => {
       <Preloader show={loaded ? false : true} />
 
       <main
-        className="content p-0 h-100 d-flex"
+        className="content p-0 h-100 d-flex sidebar-default"
         style={{ flexDirection: "column" }}
       >
         <Sidebar />
-        <div className="d-flex h-100 justify-content-center p-1 p-sm-3">
+        <div className="d-flex justify-content-center p-1 p-sm-3 page">
           {children}
         </div>
 

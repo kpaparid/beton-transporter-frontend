@@ -79,6 +79,17 @@ const Chat = ({ active, left = true, variant = "light", radius = "" }) => {
                                   ></div>
                                 );
                               }}
+                              renderView={(props) => {
+                                return (
+                                  <div
+                                    {...props}
+                                    style={{
+                                      ...props.style,
+                                      overflowX: "hidden",
+                                    }}
+                                  ></div>
+                                );
+                              }}
                             >
                               <ContactsList
                                 contacts={contacts}
@@ -165,7 +176,7 @@ const ContactContent = ({
     <>
       <div className="d-flex flex-nowrap align-items-center">
         <ContactPhoto photoUrl={photoUrl} name={fname} />
-        <div className="ps-4 text-start d-flex flex-fill flex-column flex-nowrap overflowX-hidden">
+        <div className="px-2 text-start d-flex flex-fill flex-column flex-nowrap overflowX-hidden">
           <div className="fw-bolder text-truncate">{fname}</div>
           <div className="message">{content}</div>
         </div>

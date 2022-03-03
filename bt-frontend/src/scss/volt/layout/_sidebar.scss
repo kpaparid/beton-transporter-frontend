@@ -1,6 +1,16 @@
 /**
  * = Sidebars
  */
+
+.sidebar-default {
+  .page {
+    height: calc(100% - 55px);
+    @include media-breakpoint-up(md) {
+      height: 100%;
+    }
+  }
+}
+
 .simplebar-content {
   height: 100%;
 }

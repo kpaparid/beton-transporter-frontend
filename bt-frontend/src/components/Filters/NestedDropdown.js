@@ -57,6 +57,7 @@ export const NestedDropdown = memo(
             title: (
               <CustomToggle
                 key={"DropdownRow-" + id + "-" + index}
+                className="w-100"
                 checked={checked}
                 onChange={() => onToggleItem(id)}
                 disableCheckBox={disableCheckBox}
@@ -72,21 +73,23 @@ export const NestedDropdown = memo(
       return (
         <>
           <Card className={`my-card ${className}`}>
-            <Card.Header className="card-btn">
-              <Button
-                variant="secondary"
-                className="w-100 rounded-0 rounded-top container"
-                onClick={resetAll}
-              >
-                <span className="reset">Reset All</span>
-                <Button className="close" onClick={onClose}>
-                  <FontAwesomeIcon icon={faTimes}></FontAwesomeIcon>
+            <div>
+              <Card.Header className="card-btn">
+                <Button
+                  variant="secondary"
+                  className="w-100 rounded-0 rounded-top container"
+                  onClick={resetAll}
+                >
+                  <span className="reset">Reset All</span>
+                  <Button className="close" onClick={onClose}>
+                    <FontAwesomeIcon icon={faTimes}></FontAwesomeIcon>
+                  </Button>
                 </Button>
-              </Button>
-            </Card.Header>
-            <Card.Body className="p-0 rounded-0 d-flex justify-content-center">
-              <AccordionComponent data={items} />
-            </Card.Body>
+              </Card.Header>
+              <Card.Body className="p-0 rounded-0 d-flex justify-content-center">
+                <AccordionComponent data={items} />
+              </Card.Body>
+            </div>
           </Card>
         </>
       );

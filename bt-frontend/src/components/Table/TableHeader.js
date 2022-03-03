@@ -56,6 +56,7 @@ export const Filter = memo((props) => {
       show={show}
       toggle={setShow}
       drop="down"
+      // portal={false}
       as={ButtonGroup}
       toggleClassName="primary-btn"
       toggleStyle={{ transition: "none" }}
