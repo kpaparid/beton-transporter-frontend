@@ -416,7 +416,7 @@ const gridLabels = {
       photoUrl: {
         nanoid: nanoid(),
         id: "photoUrl",
-        text: "photoUrl",
+        text: "Photo",
         maxWidth: "150px",
         type: "customComponent",
         fn: (arr) => {

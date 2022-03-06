@@ -219,7 +219,7 @@ const DateSelectorDropdown = memo(
 export const DatePickerModal = memo(
   ({
     size,
-    value: initialValue,
+    value: initialValue = [],
     buttonText,
     buttonVariant = "primary",
     closeVariant = "nonary",
