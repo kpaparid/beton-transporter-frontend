@@ -14,7 +14,9 @@ export const TableLabel = memo(
   forwardRef(({ titleProps: { title }, buttonGroupProps }, ref) => {
     return (
       <div className="d-flex justify-content-around flex-wrap align-items-center py-0">
-        <div className="col">{title}</div>
+        <div className="col">
+          <div className="w-100 justify-content-start">{title}</div>
+        </div>
         <div className="flex-wrap d-flex justify-content-end">
           <TableButtons ref={ref} {...buttonGroupProps}></TableButtons>
         </div>
