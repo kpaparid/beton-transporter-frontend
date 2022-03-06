@@ -238,25 +238,30 @@ var stompClient = null;
 export function useChatServices(
   initialActiveContact,
   onNewMessage,
-  initializeContactOnLoad
+  initializeContactOnLoad,
+  left = true,
+  right = true
 ) {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const { fetchUsers } = useServices();
   const { currentUser, findChatMessage, findChatMessages, findNewMessages } =
     useAuth();
-  // const [contacts, setContacts] = useState();
   const [activeContact, setActiveContact] = useRecoilState(chatActiveContact);
   const [contacts, setContacts] = useRecoilState(chatContacts);
   const [users, setUsers] = useRecoilState(chatUsers);
   const [messages, setMessages] = useRecoilState(chatMessages);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     sessionStorage.removeItem("recoil-persist");
     initialActiveContact && setActiveContact(initialActiveContact);
     return () => {
+      setLoading(true);
+      setActiveContact(false);
+      setContacts(false);
+      setMessages([]);
+      // setUsers(false);
       sessionStorage.removeItem("recoil-persist");
-      setActiveContact(contacts[0]);
-      stompClient = null;
     };
   }, [initialActiveContact, setActiveContact]);
 
@@ -302,17 +307,32 @@ export function useChatServices(
         });
   }, [currentUser.uid, fetchUsers, findNewMessages, updateContacts]);
   const handleOnConnected = useCallback(() => {
-    loadContacts().then((contacts) => {
-      if (initializeContactOnLoad) {
-        const c = contacts.filter((c) => c.uid !== currentUser.uid);
-        setActiveContact(c[0]);
-      }
-    });
-  }, [loadContacts, initializeContactOnLoad]);
+    left && right
+      ? loadContacts().then((contacts) => {
+          if (initializeContactOnLoad && !initialActiveContact) {
+            const c = contacts.filter((c) => c.uid !== currentUser.uid);
+            setActiveContact(c[0]);
+          } else {
+            setLoading(false);
+          }
+        })
+      : left
+      ? loadContacts().then(() => setLoading(false))
+      : initialActiveContact && setActiveContact(initialActiveContact);
+  }, [
+    loadContacts,
+    initializeContactOnLoad,
+    initialActiveContact,
+    currentUser.uid,
+    left,
+    right,
+  ]);
   const setActiveContactUid = useCallback(
     (uid) => {
       const contact = contacts?.find((v) => v.uid === uid);
+      contact && setLoading(true);
       contact && setActiveContact(contact);
+      return contact;
     },
     [contacts]
   );
@@ -323,7 +343,7 @@ export function useChatServices(
         JSON.parse(sessionStorage.getItem("recoil-persist"))
           ?.chatActiveContact || initialActiveContact;
 
-      if (active?.uid === notification.senderId) {
+      if (right && active?.uid === notification.senderId) {
         const newMessages = JSON.parse(
           sessionStorage.getItem("recoil-persist")
         )?.chatMessages;
@@ -332,40 +352,32 @@ export function useChatServices(
             setMessages([data, ...newMessages]);
           });
         } else {
-          findChatMessages(active.uid, currentUser.uid, 0)
-            .then((msgs) => {
-              setTotalPages(msgs.data.totalPages);
-              setPage(0);
-              setMessages(msgs.data.content);
-            })
-            .catch((e) => {
-              return;
-            });
+          findChatMessages(active.uid, currentUser.uid, 0).then((msgs) => {
+            setTotalPages(msgs.data.totalPages);
+            setPage(0);
+            setMessages(msgs.data.content);
+          });
         }
         loadContacts();
       } else {
-        loadContacts().then((contacts) => {
-          findNewMessages(currentUser.uid, [notification.senderId]).then(
-            ({ data }) => {
-              const message = Object.values(data)[0].message;
-              const contact = contacts?.find(
-                (c) => c.uid === notification.senderId
-              );
-              onNewMessage &&
-                onNewMessage({
-                  notification,
-                  activeUid: active?.uid,
-                  message,
-                  contact,
-                  setActive: () => {
-                    sessionStorage.removeItem("recoil-persist");
-                    setMessages();
-                    setActiveContact(contact);
-                  },
-                });
-            }
-          );
-        });
+        left &&
+          loadContacts().then((contacts) => {
+            const contact = contacts?.find(
+              (c) => c.uid === notification.senderId
+            );
+            onNewMessage &&
+              onNewMessage({
+                notification,
+                activeUid: active?.uid,
+                message: contact?.message,
+                contact,
+                setActive: () => {
+                  sessionStorage.removeItem("recoil-persist");
+                  setMessages();
+                  setActiveContact(contact);
+                },
+              });
+          });
       }
     },
     [
@@ -375,29 +387,37 @@ export function useChatServices(
       findChatMessage,
       findChatMessages,
       findNewMessages,
+      initialActiveContact,
     ]
   );
-  const { sendMessage, disconnect } = useConnectChat({
+  const { sendMessage, disconnect, connect, subscribe } = useConnectChat({
     onConnected: handleOnConnected,
     onMessageReceived,
     uid: currentUser.uid,
   });
   const handleDisconnect = useCallback(() => {
+    console.log("disconnect");
     disconnect();
     sessionStorage.removeItem("recoil-persist");
-  }, [disconnect]);
+    setActiveContact(false);
+    setContacts(false);
+    setMessages(false);
+    setUsers(false);
+  }, [disconnect, setActiveContact]);
 
   useEffect(() => {
     if (!activeContact?.uid) return;
-    findChatMessages(activeContact.uid, currentUser.uid)
-      .then((msgs) => {
-        setTotalPages(msgs.data.totalPages);
-        setMessages(msgs.data.content);
-        loadContacts();
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    right &&
+      findChatMessages(activeContact.uid, currentUser.uid)
+        .then((msgs) => {
+          setTotalPages(msgs.data.totalPages);
+          setMessages(msgs.data.content);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.log(e);
+          setLoading(false);
+        });
   }, [activeContact, currentUser?.uid, findChatMessages, loadContacts]);
   const handleSendMessage = useCallback(
     (message) => {
@@ -443,7 +463,18 @@ export function useChatServices(
     setMessages,
     findChatMessages,
   ]);
-
+  const refresh = useCallback(() => {
+    setLoading(true);
+    subscribe()
+      .then(() => handleOnConnected())
+      .catch(() => {
+        connect();
+      });
+  }, [subscribe, handleOnConnected, connect]);
+  const handleConnect = useCallback(() => {
+    setLoading(true);
+    connect();
+  }, [connect]);
   return {
     contacts,
     messages,
@@ -453,28 +484,36 @@ export function useChatServices(
     disconnect: handleDisconnect,
     loadNextPage,
     onMessageReceived,
+    connect: handleConnect,
+    stompClient,
+    refresh,
+    loading,
   };
 }
 
 export function useConnectChat({ onMessageReceived, uid, onConnected }) {
-  // const [connected, setConnected] = useState(false);
   const handleMessageReceived = useCallback(
     (msg) => {
       onMessageReceived && onMessageReceived(msg);
     },
     [onMessageReceived]
   );
+  const subscribe = useCallback(async () => {
+    stompClient.subscribe(
+      "/user/" + uid + "/queue/messages",
+      handleMessageReceived
+    );
+  }, [uid, handleMessageReceived]);
   const handleConnected = useCallback(() => {
-    try {
-      stompClient?.subscribe(
-        "/user/" + uid + "/queue/messages",
-        handleMessageReceived
-      );
-      stompClient && onConnected && onConnected();
-    } catch (e) {
-      console.log(e);
-    }
-  }, [uid, handleMessageReceived, onConnected]);
+    return subscribe()
+      .then(() => {
+        onConnected && onConnected();
+      })
+      .catch((e) => {
+        // connect();
+        console.log("hi");
+      });
+  }, [subscribe, onConnected]);
 
   const onError = useCallback((err) => {
     console.log(err);
@@ -525,20 +564,15 @@ export function useConnectChat({ onMessageReceived, uid, onConnected }) {
   const disconnect = useCallback(() => {
     try {
       stompClient?.connected && stompClient?.disconnect();
-      // setConnected(false);
     } catch (e) {
       console.log(e);
     }
   }, []);
-  useEffect(() => {
-    uid && connect();
-    return () => {
-      disconnect();
-    };
-  }, [uid, connect, disconnect]);
   return {
+    connect,
     sendMessage,
     disconnect,
+    subscribe,
   };
 }
 

@@ -6,10 +6,10 @@ import {
   faWindowClose,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Modal, Spinner, Button } from "@themesberg/react-bootstrap";
+import { Button, Modal, Spinner } from "@themesberg/react-bootstrap";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Filter } from "./TableHeader";
 
 const TableButtons = memo(
@@ -79,14 +79,7 @@ const TableButtons = memo(
       }
     }, [selectedRowsExist, editMode, onChangeMode]);
     return (
-      <div className="d-flex flex-nowrap button-group">
-        <ToastContainer
-          pauseOnFocusLoss={false}
-          position="top-center"
-          pauseOnHover={false}
-          hideProgressBar
-          autoClose={2000}
-        />
+      <div className="d-flex flex-wrap button-group justify-content-end">
         {filter && <Filter {...filterProps}></Filter>}
         {edit && (selectedRowsExist || (editMode && !selectedRowsExist)) && (
           <MyBtn

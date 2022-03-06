@@ -1,5 +1,11 @@
 import DropdownToggle from "@themesberg/react-bootstrap/lib/esm/DropdownToggle";
-import React, { forwardRef, useCallback, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Portal } from "react-portal";
 export const CustomDropdown = forwardRef(
@@ -24,6 +30,7 @@ export const CustomDropdown = forwardRef(
       show: controlledShow = false,
       toggle,
       controlled = false,
+      menuClick,
     },
     initialRef
   ) => {
@@ -34,32 +41,51 @@ export const CustomDropdown = forwardRef(
     const toggleAsComponent =
       toggleAs === "default" ? DropdownToggle : CustomToggle;
     const [backupShow, setBackupShow] = useState(false);
-
     const show = controlled ? controlledShow : backupShow;
     const setShow = controlled ? toggle : setBackupShow;
-
-    const handleToggle = useCallback((_t, _e, metadata) => {
-      const focusWithinInput = inputRef?.current?.contains(
-        document.activeElement
-      );
-      const focusWithin = refList
-        .map((ref) => ref.current?.contains(document.activeElement))
-        .reduce((a, b) => a || b, false);
-      if (
-        focusWithinInput ||
-        (_e && _e.source !== "rootClose" && _e.source !== "select") ||
-        (typeof focusWithin != "undefined" &&
-          focusWithin != null &&
-          focusWithin)
-      ) {
-        setShow(true);
-        onToggle && onToggle(true);
-      } else {
-        setShow(false);
-        onToggle && onToggle(false);
-      }
+    useEffect(() => {
+      return () => {
+        document.getElementById("body").className = `${document
+          .getElementById("body")
+          .className.replaceAll(`custom-dropdown-open`, "")}`;
+      };
     }, []);
 
+    const handleToggle = useCallback(
+      (_t, _e, metadata) => {
+        const focusWithinInput = inputRef?.current?.contains(
+          document.activeElement
+        );
+        const focusWithin = refList
+          .map((ref) => ref.current?.contains(document.activeElement))
+          .reduce((a, b) => a || b, false);
+        if (
+          focusWithinInput ||
+          (_e && _e.source !== "rootClose" && _e.source !== "select") ||
+          (typeof focusWithin != "undefined" &&
+            focusWithin != null &&
+            focusWithin)
+        ) {
+          setShow(true);
+          onToggle && onToggle(true);
+        } else {
+          setShow(false);
+          onToggle && onToggle(false);
+        }
+      },
+      [onToggle, setShow]
+    );
+    useEffect(() => {
+      if (show) {
+        document.getElementById("body").className = `${
+          document.getElementById("body").className
+        } custom-dropdown-open`.trim();
+      } else {
+        document.getElementById("body").className = `${document
+          .getElementById("body")
+          .className.replaceAll("custom-dropdown-open", "")}`.trim();
+      }
+    }, [show]);
     const onClose = useCallback(() => {
       setShow(false);
     }, []);
@@ -88,6 +114,7 @@ export const CustomDropdown = forwardRef(
         {portal ? (
           <Portal>
             <Dropdown.Menu
+              onClick={menuClick}
               flip={flip}
               ref={toggleRef}
               className={"m-0 p-0 border border-0 " + menuClassName}
@@ -97,6 +124,7 @@ export const CustomDropdown = forwardRef(
           </Portal>
         ) : (
           <Dropdown.Menu
+            onClick={menuClick}
             flip={flip}
             ref={toggleRef}
             className={"m-0 p-0 border border-0 " + menuClassName}

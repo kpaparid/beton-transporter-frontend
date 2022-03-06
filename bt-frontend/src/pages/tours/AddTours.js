@@ -325,7 +325,7 @@ const NormaModal = ({ value, availableValues, onClick, title }) => {
         scrollable
       >
         <Modal.Header className="p-0 d-flex justify-content-end">
-          <div className="p-2">
+          <div className="pt-2 pe-2">
             <Button
               variant="transparent"
               className="p-0 text-senary d-flex justify-content-center align-items-center"

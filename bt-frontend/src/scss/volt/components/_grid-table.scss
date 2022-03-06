@@ -1,11 +1,39 @@
-// .grid-table {
-//   .card-header:first-child {
-//     min-height: 85px;
-//   }
-//   & > .card-body {
-//     height: calc(100% - 85px);
-//   }
-// }
+.modal-body-container {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.filter.custom-modal {
+  .modal-body-container {
+    width: 100%;
+    max-width: 400px;
+    .grid-table-filter-dropdown .card-body:last-child {
+      width: 100%;
+      max-height: initial;
+      .accordion {
+        width: 100%;
+      }
+    }
+  }
+}
+
+body.custom-modal-open .table-responsive {
+  overflow-x: hidden;
+}
+body.custom-dropdown-open .table-responsive {
+  overflow-x: hidden;
+}
+body.custom-dropdown-open.custom-modal-open .table-responsive {
+  overflow-x: auto;
+}
+
+body.custom-modal-open #root {
+  overflow: hidden !important;
+}
+.thumb-horizontal {
+  background-color: $senary;
+  // background-color: $border-gray;
+}
 .date-picker-grid-table,
 .time-picker-grid-table {
   input {
@@ -14,6 +42,9 @@
 }
 
 .date-picker-grid-table-dropdown {
+  @include media-breakpoint-down(sm) {
+  }
+
   .btn-quinary {
     background-color: $very-light-blue !important;
   }
@@ -111,46 +142,46 @@
   .accordion {
     width: 400px;
   }
-  @include media-breakpoint-down(sm) {
-    .grid-table-filter-dropdown.card {
-      height: 100%;
-      padding: 1rem;
-    }
-    .grid-table-filter-dropdown .card-header:first-child .container {
-      display: flex;
-      justify-content: space-between;
-      &::before {
-        content: "";
-      }
-    }
-    .grid-table-filter-dropdown .card-body:last-child {
-      max-height: none;
-    }
-    .date-picker {
-      display: flex;
-      justify-content: center;
-      .date-picker-card {
-        max-width: 370px;
-      }
-    }
-    .accordion {
-      width: 100% !important;
-    }
-    padding: 0 !important;
-    border-radius: 0 !important;
-    background-color: $primary;
-    transform: none !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: 9998 !important;
-    overflow: auto !important;
-    justify-content: center !important;
-  }
+  // @include media-breakpoint-down(sm) {
+  //   .grid-table-filter-dropdown.card {
+  //     height: 100%;
+  //     padding: 1rem;
+  //   }
+  //   .grid-table-filter-dropdown .card-header:first-child .container {
+  //     display: flex;
+  //     justify-content: space-between;
+  //     &::before {
+  //       content: "";
+  //     }
+  //   }
+  //   .grid-table-filter-dropdown .card-body:last-child {
+  //     max-height: none;
+  //   }
+  //   .date-picker {
+  //     display: flex;
+  //     justify-content: center;
+  //     .date-picker-card {
+  //       max-width: 370px;
+  //     }
+  //   }
+  //   .accordion {
+  //     width: 100% !important;
+  //   }
+  //   padding: 0 !important;
+  //   border-radius: 0 !important;
+  //   background-color: $primary;
+  //   transform: none !important;
+  //   position: fixed !important;
+  //   top: 0 !important;
+  //   left: 0 !important;
+  //   right: 0 !important;
+  //   bottom: 0 !important;
+  //   width: 100% !important;
+  //   height: 100% !important;
+  //   z-index: 9998 !important;
+  //   overflow: auto !important;
+  //   justify-content: center !important;
+  // }
   .accordion-item {
     .disabled .accordion-button::after {
       background-image: none !important;

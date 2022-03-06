@@ -18,7 +18,7 @@ export const YearSelectorDropdown = ({
         <Dropdown.Toggle
           // split
           variant="transparent"
-          className="btn-title"
+          className="btn-title w-100"
           // style={{ backgroundColor: "#f5f8fb" }}
         >
           <h5 className="text-wrap text-start">

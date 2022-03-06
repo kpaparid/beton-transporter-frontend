@@ -221,7 +221,19 @@
     color: $primary;
   }
 }
-
+.messenger-dark.left.right {
+  .messenger-left {
+    border-right: 1px solid $nonary;
+  }
+  .wrapper {
+    border: 1px solid $nonary;
+  }
+}
+.messenger-light.left.right {
+  .wrapper {
+    border: 1px solid $border-gray;
+  }
+}
 .messenger-dark {
   background-color: $darker-nonary;
   .unread-count {
@@ -269,10 +281,10 @@
   .messenger-left {
     background-color: $darker-nonary;
     .card-header {
-      border-right: 1px solid $nonary;
+      // border-right: 1px solid $nonary;
     }
     .card-body {
-      border-right: 1px solid $nonary;
+      // border-right: 1px solid $nonary;
     }
     .card-footer {
       display: none;

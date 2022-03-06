@@ -1,3 +1,23 @@
+// .date-picker-dropdown-wrapper {
+//   @include media-breakpoint-down(sm) {
+//     top: 0 !important;
+//     height: 100%;
+//     width: 100%;
+//     background-color: #00000094;
+//     border-radius: 0;
+//     transform: inherit !important;
+//     .date-picker {
+//       height: 100%;
+//       display: flex;
+//       justify-content: center;
+//       align-items: center;
+//     }
+//     .date-picker-card {
+//       background-color: white;
+//     }
+//   }
+// }
+
 .date-picker-dropdown {
   .dropdown-toggle:first-child {
     padding: 0 !important;
@@ -13,13 +33,14 @@
   }
   .modal-content {
     background-color: $senary;
-    width: fit-content;
+    // width: fit-content;
   }
   .modal-header,
   .modal-body,
   .modal-footer {
-    background-color: $darker-nonary;
+    background-color: transparent;
     border: 0;
+    padding: 0;
   }
   .card-body {
     padding: 0 !important;
@@ -83,6 +104,16 @@
       }
     }
   }
+}
+.modal-body-container {
+  .date-picker {
+    border-radius: 0.4375rem;
+    overflow: hidden;
+  }
+}
+.date-picker-modal-content-darker .modal-body-container {
+  background-color: $darker-nonary;
+  padding: 1rem;
 }
 .date-picker-darker {
   .date-picker-card {

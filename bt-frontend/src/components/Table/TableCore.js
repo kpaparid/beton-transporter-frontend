@@ -25,6 +25,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import Scrollbars from "react-custom-scrollbars-2";
 import { useSelector } from "react-redux";
 import { getCustomComponent } from "../../pages/myComponents/util/labels";
 import Preloader from "../Preloader";
@@ -459,7 +460,7 @@ const TableFooter = React.memo(
       pagesCount,
     } = useSelector(selectPaginationData);
     return (
-      <Card.Footer className="p-0 border-0 d-lg-flex flex-wrap align-items-center justify-content-between">
+      <Card.Footer className="p-0 pt-3 border-0 d-lg-flex flex-wrap align-items-center justify-content-between">
         {paginationProps && currentPageSize < maxRows && (
           <PaginationComponent
             {...paginationProps}
@@ -469,7 +470,7 @@ const TableFooter = React.memo(
         )}
 
         {counterProps && (
-          <small className="fw-bold ps-3 pt-4">
+          <small className="fw-bold ps-3 pt-0">
             Showing <b>{currentPageSize}</b>{" "}
             {maxRows && <span>out of {<b>{maxRows}</b>} entries</span>}
           </small>

@@ -11,9 +11,9 @@ import React, {
 import TextareaAutosize from "react-textarea-autosize";
 import { AddressPicker } from "./AddressPicker";
 import { ComponentPreLoader } from "./ComponentPreLoader";
-import DateSelectorDropdown from "./DatePicker";
+import DateSelectorDropdown, { DateResponsivePicker } from "./DatePicker";
 import { MyFormSelect } from "./MyFormSelect";
-import TimePicker from "./TimePicker";
+import TimePicker, { TimeResponsivePicker } from "./TimePicker";
 
 export const LazyInput = memo(
   forwardRef(
@@ -85,8 +85,7 @@ export const LazyInput = memo(
             );
           case "time":
             return (
-              <TimePicker
-                // className={inputClassName}
+              <TimeResponsivePicker
                 className={"time-picker-grid-table " + className}
                 dropdownClassName={"time-picker-grid-table-dropdown"}
                 value={value}
@@ -112,7 +111,7 @@ export const LazyInput = memo(
               ? moment(value, "DD.MM.YYYY").format("YYYY.MM.DD")
               : value;
             return (
-              <DateSelectorDropdown
+              <DateResponsivePicker
                 singleDate={true}
                 className={"date-picker-grid-table " + className}
                 dropdownClassName={"date-picker-grid-table-dropdown"}

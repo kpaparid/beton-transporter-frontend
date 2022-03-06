@@ -27,7 +27,7 @@ const TitleComponent = memo(({ entityId, selectTableDate, onChange }) => {
       date={moment(tableDate, moment.ISO_8601).format("YYYY")}
     />
   ) : (
-    <Button variant="transparent" className="btn-title text-wrap">
+    <Button variant="transparent" className="btn-title text-wrap w-100">
       <h5> {title} </h5>
     </Button>
   );

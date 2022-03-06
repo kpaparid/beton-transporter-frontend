@@ -17,16 +17,16 @@ import { toArray } from "react-emoji-render";
 import TextareaAutosize from "react-textarea-autosize";
 import { useAuth } from "../../contexts/AuthContext";
 import { useChatServices } from "../myComponents/util/services";
-const Chat = ({ active, left = true, variant = "light", radius = "" }) => {
-  const { currentUser } = useAuth();
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    if (loading) {
-      setTimeout(() => {
-        setLoading(false);
-      }, 700);
-    }
-  }, [loading]);
+import { ComponentPreLoader } from "../../components/ComponentPreLoader";
+const Chat = ({
+  active,
+  onContactChange,
+  left,
+  right,
+  headerLeft,
+  headerRight,
+  variant,
+}) => {
   const {
     contacts,
     loadNextPage,
@@ -34,110 +34,188 @@ const Chat = ({ active, left = true, variant = "light", radius = "" }) => {
     messages,
     sendMessage,
     setActiveContactUid,
+    connect,
+    disconnect,
+    stompClient,
   } = useChatServices(active, null, true);
-  const handleScroll = useMemo(
-    () => debounce(loadNextPage, 400),
-    [loadNextPage]
-  );
+
+  useEffect(() => {
+    !stompClient && connect();
+    // return () => {
+    //   disconnect();
+    // };
+  }, [connect, disconnect, stompClient]);
+
   const handleContactClick = useCallback(
     (c) => {
-      setLoading(true);
-      setActiveContactUid(c);
+      onContactChange
+        ? onContactChange(contacts?.find((co) => co.uid === c)).then(() =>
+            setActiveContactUid(c)
+          )
+        : setActiveContactUid(c);
     },
-    [setActiveContactUid]
+    [setActiveContactUid, onContactChange, contacts]
   );
 
   return (
     <>
-      <div className="col-12 h-100">
-        <div className="py-0 d-flex flex-wrap h-100">
-          <div className="container-fluid p-0 h-100">
-            <div
-              className={`col-12 h-100 rounded messenger messenger-${variant}`}
-            >
-              <div className="py-0 d-flex flex-wrap h-100">
-                <div className="wrapper">
-                  {left && (
-                    <div className="h-100">
-                      <div className="messenger-left">
-                        <CardHeader
-                          name={currentUser.displayName || currentUser.email}
-                          photoUrl={currentUser?.photoURL}
-                        />
+      {activeContact ? (
+        <ChatComponent
+          {...{
+            left,
+            right,
+            headerLeft,
+            headerRight,
+            variant,
+            contacts,
+            onContactClick: handleContactClick,
+            activeContact,
+            messages,
+            sendMessage,
+            onScroll: loadNextPage,
+          }}
+        />
+      ) : (
+        <ComponentPreLoader />
+      )}
+    </>
+  );
+};
 
-                        <Card.Body className="p-0">
-                          {contacts ? (
-                            <Scrollbars
-                              autoHeight
-                              autoHeightMax={"100%"}
-                              className="h-100"
-                              renderTrackVertical={(props) => {
-                                return (
-                                  <div
-                                    {...props}
-                                    className="track-vertical"
-                                  ></div>
-                                );
-                              }}
-                              renderView={(props) => {
-                                return (
-                                  <div
-                                    {...props}
-                                    style={{
-                                      ...props.style,
-                                      overflowX: "hidden",
-                                    }}
-                                  ></div>
-                                );
-                              }}
-                            >
-                              <ContactsList
-                                contacts={contacts}
-                                onClick={handleContactClick}
-                                activeContact={activeContact}
-                              />
-                            </Scrollbars>
-                          ) : (
-                            <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-                              <Spinner animation="border" />
-                            </div>
+export const ChatComponent = memo(
+  ({
+    left = true,
+    right = true,
+    headerLeft = true,
+    headerRight = true,
+    variant = "light",
+    contacts,
+    onContactClick,
+    activeContact,
+    messages,
+    onScroll,
+    sendMessage,
+    loadingLeft = false,
+    loadingRight = false,
+  }) => {
+    const { currentUser } = useAuth();
+    const handleContactClick = useCallback(
+      (c) => {
+        onContactClick && onContactClick(c);
+      },
+      [onContactClick]
+    );
+    const handleScroll = useMemo(
+      () => onScroll && debounce(onScroll, 400),
+      [onScroll]
+    );
+    return (
+      <>
+        <div className="col-12 h-100">
+          <div className="py-0 d-flex flex-wrap h-100">
+            <div className="container-fluid p-0 h-100">
+              <div
+                className={`col-12 h-100 rounded messenger messenger-${variant} ${
+                  left ? "left" : ""
+                } ${right ? "right" : ""}`}
+              >
+                <div className="py-0 d-flex flex-wrap h-100">
+                  <div className="wrapper w-100">
+                    {left && (
+                      <div className="h-100 flex-fill">
+                        <div className="messenger-left">
+                          {headerLeft && (
+                            <CardHeader
+                              name={
+                                currentUser.displayName || currentUser.email
+                              }
+                              photoUrl={currentUser?.photoURL}
+                            />
                           )}
-                        </Card.Body>
-                        <Card.Footer className="py-2 px-3" />
+
+                          <Card.Body className="p-0">
+                            {!loadingLeft && contacts ? (
+                              <Scrollbars
+                                autoHeight
+                                autoHeightMax={"100%"}
+                                className="h-100"
+                                renderTrackVertical={(props) => {
+                                  return (
+                                    <div
+                                      {...props}
+                                      className="track-vertical"
+                                    ></div>
+                                  );
+                                }}
+                                renderView={(props) => {
+                                  return (
+                                    <div
+                                      {...props}
+                                      style={{
+                                        ...props.style,
+                                        overflowX: "hidden",
+                                      }}
+                                    ></div>
+                                  );
+                                }}
+                              >
+                                <ContactsList
+                                  contacts={contacts}
+                                  onClick={handleContactClick}
+                                  activeContact={activeContact}
+                                />
+                              </Scrollbars>
+                            ) : (
+                              <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+                                <Spinner
+                                  animation="border"
+                                  variant={variant === "dark" && "senary"}
+                                />
+                              </div>
+                            )}
+                          </Card.Body>
+                          <Card.Footer className="py-2 px-3" />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <Card className="messenger-right">
-                    <CardHeader
-                      name={activeContact?.name || activeContact.email}
-                      photoUrl={activeContact?.photoUrl}
-                    />
+                    {right && activeContact && (
+                      <Card className="messenger-right flex-fill">
+                        {headerRight && (
+                          <CardHeader
+                            name={activeContact?.name || activeContact.email}
+                            photoUrl={activeContact?.photoUrl}
+                          />
+                        )}
 
-                    <CardBody
-                      loading={loading}
-                      messages={messages}
-                      activeUid={activeContact?.uid}
-                      lastMessage={activeContact?.message}
-                      onScroll={handleScroll}
-                    />
-                    <CardFooter sendMessage={sendMessage}></CardFooter>
-                  </Card>
+                        <CardBody
+                          loading={loadingRight}
+                          messages={messages}
+                          activeUid={activeContact?.uid}
+                          lastMessage={activeContact?.message}
+                          onScroll={handleScroll}
+                        />
+                        <CardFooter sendMessage={sendMessage}></CardFooter>
+                      </Card>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  },
+  isEqual
+);
+
 const ContactsList = ({ contacts, activeContact, ...rest }) => {
   return (
     <>
       <div className="d-flex flex-column messages-list">
         {contacts.map((c) => {
-          const active = activeContact.uid === c.uid;
+          const active = activeContact?.uid === c.uid;
           return (
             <Contact {...rest} key={c.uid} active={active}>
               {c}
@@ -249,7 +327,6 @@ const CardBody = memo(
         messages.length === 0 &&
         activeUid !== messages[0]?.recipientId &&
         activeUid !== messages[0]?.senderId;
-      console.log("hi");
     }, [activeUid, lastMessage]);
 
     const dates = [

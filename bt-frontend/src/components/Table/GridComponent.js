@@ -7,6 +7,7 @@ import _ from "lodash";
 import { useGridTableProps } from "../../pages/reducers/selectors";
 import { Card } from "@themesberg/react-bootstrap";
 import { ComponentPreLoader } from "../ComponentPreLoader";
+import Scrollbars from "react-custom-scrollbars-2";
 
 export const GridTableComponent = memo(({ actions, selectors, entityId }) => {
   const { tableProps, ...rest } = useGridTableProps({

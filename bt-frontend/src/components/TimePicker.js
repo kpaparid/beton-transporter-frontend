@@ -8,94 +8,193 @@ import isequal from "lodash.isequal";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ButtonGroup, CloseButton, Modal } from "react-bootstrap";
 import Scrollbars from "react-custom-scrollbars-2";
+import { useWindowDimensions } from "../pages/myComponents/util/utilities";
 import { CustomDropdown } from "./Filters/CustomDropdown";
 
+export const TimeResponsivePicker = memo((props) => {
+  const { width, height } = useWindowDimensions();
+  const modeModal = height < 650 || width < 650;
+  useEffect(() => {
+    const oldClassName = document.getElementById("body").className;
+    const m = oldClassName
+      .replaceAll("custom-modal-open", "")
+      .replaceAll("custom-dropdown-open", "")
+      .trim();
+    document.body.className = m;
+    return () =>
+      (document.body.className = document.getElementById("body").className)
+        .replaceAll("custom-modal-open", "")
+        .replaceAll("custom-dropdown-open", "")
+        .trim();
+  }, [modeModal]);
+  return modeModal ? (
+    <TimePickerModalWithText {...props} />
+  ) : (
+    <TimePickerDropdown {...props} />
+  );
+}, isequal);
+
+export const TimePickerModalWithText = memo((props) => {
+  const { onChange, inputStyle, value } = props;
+
+  const handleInputChange = useCallback(
+    (e) => {
+      const v = e.target.value;
+      onChange && onChange(v);
+    },
+    [onChange]
+  );
+  const toggleComponent = useCallback(
+    ({ toggle }) => {
+      return (
+        <div className="d-flex justify-content-center">
+          <input
+            type="text"
+            className="text-center"
+            style={inputStyle}
+            autoFocus={false}
+            value={value}
+            onChange={handleInputChange}
+            onFocus={(e) => {
+              e.target.blur();
+              toggle();
+            }}
+          />
+        </div>
+      );
+    },
+    [inputStyle, value, handleInputChange]
+  );
+  return (
+    <TimePickerModal
+      footer={false}
+      modalClassName="bg-transparent"
+      renderInput={toggleComponent}
+      {...props}
+    />
+  );
+}, isequal);
 export const TimePickerModal = ({
+  footer = true,
   defaultValue = "00:00",
   value: initialValue = defaultValue,
   buttonText,
   buttonVariant = "primary",
-  closeVariant = "nonary",
-  saveVariant = "senary",
-  timeVariant = "primary",
-  timeActiveVariant = "primary",
+  closeVariant = "secondary",
+  saveVariant = "primary",
   buttonClassName = "",
   modalClassName = "",
   modalContentClassName = "",
   onChange,
+  variant = "light",
+  footerVariant = variant,
+  className = "",
+  renderInput = ({ toggle }) => (
+    <Button
+      variant={buttonVariant}
+      onClick={toggle}
+      className={"time-picker-modal-btn " + buttonClassName}
+    >
+      {buttonText}
+    </Button>
+  ),
 }) => {
   const [show, setShow] = useState(false);
   const [value, setValue] = useState(initialValue);
-  const splitted = value.split(":");
-  const hour = (splitted.length >= 2 && splitted[0]) || "00";
-  const minute = (splitted.length >= 2 && splitted[1]) || "00";
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
+    const oldClassName = document.getElementById("body").className;
+    document.getElementById("body").className = oldClassName.replace(
+      "custom-modal-open",
+      ""
+    );
     setShow(false);
-    setValue(defaultValue);
+    setValue(initialValue);
+  }, [initialValue]);
+  const handleShow = () => {
+    const oldClassName = document.getElementById("body").className;
+    document.getElementById(
+      "body"
+    ).className = `${oldClassName} custom-modal-open`;
+    setShow(true);
   };
-  const handleShow = () => setShow(true);
-  const handleSave = () => {
+
+  const handleSave = useCallback(() => {
     onChange(value);
     handleClose();
-  };
+  }, [value, handleClose, onChange]);
 
-  useEffect(() => setValue(initialValue), [initialValue]);
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
+    return () => {
+      const oldClassName = document
+        .getElementById("body")
+        .className.replace("custom-modal-open", "");
+      document.getElementById("body").className = oldClassName;
+    };
+  }, []);
   return (
     <>
-      <Button
-        variant={buttonVariant}
-        onClick={handleShow}
-        className={"time-picker-modal-btn " + buttonClassName}
-      >
-        {buttonText}
-      </Button>
+      {renderInput({ toggle: handleShow })}
 
       <Modal
         show={show}
         onHide={handleClose}
+        onExit={handleClose}
         centered
+        fullscreen
         className={modalClassName + " time-picker-modal"}
         contentClassName={
-          "time-picker-modal-content  bg-transparent " + modalContentClassName
+          "time-picker-modal-content  shadow-none bg-transparent " +
+          modalContentClassName
         }
         scrollable
       >
-        <Modal.Header>
-          <Modal.Title className="d-flex flex-nowrap justify-content-center align-items-center w-100">
-            <div className="title-wrapper d-flex flex-nowrap">
-              <div>{hour}</div>
-              <div className="px-2">:</div>
-              <div>{minute}</div>
-            </div>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <TimeSelectorBody
-            variant={timeVariant}
-            timeActiveVariant={timeActiveVariant}
-            value={value || defaultValue}
-            onChange={setValue}
-          ></TimeSelectorBody>
-        </Modal.Body>
-        <Modal.Footer className="border-senary">
-          <div className="w-100 btn-group-wrapper d-flex justify-content-around">
-            <Button
-              variant={closeVariant}
-              className="col-5"
-              onClick={handleClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant={saveVariant}
-              className="col-5 fw-bolder"
-              onClick={handleSave}
-            >
-              Save
-            </Button>
+        <Modal.Body
+          id="modal-container"
+          className="d-flex"
+          onClick={(e) => {
+            e.currentTarget.id === "modal-container" && setShow(false);
+          }}
+        >
+          <div
+            className="m-auto modal-body-container "
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <TimeSelector
+              value={value}
+              onChange={onChange}
+              className={className}
+              variant={variant}
+            ></TimeSelector>
+            {footer && (
+              <Modal.Footer className={`border-senary ${footerVariant}`}>
+                <div className="w-100 btn-group-wrapper d-flex justify-content-around">
+                  <Button
+                    variant={closeVariant}
+                    className="col-5 border-0"
+                    onClick={handleClose}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant={saveVariant}
+                    className="col-5 fw-bolder  border-0"
+                    onClick={handleSave}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </Modal.Footer>
+            )}
           </div>
-        </Modal.Footer>
+        </Modal.Body>
       </Modal>
     </>
   );
@@ -124,7 +223,7 @@ export const TimePickerDropdown = memo(
         <div className={`d-block w-100  date-picker-dropdown ${className}`}>
           <div className="d-flex flex-nowrap w-100 align-items-center justify-content-center">
             <CustomDropdown
-              id={"TourFilter"}
+              id={"time-picker"}
               as={ButtonGroup}
               disabled={disabled}
               toggleAs="custom"
@@ -214,8 +313,10 @@ export const TimeSelector = memo(
     onChange,
     defaultValue = "00:00",
     close = false,
-    className = "",
+    className: initialClassName = "",
+    variant = "light",
   }) => {
+    const className = `time-picker time-picker-${variant} ${initialClassName}`;
     const splitted = (value || defaultValue).split(":");
     const hour = (splitted.length >= 2 && splitted[0]) || "00";
     const minute = (splitted.length >= 2 && splitted[1]) || "00";
@@ -280,7 +381,7 @@ const TimeSelectorBody = memo(
       ref2.current.scrollTop(h2);
     }, [hour, minute]);
     return (
-      <div className="d-flex flex-nowrap w-100 justify-content-around">
+      <div className="d-flex flex-nowrap w-100 justify-content-around time-selector-body">
         <div
           id="col-hours"
           className="col-hours d-flex flex-fill justify-content-center"
@@ -288,19 +389,12 @@ const TimeSelectorBody = memo(
           <Scrollbars
             autoHeight
             autoHide
-            style={{
-              marginBottom: "0px",
-              width: buttonSize,
-            }}
+            style={{ marginBottom: "0px", width: "auto" }}
             autoHeightMin={50}
             autoHeightMax={200}
             ref={ref1}
-            renderTrackHorizontal={(props) => (
-              <div
-                {...props}
-                style={{ display: "none" }}
-                className="track-horizontal"
-              />
+            renderView={(props) => (
+              <div {...props} style={{ ...props.style, overflowX: "hidden" }} />
             )}
           >
             {hours.map((e, index) => (
@@ -337,12 +431,8 @@ const TimeSelectorBody = memo(
             ref={ref2}
             autoHeightMin={50}
             autoHeightMax={200}
-            renderTrackHorizontal={(props) => (
-              <div
-                {...props}
-                style={{ display: "none" }}
-                className="track-horizontal"
-              />
+            renderView={(props) => (
+              <div {...props} style={{ ...props.style, overflowX: "hidden" }} />
             )}
           >
             {minutes.map((e, index) => (

@@ -17,11 +17,85 @@ import "swiper/modules/virtual/virtual.scss";
 import { Swiper, SwiperSlide } from "swiper/react/swiper-react.js";
 import "swiper/swiper.scss";
 import {
-  rotateArray,
   calcIndexedCalendarDays,
+  rotateArray,
+  useBreakpoints,
+  useWindowDimensions,
 } from "../pages/myComponents/util/utilities";
 import { CustomDropdown } from "./Filters/CustomDropdown";
+import CustomModal from "./Filters/CustomModal";
 
+export const DateResponsivePicker = memo((props) => {
+  const { width, height } = useWindowDimensions();
+  const modeModal = height < 750 || width < 750;
+  useEffect(() => {
+    const oldClassName = document.getElementById("body").className;
+    const m = oldClassName
+      .replaceAll("custom-modal-open", "")
+      .replaceAll("custom-dropdown-open", "")
+      .trim();
+    document.body.className = m;
+    return () =>
+      (document.body.className = document.getElementById("body").className)
+        .replaceAll("custom-modal-open", "")
+        .replaceAll("custom-dropdown-open", "")
+        .trim();
+  }, [modeModal]);
+  return modeModal ? (
+    <DatePickerModalWithText {...props} />
+  ) : (
+    <DateSelectorDropdown {...props} />
+  );
+}, isEqual);
+
+export const DatePickerModalWithText = memo((props) => {
+  const { onChange, format, inputStyle, value, ...rest } = props;
+
+  const handleInputChange = useCallback(
+    (e) => {
+      const v = moment(e.target.value, format, true).isValid()
+        ? moment(e.target.value, format).format("YYYY.MM.DD")
+        : e.target.value;
+      onChange && onChange(v);
+    },
+    [onChange, format]
+  );
+  const toggleComponent = useCallback(
+    ({ toggle }) => {
+      const v = moment(value, "YYYY.MM.DD", true).isValid()
+        ? moment(value, "YYYY.MM.DD").format(format)
+        : value;
+      return (
+        <div className="d-flex justify-content-center">
+          <input
+            type="text"
+            className="text-center"
+            style={inputStyle}
+            autoFocus={false}
+            value={v}
+            onChange={handleInputChange}
+            onFocus={(e) => {
+              e.target.blur();
+              toggle();
+            }}
+          />
+        </div>
+      );
+    },
+    [inputStyle, format, value, handleInputChange]
+  );
+
+  return (
+    <DatePickerModal
+      carousel
+      footer={false}
+      modalClassName="bg-transparent"
+      renderInput={toggleComponent}
+      value={value}
+      {...props}
+    />
+  );
+}, isEqual);
 const DateSelectorDropdown = memo(
   ({
     value,
@@ -67,17 +141,16 @@ const DateSelectorDropdown = memo(
             <input
               type="text"
               className="text-center"
-              {...rest}
-              value={v}
               style={inputStyle}
               autoFocus={false}
+              value={v}
+              {...rest}
             />
           </div>
         );
       },
       [Input, inputStyle, format]
     );
-
     const toggleComponent = useCallback(
       ({ withButton, ...props }) =>
         withButton ? (
@@ -107,19 +180,17 @@ const DateSelectorDropdown = memo(
                 {domInput({
                   value: value,
                   onChange: handleInputChange,
-                  // onBlur: onBlur,
                 })}
               </div>
             )}
 
             <CustomDropdown
-              id={"TourFilter"}
               as={ButtonGroup}
               disabled={disabled}
               ref={{ ref: ref }}
               toggleAs="custom"
-              // className={!withButton ? "d-flex" : null}
               portal={portal}
+              menuClassName={"date-picker-dropdown-wrapper"}
               value={toggleComponent({
                 value: value,
                 onChange: handleInputChange,
@@ -144,6 +215,7 @@ const DateSelectorDropdown = memo(
   },
   isEqual
 );
+
 export const DatePickerModal = memo(
   ({
     size,
@@ -156,77 +228,127 @@ export const DatePickerModal = memo(
     timeActiveVariant = "primary",
     buttonClassName = "",
     modalClassName = "",
-    modalContentClassName = "",
+    modalContentClassName = "bg-transparent",
+    bodyClassName = "",
     onChange,
     disableMonthSwap = true,
+    footer = true,
+    singleDate,
+    renderInput = ({ toggle }) => (
+      <Button
+        size={size}
+        variant={buttonVariant}
+        onClick={toggle}
+        className={"date-picker-modal-btn w-100" + buttonClassName}
+      >
+        {buttonText}
+      </Button>
+    ),
     ...rest
   }) => {
     const [show, setShow] = useState(false);
     const [value, setValue] = useState(initialValue);
-    const handleDateChange = useCallback((v) => {
-      setValue(v);
-    }, []);
+    const handleDateChange = useCallback(
+      (v) => {
+        footer ? setValue(v) : onChange(v);
+      },
+      [footer, onChange]
+    );
 
     const handleClose = useCallback(() => {
+      const oldClassName = document.getElementById("body").className;
+      document.getElementById("body").className = oldClassName.replace(
+        "custom-modal-open",
+        ""
+      );
       setShow(false);
       setValue(initialValue);
     }, [initialValue]);
-    const handleShow = () => setShow(true);
+    const handleShow = () => {
+      const oldClassName = document.getElementById("body").className;
+      document.getElementById(
+        "body"
+      ).className = `${oldClassName} custom-modal-open`;
+      setShow(true);
+    };
+
     const handleSave = useCallback(() => {
       onChange(value);
       handleClose();
     }, [value, handleClose, onChange]);
 
     useEffect(() => {
-      !isEqual(value, initialValue) && setValue(initialValue);
+      setValue(initialValue);
     }, [initialValue]);
+
+    useEffect(() => {
+      return () => {
+        const oldClassName = document
+          .getElementById("body")
+          .className.replace("custom-modal-open", "");
+        document.getElementById("body").className = oldClassName;
+      };
+    }, []);
 
     return (
       <>
-        <Button
-          size={size}
-          variant={buttonVariant}
-          onClick={handleShow}
-          className={"date-picker-modal-btn w-100" + buttonClassName}
-        >
-          {buttonText}
-        </Button>
+        {renderInput({ toggle: handleShow })}
 
         <Modal
+          fullscreen
           show={show}
+          onExit={handleClose}
           onHide={handleClose}
           centered
-          className={modalClassName + " date-picker-modal"}
+          className={modalClassName + " date-picker-modal py-0"}
           contentClassName={
-            "date-picker-modal-content dark-modal " + modalContentClassName
+            "date-picker-modal-content shadow-none " + modalContentClassName
           }
-          // scrollable
         >
-          <Modal.Body>
-            <DateSelector
-              onChange={handleDateChange}
-              disableMonthSwap={disableMonthSwap}
-              {...rest}
-            />
-          </Modal.Body>
-          <Modal.Footer className="">
-            <div className="w-100 btn-group-wrapper d-flex justify-content-around">
-              <Button
-                variant={closeVariant}
-                className="col-5"
-                onClick={handleClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant={saveVariant}
-                className="col-5 fw-bolder"
-                onClick={handleSave}
-              >
-                Save
-              </Button>
+          <Modal.Body
+            id="modal-container"
+            className="d-flex"
+            onClick={(e) => {
+              e.currentTarget.id === "modal-container" && setShow(false);
+            }}
+          >
+            <div
+              className="m-auto modal-body-container"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <DateSelector
+                onChange={handleDateChange}
+                disableMonthSwap={disableMonthSwap}
+                from={singleDate ? value : value[0]}
+                to={!singleDate && value[1]}
+                singleDate={singleDate}
+                {...rest}
+              />
+              {footer && (
+                <Modal.Footer className="">
+                  <div className="w-100 btn-group-wrapper d-flex justify-content-around">
+                    <Button
+                      variant={closeVariant}
+                      className="col-5"
+                      onClick={handleClose}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant={saveVariant}
+                      className="col-5 fw-bolder"
+                      onClick={handleSave}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </Modal.Footer>
+              )}
             </div>
-          </Modal.Footer>
+          </Modal.Body>
         </Modal>
       </>
     );
@@ -485,7 +607,7 @@ const DateSelectorPureComponent = memo(
             )}
           </div>
         </Card.Header>
-        <Card.Body className="px-3">
+        <Card.Body className="px-3 bg-white">
           <Table className="user-table align-items-center">
             <thead className="rounded-bottom">
               <HeaderRow headers={headers} />

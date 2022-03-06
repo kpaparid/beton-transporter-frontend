@@ -124,6 +124,7 @@ const TimePicker = ({ title, value, onChange }) => {
         buttonVariant={value ? "senary" : "nonary"}
         timeVariant="nonary"
         timeActiveVariant="senary"
+        variant="dark"
         buttonClassName="w-100 p-0"
         buttonText={
           <BCard title={title}>

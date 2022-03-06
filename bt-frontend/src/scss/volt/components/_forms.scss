@@ -1,6 +1,8 @@
 .form-login {
   box-shadow: none !important;
   line-height: 1.5 !important;
+  color: $dark;
+  font: 300 10pt/1.5 "SourceSansPro", sans-serif !important;
   &:-webkit-autofill::first-line,
   &:-webkit-autofill,
   &:-webkit-autofill:hover,

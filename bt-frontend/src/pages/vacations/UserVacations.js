@@ -74,6 +74,7 @@ const UserVacations = () => {
         <div className="py-4">
           <div className="w-100 d-flex justify-content-center p-1">
             <DatePickerModal
+              modalClassName="date-picker-modal-content-darker"
               carousel
               variant="darker"
               disableMonthSwap

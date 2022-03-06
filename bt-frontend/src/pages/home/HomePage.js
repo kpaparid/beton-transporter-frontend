@@ -13,6 +13,7 @@ import NotFound from "../authentication/NotFound";
 import ServerError from "../authentication/ServerError";
 import Signin from "../authentication/Signin";
 import Chat from "../messages/Chat";
+import ChatDashboard from "../messages/ChatDashboard";
 import UserChat from "../messages/UserChat";
 import UserMessenger from "../messages/UserMessenger";
 import DashboardOverview from "../overview/DashboardOverview";
@@ -346,7 +347,7 @@ const HomePage = () => (
           path={MyRoutes.Chat.path}
           element={
             <RouteWithSidebar>
-              <Chat />
+              <ChatDashboard />
             </RouteWithSidebar>
           }
         />

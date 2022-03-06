@@ -1,7 +1,58 @@
 import BigNumber from "bignumber.js";
 import moment from "moment";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
+export function useBreakpoints() {
+  const { width, height } = useWindowDimensions();
+  const wB =
+    width <= 1400
+      ? width <= 1200
+        ? width <= 992
+          ? width <= 768
+            ? width <= 576
+              ? "xs"
+              : "sm"
+            : "md"
+          : "lg"
+        : "xl"
+      : "xxl";
+  const hB =
+    height <= 1400
+      ? height <= 1200
+        ? height <= 992
+          ? height <= 768
+            ? height <= 576
+              ? "xs"
+              : "sm"
+            : "md"
+          : "lg"
+        : "xl"
+      : "xxl";
+  return { width: wB, height: hB };
+}
+function getWindowDimensions() {
+  const { innerWidth: width, innerHeight: height } = window;
+  return {
+    width,
+    height,
+  };
+}
+export function useWindowDimensions() {
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(getWindowDimensions());
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowDimensions;
+}
 export function useWindowSize() {
   const [size, setSize] = useState(0);
   useLayoutEffect(() => {
