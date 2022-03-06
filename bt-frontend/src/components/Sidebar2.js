@@ -9,7 +9,7 @@ import Android from "../assets/img/favicon/android-chrome-192x192.png";
 import { useUserNavbar } from "../contexts/AuthContext";
 
 const Sidebar2 = () => {
-  const { dropdown } = useUserNavbar();
+  const { dropdown } = useUserNavbar(undefined, "dark");
   return (
     <>
       <Navbar
@@ -36,12 +36,12 @@ const Sidebar2 = () => {
 export default Sidebar2;
 
 export const UserNavbar = () => {
-  const { dropdown } = useUserNavbar();
+  const { dropdown } = useUserNavbar(undefined, "dark");
   return (
     // <Navbar variant="dark" expanded className="p-0">
     <Container fluid className="px-0">
       <div className={`d-flex justify-content-end w-100`}>
-        <Nav className="align-items-center">{dropdown}</Nav>
+        <Nav className="align-items-center test">{dropdown}</Nav>
       </div>
     </Container>
     // </Navbar>

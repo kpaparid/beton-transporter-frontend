@@ -193,3 +193,19 @@
     }
   }
 }
+.user-navbar.light {
+  border-color: $border-gray !important;
+  background-color: white !important;
+  .dropdown-item {
+    background-color: white;
+    color: $dark !important;
+  }
+}
+.user-navbar.dark {
+  border-color: $senary !important;
+  background-color: $darker-nonary !important;
+  .dropdown-item {
+    background-color: $darker-nonary;
+    color: $senary !important;
+  }
+}

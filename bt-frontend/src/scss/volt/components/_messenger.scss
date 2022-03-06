@@ -1,4 +1,10 @@
 .messenger {
+  &.left.right .messenger-right,
+  &.left.right .wrapper > div:first-child {
+    @include media-breakpoint-down(sm) {
+      min-width: 100%;
+    }
+  }
   .message.sent {
     justify-content: flex-end;
     .btn {

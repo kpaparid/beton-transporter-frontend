@@ -42,9 +42,6 @@ body.custom-modal-open #root {
 }
 
 .date-picker-grid-table-dropdown {
-  @include media-breakpoint-down(sm) {
-  }
-
   .btn-quinary {
     background-color: $very-light-blue !important;
   }

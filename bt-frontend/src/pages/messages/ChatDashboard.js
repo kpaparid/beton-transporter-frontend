@@ -36,7 +36,7 @@ const ChatDashboard = () => {
     <>
       <div className="col-12 h-100">
         <div className="d-flex flex-wrap h-100 align-content-center">
-          <div className="container-fluid py-3 h-100">
+          <div className="container-fluid p-0 py-3 h-100">
             <ChatComponent
               variant="light"
               border={false}

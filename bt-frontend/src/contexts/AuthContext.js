@@ -225,12 +225,12 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-export const useUserNavbar = (size = "30px") => {
+export const useUserNavbar = (size = "30px", variant = "light") => {
   const { currentUser, logout } = useAuth();
   const name = currentUser?.displayName || currentUser?.email;
   const image = !currentUser.photoURL ? (
     <div
-      className="bg-senary text-nonary rounded-circle fw-bolder"
+      className="bg-white text-nonary rounded-circle fw-bolder"
       style={{
         height: size,
         width: size,
@@ -249,7 +249,7 @@ export const useUserNavbar = (size = "30px") => {
   );
 
   const dropdown = (
-    <Dropdown as={Nav.Item} className="" drop="up" flip="true">
+    <Dropdown as={Nav.Item} drop="up" flip="true" className="user-navbar">
       <Dropdown.Toggle as={Nav.Link} className="p-0">
         <div className="media d-flex align-items-center w-100 p-2">
           {image}
@@ -258,8 +258,14 @@ export const useUserNavbar = (size = "30px") => {
           </div>
         </div>
       </Dropdown.Toggle>
-      <Dropdown.Menu className="" style={{ right: "0%", minWidth: "8rem" }}>
-        <Dropdown.Item className="fw-bold px-3 text-primary" onClick={logout}>
+      <Dropdown.Menu
+        style={{ right: "0%", minWidth: "8rem" }}
+        className={`user-navbar ${variant}`}
+      >
+        <Dropdown.Item
+          className={` fw-bold px-3 text-primary"`}
+          onClick={logout}
+        >
           <FontAwesomeIcon icon={faSignOutAlt} className="text-danger me-2" />
           Logout
         </Dropdown.Item>
