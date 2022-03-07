@@ -1,7 +1,10 @@
 /**
  * = Backgrounds
 */
-
+.body {
+  -webkit-scroll-behavior: auto !important;
+  scroll-behavior: auto !important;
+}
 .user-settings {
   .card-body input {
     color: $senary !important;
