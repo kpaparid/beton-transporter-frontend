@@ -120,7 +120,6 @@ const SettingsCard = ({ settings, entityId, postSettings }) => {
     setTabTitle(tabs.reduce((a, b) => ({ ...a, [b]: settings[b].title }), {}));
   }, [settings, tabs]);
   const handleSave = useCallback(() => {
-    // postSettings(newTabLabels);
     const b = tabs.reduce(
       (a, b) => ({
         ...a,
@@ -129,37 +128,7 @@ const SettingsCard = ({ settings, entityId, postSettings }) => {
       {}
     );
     const body = { id: "add-tours", value: JSON.stringify(b) };
-    const body2 = {
-      id: "work-plant",
-      value: JSON.stringify([
-        "Dortmund Holcim",
-        "Ludenscheid Holcim",
-        "Balve Holcim",
-        "Plettenberg Holcim",
-        "Unna Holcim",
-        "Luenen Holcim",
-        "Radevormwald Holcim",
-        "Wuppertal Holcim",
-        "Herne Holcim",
-        "Sonstige Holcim",
-        "Iserlohn Elskes",
-        "Witten Elskes",
-        "Dortmund Elskes",
-        "Kamen Elskes",
-        "Werl Elskes",
-        "Sonstige Elskes",
-        "Soest Hellwegbeton",
-        "Sonstige Hellwegbeton",
-        "Sundern TB Westenfeld",
-        "Neheim TB Westenfeld",
-        "Sprockhoevel TER",
-        "Menden Herbrueger",
-        "Meschede TB Meschede",
-        "Sonstige",
-      ]),
-    };
-    // postSettings(body);
-    postSettings(body2);
+    postSettings(body);
   }, [postSettings, newTabLabels, newTabTitle, tabs]);
 
   return (
@@ -264,9 +233,9 @@ const UserDisplay = ({
   className = "",
 }) => {
   return (
-    <div className={`p-2 ${className}`}>
+    <div className={`py-2 ${className}`}>
       <div
-        className={`bg-darker-nonary p-5 rounded `}
+        className={`bg-darker-nonary p-3 p-sm-5 rounded `}
         style={{
           // minWidth: "600px",
           // transform: "scale(0.8)",
@@ -278,12 +247,12 @@ const UserDisplay = ({
             <Col lg={12} className="">
               <Nav className="nav-tabs d-flex flex-nowrap justify-content-around w-100 border-0">
                 {tabs.map((t) => (
-                  <Nav.Item className="col-4" key={t}>
+                  <Nav.Item className="col-4 d-flex align-items-end" key={t}>
                     <Nav.Link
                       onClick={() => setActiveKey(t)}
                       eventKey={t}
                       className={
-                        "border-bottom  border-senary mb-sm-3 mb-md-0 text-center fw-bolder px-1 " +
+                        "w-100 border-bottom  border-senary mb-sm-3 mb-md-0 text-center fw-bolder px-1 " +
                         (activeKey === t
                           ? "text-nonary bg-senary"
                           : "text-senary bg-darker-nonary")
@@ -392,7 +361,7 @@ const TitleButton = ({ value: initialValue, onChange }) => {
 };
 const BCard = ({ title, titleWidth = "50px", contentWidth }) => {
   return (
-    <div className="p-1">
+    <div className="p-1 px-3">
       <Button variant="nonary" className={"w-100 p-0"}>
         <Card bg="transparent border-0">
           <Card.Body className="d-flex flex-nowrap justify-content-between align-items-center p-3 border-0 fw-bolder">
