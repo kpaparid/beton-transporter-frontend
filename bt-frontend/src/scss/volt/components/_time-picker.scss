@@ -18,6 +18,9 @@
     border-color: $primary !important;
   }
 }
+.time-picker {
+  box-shadow: 0 2px 18px rgb(0 0 0 / 46%);
+}
 .time-picker-modal {
   .time-picker.time-picker-dark {
     .card-header {
@@ -41,18 +44,18 @@
         color: $darker-nonary;
       }
     }
-  }
-  .dark.modal-footer {
-    background-color: $darker-nonary !important;
-    .btn-secondary {
-      background-color: $nonary !important;
-      border-color: $nonary !important;
-      color: $senary;
-    }
-    .btn-primary {
-      background-color: $senary !important;
-      border-color: $senary !important;
-      color: $darker-nonary;
+    .card-footer {
+      background-color: $darker-nonary !important;
+      .btn-secondary {
+        background-color: $nonary !important;
+        border-color: $nonary !important;
+        color: $senary;
+      }
+      .btn-primary {
+        background-color: $senary !important;
+        border-color: $senary !important;
+        color: $darker-nonary;
+      }
     }
   }
 }

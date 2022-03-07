@@ -77,17 +77,14 @@ export const TimePickerModalWithText = memo((props) => {
 export const TimePickerModal = ({
   footer = true,
   defaultValue = "00:00",
-  value: initialValue = defaultValue,
+  value = defaultValue,
   buttonText,
   buttonVariant = "primary",
-  closeVariant = "secondary",
-  saveVariant = "primary",
   buttonClassName = "",
   modalClassName = "",
   modalContentClassName = "",
   onChange,
   variant = "light",
-  footerVariant = variant,
   className = "",
   renderInput = ({ toggle }) => (
     <Button
@@ -100,8 +97,6 @@ export const TimePickerModal = ({
   ),
 }) => {
   const [show, setShow] = useState(false);
-  const [value, setValue] = useState(initialValue);
-
   const handleClose = useCallback(() => {
     const oldClassName = document.getElementById("body").className;
     document.getElementById("body").className = oldClassName.replace(
@@ -109,8 +104,7 @@ export const TimePickerModal = ({
       ""
     );
     setShow(false);
-    setValue(initialValue);
-  }, [initialValue]);
+  }, []);
   const handleShow = () => {
     const oldClassName = document.getElementById("body").className;
     document.getElementById(
@@ -119,14 +113,13 @@ export const TimePickerModal = ({
     setShow(true);
   };
 
-  const handleSave = useCallback(() => {
-    onChange(value);
-    handleClose();
-  }, [value, handleClose, onChange]);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+  const handleSave = useCallback(
+    (v) => {
+      onChange(v);
+      handleClose();
+    },
+    [handleClose, onChange]
+  );
 
   useEffect(() => {
     return () => {
@@ -172,27 +165,10 @@ export const TimePickerModal = ({
               onChange={onChange}
               className={className}
               variant={variant}
-            ></TimeSelector>
-            {footer && (
-              <Modal.Footer className={`border-senary ${footerVariant}`}>
-                <div className="w-100 btn-group-wrapper d-flex justify-content-around">
-                  <Button
-                    variant={closeVariant}
-                    className="col-5 border-0"
-                    onClick={handleClose}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant={saveVariant}
-                    className="col-5 fw-bolder  border-0"
-                    onClick={handleSave}
-                  >
-                    Save
-                  </Button>
-                </div>
-              </Modal.Footer>
-            )}
+              footer={footer}
+              onSave={handleSave}
+              onClose={handleClose}
+            />
           </div>
         </Modal.Body>
       </Modal>
@@ -309,15 +285,35 @@ export const TimeSelectorRange = memo(
 
 export const TimeSelector = memo(
   ({
-    value,
     onChange,
     defaultValue = "00:00",
+    value: initialValue,
     close = false,
     className: initialClassName = "",
     variant = "light",
+    footer,
+    onClose,
+    onSave,
+    closeVariant = "secondary",
+    saveVariant = "primary",
+    footerVariant = variant,
   }) => {
     const className = `time-picker time-picker-${variant} ${initialClassName}`;
-    const splitted = (value || defaultValue).split(":");
+    const [value, setValue] = useState(initialValue || defaultValue);
+    const handleChange = useCallback(
+      (v) => {
+        footer ? setValue(v) : onChange(v);
+      },
+      [onChange, footer]
+    );
+    const handleSave = useCallback(() => {
+      onSave && onSave(value);
+    }, [value, onSave]);
+
+    useEffect(() => {
+      setValue(initialValue);
+    }, [initialValue]);
+    const splitted = value.split(":");
     const hour = (splitted.length >= 2 && splitted[0]) || "00";
     const minute = (splitted.length >= 2 && splitted[1]) || "00";
 
@@ -339,10 +335,30 @@ export const TimeSelector = memo(
           </Card.Header>
           <Card.Body>
             <TimeSelectorBody
-              value={value || defaultValue}
-              onChange={onChange}
+              value={value}
+              onChange={handleChange}
             ></TimeSelectorBody>
           </Card.Body>
+          {footer && (
+            <Card.Footer>
+              <div className="w-100 btn-group-wrapper d-flex justify-content-around">
+                <Button
+                  variant={closeVariant}
+                  className="col-5 border-0"
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant={saveVariant}
+                  className="col-5 fw-bolder  border-0"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+              </div>
+            </Card.Footer>
+          )}
         </Card>
       </div>
     );

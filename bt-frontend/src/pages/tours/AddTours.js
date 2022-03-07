@@ -30,6 +30,7 @@ import { useGeoAddresses, useServices } from "../myComponents/util/services";
 
 const AddTours = () => {
   const location = useLocation();
+  const hasPreviousState = location.key !== "default";
   const state = location.state;
   const [availableValues, setAvailableValues] = useState();
   const [tabs, setTabs] = useState();
@@ -43,7 +44,11 @@ const AddTours = () => {
   const onSubmit = useCallback(
     (data) => {
       postTour([{ ...data, driver: currentUser.uid }])
-        .then(() => navigate(MyRoutes.UserTours.path))
+        .then(() =>
+          hasPreviousState
+            ? navigate(-1, { replace: true })
+            : navigate(MyRoutes.UserTours.path, { replace: true })
+        )
         .catch((er) => {
           console.log(er);
         });
@@ -113,7 +118,7 @@ const AddTours = () => {
       setValue("date", moment().format("YYYY.MM.DD"));
       setValue("driver", currentUser.displayName || currentUser.email);
     }
-  }, [currentUser, claims, state]);
+  }, [currentUser, claims, state, fetchSettings, register, setValue]);
 
   return (
     <>
@@ -194,7 +199,11 @@ const AddTours = () => {
                     width: "80px",
                     fontWeight: "800",
                   }}
-                  onClick={() => navigate(MyRoutes.UserTours.path)}
+                  onClick={() =>
+                    hasPreviousState
+                      ? navigate(-1, { replace: true })
+                      : navigate(MyRoutes.UserTours.path, { replace: true })
+                  }
                 >
                   Cancel
                 </Button>
@@ -432,6 +441,7 @@ const TimePicker = ({ title, value, onChange }) => {
         timeVariant="nonary"
         timeActiveVariant="senary"
         buttonClassName="w-100 p-0"
+        variant="dark"
         buttonText={
           <BCard title={title}>
             {value || (

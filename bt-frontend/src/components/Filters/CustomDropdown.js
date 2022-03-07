@@ -83,7 +83,7 @@ export const CustomDropdown = forwardRef(
       } else {
         document.getElementById("body").className = `${document
           .getElementById("body")
-          .className.replaceAll("custom-dropdown-open", "")}`.trim();
+          .className.replace("custom-dropdown-open", "")}`.trim();
       }
     }, [show]);
     const onClose = useCallback(() => {

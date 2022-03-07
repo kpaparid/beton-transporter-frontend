@@ -17,6 +17,7 @@ const AddWorkHours = () => {
   const { postWorkHour } = useServices();
   const navigate = useNavigate();
   const { register, handleSubmit, setValue, watch } = useForm();
+  const hasPreviousState = location.key !== "default";
 
   const saveEnabled =
     watch("begin") &&
@@ -28,12 +29,16 @@ const AddWorkHours = () => {
   const onSubmit = useCallback(
     (data) => {
       postWorkHour([{ ...data, driver: currentUser.uid }])
-        .then(() => navigate(MyRoutes.UserWorkHours.path))
+        .then(() =>
+          hasPreviousState
+            ? navigate(-1, { replace: true })
+            : navigate(MyRoutes.UserWorkHours.path, { replace: true })
+        )
         .catch((er) => {
           console.log(er);
         });
     },
-    [postWorkHour, currentUser?.uid, navigate]
+    [postWorkHour, currentUser?.uid, navigate, hasPreviousState]
   );
 
   useEffect(() => {
@@ -91,7 +96,12 @@ const AddWorkHours = () => {
                     width: "80px",
                     fontWeight: "800",
                   }}
-                  onClick={() => navigate(MyRoutes.UserWorkHours.path)}
+                  onClick={() =>
+                    hasPreviousState
+                      ? navigate(-1, { replace: true })
+                      : navigate(MyRoutes.UserWorkHours.path, { replace: true })
+                  }
+                  // onClick={() => navigate(MyRoutes.UserWorkHours.path)}
                 >
                   Cancel
                 </Button>
