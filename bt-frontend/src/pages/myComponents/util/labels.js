@@ -248,7 +248,7 @@ export const getCustomComponent = (props) => {
     <RolesBadges {...props} />
   ) : props.Header === "Status" ? (
     <StatusBadges {...props} />
-  ) : props.Header === "photoUrl" ? (
+  ) : props.Header === "Photo" ? (
     <ContactAvatar {...props} />
   ) : (
     <div>error</div>
