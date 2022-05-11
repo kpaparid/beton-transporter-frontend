@@ -1,31 +1,16 @@
-import React, { useState } from "react";
+import { faUserCircle } from "@fortawesome/free-regular-svg-icons";
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBell,
-  faCog,
-  faEnvelopeOpen,
-  faSearch,
-  faSignOutAlt,
-  faUserShield,
-} from "@fortawesome/free-solid-svg-icons";
-import Profile3 from "./../assets/img/team/profile-empty.jpg";
-import { faUserCircle } from "@fortawesome/free-regular-svg-icons";
-import {
-  Row,
-  Col,
-  Nav,
-  Form,
-  Image,
-  Navbar,
-  Dropdown,
   Container,
-  ListGroup,
-  InputGroup,
+  Dropdown,
+  Image,
+  Nav,
+  Navbar,
 } from "@themesberg/react-bootstrap";
-
-import { useAuth } from "../contexts/AuthContext";
+import React from "react";
 import { Link } from "react-router-dom";
-import { current } from "immer";
+import { useAuth } from "../contexts/AuthContext";
 
 export const UserNavbar = () => {
   const { currentUser, logout } = useAuth();

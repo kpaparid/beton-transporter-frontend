@@ -253,7 +253,7 @@ export const useUserNavbar = (size = "30px", variant = "light") => {
       <Dropdown.Toggle as={Nav.Link} className="p-0">
         <div className="media d-flex align-items-center w-100 p-2">
           {image}
-          <div className="media-body text-light align-items-center d-none d-sm-block">
+          <div className="ps-2 media-body text-light align-items-center d-none d-sm-block">
             <span className="mb-0 font-small fw-bold">{name}</span>
           </div>
         </div>

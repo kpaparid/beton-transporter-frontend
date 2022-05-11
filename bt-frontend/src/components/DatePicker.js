@@ -278,7 +278,7 @@ export const DatePickerModal = memo(
     }, [value, handleClose, onChange]);
 
     useEffect(() => {
-      setValue(initialValue);
+      // setValue(initialValue);
     }, [initialValue]);
 
     useEffect(() => {

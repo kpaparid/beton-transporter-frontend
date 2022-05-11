@@ -213,7 +213,7 @@ export const ChatComponent = memo(
 const ContactsList = ({ contacts, activeContact, ...rest }) => {
   return (
     <>
-      <div className="d-flex flex-column messages-list">
+      <div className="d-flex flex-column messages-list pb-3">
         {contacts.map((c) => {
           const active = activeContact?.uid === c.uid;
           return (

@@ -90,27 +90,32 @@ public ResponseEntity<?> addClaim(@RequestParam Map<String, Object> claims, @Pat
 
         try {
             List<User> list = securityService.getAllUsers();
-            if (pageable.getSort().isSorted()) {
-                if (pageable.getSort().getOrderFor("email") != null) {
-                    if (pageable.getSort().getOrderFor("email").isAscending()) {
-                        list.sort(Comparator.comparing(User::getEmail).reversed());
-                    } else {
-                        list.sort(Comparator.comparing(User::getEmail));
-                    }
-                } else if (pageable.getSort().getOrderFor("name") != null) {
-                    if (pageable.getSort().getOrderFor("name").isAscending()) {
-                        list.sort(Comparator.comparing(User::getName).reversed());
-                    } else {
-                        list.sort(Comparator.comparing(User::getName));
+            try{
+                if (pageable.getSort().isSorted()) {
+                    if (pageable.getSort().getOrderFor("email") != null) {
+                        if (pageable.getSort().getOrderFor("email").isAscending()) {
+                            list.sort(Comparator.comparing(User::getEmail).reversed());
+                        } else {
+                            list.sort(Comparator.comparing(User::getEmail));
+                        }
+                    } else if (pageable.getSort().getOrderFor("name") != null) {
+                        if (pageable.getSort().getOrderFor("name").isAscending()) {
+                            list.sort(Comparator.comparing(User::getName).reversed());
+                        } else {
+                            list.sort(Comparator.comparing(User::getName));
+                        }
                     }
                 }
+            }finally {
+                PagedListHolder<User> page = new PagedListHolder<>(list);
+                page.setPageSize(pageable.getPageSize());
+                page.setPage(pageable.getPageNumber());
+                PageImpl<User> pageImpl = new PageImpl<>(page.getPageList(), pageable, list.size());
+                return ResponseHandler.generateResponse("Successfully loaded data!", HttpStatus.OK, pageImpl);
+
             }
-            PagedListHolder<User> page = new PagedListHolder<>(list);
-            page.setPageSize(pageable.getPageSize());
-            page.setPage(pageable.getPageNumber());
-            PageImpl<User> pageImpl = new PageImpl<>(page.getPageList(), pageable, list.size());
-            return ResponseHandler.generateResponse("Successfully loaded data!", HttpStatus.OK, pageImpl);
-        } catch (Exception e) {
+
+            } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
     }

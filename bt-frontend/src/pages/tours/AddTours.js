@@ -133,7 +133,7 @@ const AddTours = () => {
                   <Nav className="nav-tabs d-flex flex-nowrap justify-content-around w-100 border-0">
                     {tabs &&
                       Object.keys(tabs).map((t) => (
-                        <Nav.Item className="col-4">
+                        <Nav.Item className="col-4" key={t}>
                           <Nav.Link
                             onClick={() => setActiveKey(t)}
                             eventKey={t}

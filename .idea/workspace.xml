@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3f78bd69-fd7d-4304-8df5-bfaa795144ff" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/bt-frontend/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/bt-frontend/.vscode/launch.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/asset-manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/css/2.f5c41b1f.chunk.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/css/2.f5c41b1f.chunk.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/css/main.37d61a04.chunk.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/css/main.37d61a04.chunk.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/2.1a266bcf.chunk.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/2.1a266bcf.chunk.js.LICENSE.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/2.1a266bcf.chunk.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/3.9dce18cd.chunk.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/3.9dce18cd.chunk.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/main.bf443c15.chunk.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/main.bf443c15.chunk.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/runtime-main.970bc9d5.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/js/runtime-main.970bc9d5.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/404.59d1f9fd.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/500.d508258f.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/android-chrome-192x192.c1fb2234.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-brands-400.2285773e.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-brands-400.23f19bb0.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-brands-400.2f517e09.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-brands-400.527940b1.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-brands-400.d878b0a6.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-regular-400.4689f52c.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-regular-400.491974d1.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-regular-400.77206a6b.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-regular-400.7a333762.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-regular-400.bb58e57c.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-solid-900.1551f4f6.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-solid-900.7a8b4f13.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-solid-900.9bbb245e.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-solid-900.be9ee23c.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/fa-solid-900.eeccf4f6.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/profile-cover.4b034f41.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/profile-picture-1.e783b80f.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/react-logo-transparent.c39e9569.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/build/static/media/signin.454f944b.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bt-frontend/src/pages/messages/Chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/bt-frontend/src/pages/messages/Chat.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="28leaMZ4qBKhVPkUmbCqTCzKI5q" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/bt-backend" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3f78bd69-fd7d-4304-8df5-bfaa795144ff" name="Default Changelist" comment="" />
+      <created>1651795661799</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1651795661799</updated>
+    </task>
+    <servers />
+  </component>
+</project>

@@ -23,11 +23,10 @@ const Sidebar2 = () => {
           <div className="text-light d-flex align-items-end">
             <Nav.Link as={Link} to={MyRoutes.UserHome.path}>
               <Image src={Android} style={{ height: "30px" }}></Image>
-              <span className="ps-2">Beton</span>
+              <span className="ps-2 fw-bolder">Beton Transporter</span>
             </Nav.Link>
           </div>
           {dropdown}
-          {/* <UserNavbar /> */}
         </div>
       </Navbar>
     </>
@@ -38,12 +37,10 @@ export default Sidebar2;
 export const UserNavbar = () => {
   const { dropdown } = useUserNavbar(undefined, "dark");
   return (
-    // <Navbar variant="dark" expanded className="p-0">
     <Container fluid className="px-0">
       <div className={`d-flex justify-content-end w-100`}>
         <Nav className="align-items-center test">{dropdown}</Nav>
       </div>
     </Container>
-    // </Navbar>
   );
 };

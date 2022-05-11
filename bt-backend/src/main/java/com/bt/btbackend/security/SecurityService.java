@@ -26,9 +26,15 @@ public class SecurityService {
     private RoleService roleService;
 
     public UserRecord createUser(User user) {
-        UserRecord.CreateRequest request = new UserRecord.CreateRequest()
-                .setEmail(user.getEmail())
-                .setPassword(user.getPassword());
+        UserRecord.CreateRequest request=null;
+        try{
+            request = new UserRecord.CreateRequest()
+                    .setEmail(user.getEmail())
+                    .setPassword(user.getPassword());
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
         if (user.getDisabled() != null) {
             request.setDisabled(user.getDisabled());
         }
