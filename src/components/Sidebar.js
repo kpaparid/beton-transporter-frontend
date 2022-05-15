@@ -166,11 +166,11 @@ const Sidebar = () => {
                   link={MyRoutes.Settings.path}
                 />
 
-                <NavItem
+                {/* <NavItem
                   title="App"
                   icon={faCog}
                   link={MyRoutes.UserHome.path}
-                />
+                /> */}
               </div>
               {dropdown}
             </Nav>
