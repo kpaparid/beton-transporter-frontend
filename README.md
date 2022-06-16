@@ -5,25 +5,30 @@ Beton Transporter is a full stack web platform used by concrete-selling companie
 
 ## Screenshots
 
+![App Screenshot](https://media.giphy.com/media/InfoFlvDzbtrFOLzli/giphy.gif)
 
   
 ## Features
 
-- Admin Panel with 
 - State management using Redux
-
-- Admin's features
-  - Workday data (workhours, tours)
-  - Vacations Planner
-  - Chat
-
-
-- User's features
-  - Workday data (workhours, tours)
-  - Vacations Planner
-  - Chat
-- Fully Responsive
+- - Fully Responsive
 - Real Time and Dynamic
+- 
+- Admin's features
+  - Cbm Overview
+  - Driver's Workhours
+  - Manage Vacations
+  - Detailed Overview of Driver's Data through Data Tables (Add, Delete, Edit, Sort, Filter included)
+  - Chat
+  - User's Manager
+  - Simplify Driver's experience through custom settings.
+
+
+- Driver's features
+  - Workday data (workhours, tours)
+  - Vacations Planner
+  - Chat
+  - Overview
 
 
 ## Run Locally
