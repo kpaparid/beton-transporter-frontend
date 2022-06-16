@@ -11,9 +11,9 @@ Beton Transporter is a full stack web platform used by concrete-selling companie
 ## Features
 
 - State management using Redux
-- - Fully Responsive
+- Fully Responsive
 - Real Time and Dynamic
-- 
+
 - Admin's features
   - Cbm Overview
   - Driver's Workhours
